@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Distak ERP Funcional</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#07111f">
+<style>
+:root{--bg:#eef2f7;--dark:#07111f;--nav:#101827;--gold:#f59e0b;--card:#fff;--text:#111827;--muted:#64748b;--green:#15803d;--red:#b91c1c;--blue:#1d4ed8;--line:#e2e8f0}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.login{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+.brand{background:linear-gradient(135deg,#07111f,#1e293b);color:white;padding:70px;display:flex;flex-direction:column;justify-content:center}
+.brand h1{font-size:42px;margin:0 0 12px}.brand p{font-size:18px;color:#cbd5e1;line-height:1.5}
+.loginbox{display:flex;align-items:center;justify-content:center;padding:35px}.login-card{background:white;border-radius:22px;padding:34px;width:430px;box-shadow:0 20px 50px rgba(15,23,42,.16)}
+.app{display:none}
+header{height:74px;background:var(--dark);color:white;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+header h1{font-size:22px;margin:0}header small{color:#cbd5e1}
+.layout{display:flex;min-height:calc(100vh - 74px)}
+aside{width:265px;background:var(--nav);color:white;padding:16px 0}
+aside a{display:block;padding:13px 24px;color:white;text-decoration:none;border-left:4px solid transparent;cursor:pointer}
+aside a.active,aside a:hover{background:#263449;border-left-color:var(--gold)}
+aside .title{padding:12px 24px;color:#94a3b8;font-size:12px;text-transform:uppercase}
+main{flex:1;padding:26px;overflow:auto}
+.view{display:none}.view.active{display:block}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}.top h2{margin:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:20px}
+.card,.panel{background:var(--card);border-radius:18px;padding:18px;box-shadow:0 2px 12px rgba(15,23,42,.08)}
+.panel{margin-bottom:18px}.card small{font-weight:bold;color:var(--muted)}.card strong{display:block;font-size:25px;margin-top:8px}
+.green{color:var(--green)}.red{color:var(--red)}.blue{color:var(--blue)}.gold{color:#b45309}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+table{width:100%;border-collapse:collapse}th,td{padding:11px;border-bottom:1px solid var(--line);font-size:14px;text-align:left;vertical-align:top}th{color:var(--muted)}
+input,select,textarea{padding:11px;border:1px solid #cbd5e1;border-radius:12px;width:100%;font-family:inherit}textarea{min-height:86px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:12px}
+.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:bold;cursor:pointer;margin:3px}
+.primary{background:var(--gold);color:#111827}.dark{background:#111827;color:white}.light{background:#e2e8f0;color:#111827}.danger{background:#fee2e2;color:#991b1b}
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:bold}.bgreen{background:#dcfce7;color:#166534}.bred{background:#fee2e2;color:#991b1b}.byellow{background:#fef3c7;color:#92400e}.bblue{background:#dbeafe;color:#1e40af}.bgray{background:#e5e7eb;color:#374151}
+.notice{background:#fff7ed;border-left:5px solid var(--gold);padding:13px;border-radius:12px;margin-bottom:14px}
+.mobile-tip{display:none}
+@media print{aside,header,.no-print,.top button{display:none!important}main{padding:0}.view{display:block}.panel{box-shadow:none;border:0}.print-only{display:block!important}}
+.print-only{display:none}
+@media(max-width:950px){.login{grid-template-columns:1fr}.brand{padding:35px}.layout{display:block}aside{width:100%;display:grid;grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}header{height:auto;display:block;padding:16px}.mobile-tip{display:block}}
+</style>
+</head>
+<body>
+<section class="login" id="login">
+ <div class="brand">
+  <h1>Distak ERP Local</h1>
+  <p>Aplicação funcional para gerir clientes, obras, orçamentos, custos, pagamentos e documentos.</p>
+  <p><strong>Distak Construção Civil Unipessoal, Lda</strong><br>Alvará 116681-PAR · Seguro RC 1.000.000 €</p>
+ </div>
+ <div class="loginbox">
+  <div class="login-card">
+   <h2>Entrar</h2>
+   <p style="color:#64748b">Versão local: os dados ficam guardados neste navegador/equipamento.</p>
+   <input id="loginEmail" value="admin@distak.pt">
+   <input id="loginPass" type="password" value="123456">
+   <button class="btn primary" style="width:100%;margin-top:10px" onclick="entrar()">Entrar</button>
+  </div>
+ </div>
+</section>
+
+<section class="app" id="app">
+<header>
+ <div><h1>Distak ERP Local</h1><small>Gestão de obras, custos, pagamentos e orçamentos</small></div>
+ <div><strong>José Filipe Alves Silva</strong><br><small>Administrador</small></div>
+</header>
+<div class="layout">
+<aside class="no-print">
+ <div class="title">Menu</div>
+ <a class="active" onclick="showView('dashboard',this)">📊 Dashboard</a>
+ <a onclick="showView('clientes',this)">👥 Clientes</a>
+ <a onclick="showView('obras',this)">🏗️ Obras</a>
+ <a onclick="showView('orcamentos',this)">🧾 Orçamentos</a>
+ <a onclick="showView('custos',this)">📉 Custos</a>
+ <a onclick="showView('pagamentos',this)">💶 Pagamentos</a>
+ <a onclick="showView('documentos',this)">📂 Documentos</a>
+ <a onclick="showView('backup',this)">💾 Backup</a>
+</aside>
+<main>
+
+<section id="dashboard" class="view active">
+ <div class="top"><h2>Dashboard</h2><button class="btn primary" onclick="demoData()">Carregar dados exemplo</button></div>
+ <div class="notice mobile-tip">No telemóvel/tablet pode adicionar ao ecrã principal pelo menu do navegador.</div>
+ <div class="kpis">
+  <div class="card"><small>Valor total das obras</small><strong id="kpiObras">0,00 €</strong></div>
+  <div class="card"><small>Custos registados</small><strong class="gold" id="kpiCustos">0,00 €</strong></div>
+  <div class="card"><small>Pagamentos recebidos</small><strong class="green" id="kpiPagos">0,00 €</strong></div>
+  <div class="card"><small>Por receber</small><strong class="red" id="kpiDivida">0,00 €</strong></div>
+  <div class="card"><small>Lucro estimado</small><strong class="blue" id="kpiLucro">0,00 €</strong></div>
+ </div>
+ <div class="grid">
+  <div class="panel"><h3>Últimas obras</h3><div id="dashObras"></div></div>
+  <div class="panel"><h3>Alertas</h3><div id="alertas"></div></div>
+ </div>
+</section>
+
+<section id="clientes" class="view">
+ <div class="top"><h2>Clientes</h2><button class="btn primary" onclick="saveCliente()">Guardar cliente</button></div>
+ <div class="panel">
+  <div class="form">
+   <input id="clienteNome" placeholder="Nome do cliente">
+   <input id="clienteNif" placeholder="NIF">
+   <input id="clienteEmail" placeholder="Email">
+   <input id="clienteTelefone" placeholder="Telefone">
+   <input id="clienteMorada" placeholder="Morada">
+  </div>
+ </div>
+ <div class="panel"><h3>Lista de clientes</h3><div id="listaClientes"></div></div>
+</section>
+
+<section id="obras" class="view">
+ <div class="top"><h2>Obras</h2><button class="btn primary" onclick="saveObra()">Guardar obra</button></div>
+ <div class="panel">
+  <div class="form">
+   <input id="obraNome" placeholder="Nome da obra">
+   <select id="obraCliente"></select>
+   <input id="obraMorada" placeholder="Morada da obra">
+   <input id="obraValor" placeholder="Valor da obra €">
+   <input id="obraPrazo" placeholder="Prazo">
+   <select id="obraEstado"><option>Orçamento</option><option>Aprovado</option><option>Em execução</option><option>Concluído</option><option>Suspenso</option><option>Pagamento em atraso</option></select>
+  </div>
+  <textarea id="obraNotas" placeholder="Notas da obra"></textarea>
+ </div>
+ <div class="panel"><h3>Lista de obras</h3><div id="listaObras"></div></div>
+</section>
+
+<section id="orcamentos" class="view">
+ <div class="top"><h2>Orçamentos</h2><div><button class="btn primary" onclick="saveOrcamento()">Guardar orçamento</button><button class="btn dark" onclick="printOrcamento()">Gerar PDF / imprimir</button></div></div>
+ <div class="panel" id="orcamentoPrint">
+  <div class="print-only"><h1>Distak Construção Civil Unipessoal, Lda</h1><p>Alvará 116681-PAR · Seguro RC 1.000.000 €</p></div>
+  <div class="form">
+   <input id="orcNumero" placeholder="N.º orçamento">
+   <select id="orcObra"></select>
+   <input id="orcMao" placeholder="Mão de obra €">
+   <select id="orcIvaMao"><option value="0.06">IVA mão de obra 6%</option><option value="0.23">IVA mão de obra 23%</option></select>
+   <input id="orcMat" placeholder="Materiais €">
+   <select id="orcIvaMat"><option value="0.23">IVA materiais 23%</option><option value="0.06">IVA materiais 6%</option></select>
+   <input id="orcLog" placeholder="Logística/Subempreiteiros €">
+   <input id="orcValidade" placeholder="Validade: 60 dias">
+  </div>
+  <textarea id="orcDesc" placeholder="Descrição técnica dos trabalhos"></textarea>
+  <textarea id="orcCond" placeholder="Condições comerciais, pagamentos, garantia e exclusões"></textarea>
+  <div class="kpis">
+   <div class="card"><small>Subtotal</small><strong id="orcSubtotal">0,00 €</strong></div>
+   <div class="card"><small>IVA</small><strong id="orcIva">0,00 €</strong></div>
+   <div class="card"><small>Total final</small><strong class="green" id="orcTotal">0,00 €</strong></div>
+  </div>
+ </div>
+ <div class="panel"><h3>Orçamentos guardados</h3><div id="listaOrcamentos"></div></div>
+</section>
+
+<section id="custos" class="view">
+ <div class="top"><h2>Custos</h2><button class="btn primary" onclick="saveCusto()">Guardar custo</button></div>
+ <div class="panel">
+  <div class="form">
+   <select id="custoObra"></select>
+   <input id="custoDesc" placeholder="Descrição do custo">
+   <input id="custoValor" placeholder="Valor €">
+   <select id="custoTipo"><option>Material</option><option>Mão de obra</option><option>Subempreiteiro</option><option>Máquina</option><option>Entulho</option><option>Transporte</option><option>Outro</option></select>
+   <input id="custoData" type="date">
+  </div>
+ </div>
+ <div class="panel"><h3>Custos registados</h3><div id="listaCustos"></div></div>
+</section>
+
+<section id="pagamentos" class="view">
+ <div class="top"><h2>Pagamentos</h2><button class="btn primary" onclick="savePagamento()">Guardar pagamento</button></div>
+ <div class="panel">
+  <div class="form">
+   <select id="pagObra"></select>
+   <input id="pagValor" placeholder="Valor recebido €">
+   <input id="pagData" type="date">
+   <input id="pagMetodo" placeholder="Método: transferência, numerário...">
+   <textarea id="pagObs" placeholder="Observações"></textarea>
+  </div>
+ </div>
+ <div class="panel"><h3>Pagamentos registados</h3><div id="listaPagamentos"></div></div>
+</section>
+
+<section id="documentos" class="view">
+ <div class="top"><h2>Documentos</h2><button class="btn primary" onclick="saveDocumento()">Guardar documento</button></div>
+ <div class="panel">
+  <div class="notice">Nesta versão local guarda-se o nome/referência do documento. Para anexos reais sincronizados é preciso servidor/base de dados.</div>
+  <div class="form">
+   <select id="docObra"></select>
+   <input id="docNome" placeholder="Nome do documento/foto">
+   <input id="docTipo" placeholder="Tipo: contrato, foto, garantia, relatório">
+   <textarea id="docNotas" placeholder="Notas"></textarea>
+  </div>
+ </div>
+ <div class="panel"><h3>Documentos registados</h3><div id="listaDocumentos"></div></div>
+</section>
+
+<section id="backup" class="view">
+ <div class="top"><h2>Backup e dados</h2></div>
+ <div class="panel">
+  <p>Faça cópia de segurança dos dados desta aplicação local.</p>
+  <button class="btn dark" onclick="exportData()">Exportar backup JSON</button>
+  <button class="btn light" onclick="document.getElementById('importFile').click()">Importar backup JSON</button>
+  <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+  <button class="btn danger" onclick="clearAll()">Apagar tudo</button>
+ </div>
+</section>
+
+</main>
+</div>
+</section>
+
+<script>
+const KEY='distak_erp_local_v1';
+let db = JSON.parse(localStorage.getItem(KEY) || '{"clientes":[],"obras":[],"orcamentos":[],"custos":[],"pagamentos":[],"documentos":[]}');
+
+function euro(v){v=Number(v)||0;return v.toLocaleString('pt-PT',{style:'currency',currency:'EUR'});}
+function num(id){return parseFloat(String(document.getElementById(id).value||'0').replace(',','.'))||0;}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render();}
+function entrar(){document.getElementById('login').style.display='none';document.getElementById('app').style.display='block';render();}
+function showView(id,el){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('aside a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');render();}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function getClienteName(cid){return (db.clientes.find(c=>c.id===cid)||{}).nome||'—';}
+function getObraName(oid){return (db.obras.find(o=>o.id===oid)||{}).nome||'—';}
+function options(selectId){let s=document.getElementById(selectId); if(!s)return; s.innerHTML='<option value="">Selecionar</option>'+db.obras.map(o=>`<option value="${o.id}">${o.nome}</option>`).join('');}
+function clientOptions(){let s=document.getElementById('obraCliente'); if(!s)return; s.innerHTML='<option value="">Selecionar cliente</option>'+db.clientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');}
+function obraOptionsAll(){['orcObra','custoObra','pagObra','docObra'].forEach(options); clientOptions();}
+function del(type,i){if(confirm('Apagar registo?')){db[type].splice(i,1);save();}}
+
+function saveCliente(){db.clientes.push({id:id(),nome:v('clienteNome'),nif:v('clienteNif'),email:v('clienteEmail'),telefone:v('clienteTelefone'),morada:v('clienteMorada')});clear(['clienteNome','clienteNif','clienteEmail','clienteTelefone','clienteMorada']);save();}
+function saveObra(){db.obras.push({id:id(),nome:v('obraNome'),cliente:v('obraCliente'),morada:v('obraMorada'),valor:num('obraValor'),prazo:v('obraPrazo'),estado:v('obraEstado'),notas:v('obraNotas')});clear(['obraNome','obraMorada','obraValor','obraPrazo','obraNotas']);save();}
+function saveOrcamento(){let o=calcOrc();db.orcamentos.push({id:id(),numero:v('orcNumero'),obra:v('orcObra'),mao:num('orcMao'),ivaMao:Number(v('orcIvaMao')),mat:num('orcMat'),ivaMat:Number(v('orcIvaMat')),log:num('orcLog'),validade:v('orcValidade'),desc:v('orcDesc'),cond:v('orcCond'),total:o.total});save();}
+function saveCusto(){db.custos.push({id:id(),obra:v('custoObra'),desc:v('custoDesc'),valor:num('custoValor'),tipo:v('custoTipo'),data:v('custoData')});clear(['custoDesc','custoValor','custoData']);save();}
+function savePagamento(){db.pagamentos.push({id:id(),obra:v('pagObra'),valor:num('pagValor'),data:v('pagData'),metodo:v('pagMetodo'),obs:v('pagObs')});clear(['pagValor','pagData','pagMetodo','pagObs']);save();}
+function saveDocumento(){db.documentos.push({id:id(),obra:v('docObra'),nome:v('docNome'),tipo:v('docTipo'),notas:v('docNotas')});clear(['docNome','docTipo','docNotas']);save();}
+function v(id){let e=document.getElementById(id);return e?e.value:'';}
+function clear(ids){ids.forEach(i=>{let e=document.getElementById(i);if(e)e.value='';});}
+
+function calcOrc(){
+ let mao=num('orcMao'), mat=num('orcMat'), log=num('orcLog'), im=Number(v('orcIvaMao')||0), it=Number(v('orcIvaMat')||0);
+ let iva=mao*im+mat*it+log*0.23, subtotal=mao+mat+log,total=subtotal+iva;
+ setText('orcSubtotal',euro(subtotal));setText('orcIva',euro(iva));setText('orcTotal',euro(total));
+ return {subtotal,iva,total};
+}
+['orcMao','orcMat','orcLog','orcIvaMao','orcIvaMat'].forEach(i=>document.addEventListener('input',e=>{if(e.target&&e.target.id===i)calcOrc();}));
+
+function table(rows,headers){
+ if(!rows.length)return '<p style="color:#64748b">Sem registos.</p>';
+ return '<table><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'<th></th></tr>'+rows.join('')+'</table>';
+}
+function render(){
+ obraOptionsAll(); calcOrc();
+ let totalObras=db.obras.reduce((s,o)=>s+(Number(o.valor)||0),0);
+ let totalCustos=db.custos.reduce((s,c)=>s+(Number(c.valor)||0),0);
+ let totalPagos=db.pagamentos.reduce((s,p)=>s+(Number(p.valor)||0),0);
+ setText('kpiObras',euro(totalObras));setText('kpiCustos',euro(totalCustos));setText('kpiPagos',euro(totalPagos));setText('kpiDivida',euro(totalObras-totalPagos));setText('kpiLucro',euro(totalPagos-totalCustos));
+ document.getElementById('listaClientes').innerHTML=table(db.clientes.map((c,i)=>`<tr><td>${c.nome}</td><td>${c.nif}</td><td>${c.email}</td><td>${c.telefone}</td><td><button class="btn danger" onclick="del('clientes',${i})">Apagar</button></td></tr>`),['Nome','NIF','Email','Telefone']);
+ document.getElementById('listaObras').innerHTML=table(db.obras.map((o,i)=>`<tr><td>${o.nome}</td><td>${getClienteName(o.cliente)}</td><td>${euro(o.valor)}</td><td><span class="badge bblue">${o.estado}</span></td><td>${o.prazo}</td><td><button class="btn danger" onclick="del('obras',${i})">Apagar</button></td></tr>`),['Obra','Cliente','Valor','Estado','Prazo']);
+ document.getElementById('listaOrcamentos').innerHTML=table(db.orcamentos.map((o,i)=>`<tr><td>${o.numero}</td><td>${getObraName(o.obra)}</td><td>${euro(o.total)}</td><td>${o.validade}</td><td><button class="btn danger" onclick="del('orcamentos',${i})">Apagar</button></td></tr>`),['N.º','Obra','Total','Validade']);
+ document.getElementById('listaCustos').innerHTML=table(db.custos.map((c,i)=>`<tr><td>${getObraName(c.obra)}</td><td>${c.desc}</td><td>${c.tipo}</td><td>${euro(c.valor)}</td><td>${c.data||''}</td><td><button class="btn danger" onclick="del('custos',${i})">Apagar</button></td></tr>`),['Obra','Descrição','Tipo','Valor','Data']);
+ document.getElementById('listaPagamentos').innerHTML=table(db.pagamentos.map((p,i)=>`<tr><td>${getObraName(p.obra)}</td><td>${euro(p.valor)}</td><td>${p.data||''}</td><td>${p.metodo||''}</td><td><button class="btn danger" onclick="del('pagamentos',${i})">Apagar</button></td></tr>`),['Obra','Valor','Data','Método']);
+ document.getElementById('listaDocumentos').innerHTML=table(db.documentos.map((d,i)=>`<tr><td>${getObraName(d.obra)}</td><td>${d.nome}</td><td>${d.tipo}</td><td>${d.notas}</td><td><button class="btn danger" onclick="del('documentos',${i})">Apagar</button></td></tr>`),['Obra','Nome','Tipo','Notas']);
+ document.getElementById('dashObras').innerHTML=document.getElementById('listaObras').innerHTML;
+ document.getElementById('alertas').innerHTML=(totalObras-totalPagos>0?`<p><span class="badge bred">Atenção</span> Tem ${euro(totalObras-totalPagos)} por receber.</p>`:'<p><span class="badge bgreen">OK</span> Sem dívida calculada.</p>')+(db.obras.some(o=>o.estado==='Suspenso'||o.estado==='Pagamento em atraso')?'<p><span class="badge byellow">Obras</span> Existem obras suspensas/em atraso.</p>':'');
+}
+function setText(id,t){let e=document.getElementById(id);if(e)e.textContent=t;}
+function printOrcamento(){window.print();}
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='backup_distak_erp.json';a.click();}
+function importData(ev){let f=ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();alert('Backup importado.');}catch(e){alert('Ficheiro inválido.')}};r.readAsText(f);}
+function clearAll(){if(confirm('Apagar todos os dados desta aplicação?')){localStorage.removeItem(KEY);db={clientes:[],obras:[],orcamentos:[],custos:[],pagamentos:[],documentos:[]};render();}}
+function demoData(){
+ db={
+ clientes:[{id:'c1',nome:'Condomínio Malveira',nif:'',email:'',telefone:'',morada:'Malveira'},{id:'c2',nome:'José Manuel Rosado Gambôa',nif:'',email:'',telefone:'',morada:'Paço de Arcos'}],
+ obras:[{id:'o1',nome:'Telhado / Beirado Malveira',cliente:'c1',morada:'Malveira',valor:4800,prazo:'A combinar',estado:'Pagamento em atraso',notas:'Aguardar sinal'},{id:'o2',nome:'Reconstrução Moradia Paço de Arcos',cliente:'c2',morada:'Travessa Forte de São Pedro 30A-30B',valor:258500,prazo:'A definir',estado:'Orçamento',notas:'Margem protegida'}],
+ orcamentos:[],custos:[{id:'cu1',obra:'o1',desc:'Materiais estimativos',valor:950,tipo:'Material',data:''}],pagamentos:[{id:'p1',obra:'o1',valor:0,data:'',metodo:'',obs:''}],documentos:[]
+ };save();
+}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}
+</script>
+</body>
+</html>
