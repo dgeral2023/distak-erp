@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Distak ERP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#eef2f7; --dark:#07111f; --nav:#101827; --gold:#f59e0b; --card:#fff;
+  --text:#111827; --muted:#64748b; --green:#15803d; --red:#b91c1c;
+  --blue:#1d4ed8; --line:#e2e8f0;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#07111f,#1e293b);padding:25px}
+.login-card{background:white;border-radius:22px;padding:35px;width:430px;box-shadow:0 20px 50px rgba(15,23,42,.25)}
+.login-card h1{margin:0 0 8px}.login-card p{color:#64748b}
+input,select,textarea{padding:12px;border:1px solid #cbd5e1;border-radius:12px;width:100%;font-family:inherit;margin:5px 0}
+textarea{min-height:80px}
+.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:bold;cursor:pointer;margin:3px}
+.primary{background:var(--gold);color:#111827}.dark{background:#111827;color:white}.danger{background:#fee2e2;color:#991b1b}.light{background:#e2e8f0;color:#111827}
+.app{display:none}
+header{height:74px;background:var(--dark);color:white;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+header h1{font-size:22px;margin:0} header small{color:#cbd5e1}
+.layout{display:flex;min-height:calc(100vh - 74px)}
+aside{width:265px;background:var(--nav);color:white;padding:16px 0}
+aside a{display:block;padding:13px 24px;color:white;text-decoration:none;border-left:4px solid transparent;cursor:pointer}
+aside a.active,aside a:hover{background:#263449;border-left-color:var(--gold)}
+aside .title{padding:12px 24px;color:#94a3b8;font-size:12px;text-transform:uppercase}
+main{flex:1;padding:26px;overflow:auto}
+.view{display:none}.view.active{display:block}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}.top h2{margin:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:20px}
+.card,.panel{background:var(--card);border-radius:18px;padding:18px;box-shadow:0 2px 12px rgba(15,23,42,.08)}
+.panel{margin-bottom:18px}.card small{font-weight:bold;color:var(--muted)}.card strong{display:block;font-size:25px;margin-top:8px}
+.green{color:var(--green)}.red{color:var(--red)}.blue{color:var(--blue)}.gold{color:#b45309}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+table{width:100%;border-collapse:collapse}th,td{padding:11px;border-bottom:1px solid var(--line);font-size:14px;text-align:left;vertical-align:top}th{color:var(--muted)}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:12px}
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:bold}
+.bred{background:#fee2e2;color:#991b1b}.bblue{background:#dbeafe;color:#1e40af}.bgreen{background:#dcfce7;color:#166534}.byellow{background:#fef3c7;color:#92400e}
+.notice{background:#fff7ed;border-left:5px solid var(--gold);padding:13px;border-radius:12px;margin-bottom:14px}
+.finance-only{display:none}
+body.role-admin .finance-only, body.role-escritorio .finance-only{display:block}
+body.role-funcionario .hide-funcionario, body.role-cliente .hide-cliente{display:none!important}
+body.role-cliente .hide-client-role{display:none!important}
+@media(max-width:950px){.layout{display:block}aside{width:100%;display:grid;grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}header{height:auto;display:block;padding:16px}}
+</style>
+</head>
+<body>
+
+<section class="login" id="loginPage">
+ <div class="login-card">
+  <h1>Distak ERP</h1>
+  <p>Entre com o seu email e password.</p>
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button class="btn primary" style="width:100%" onclick="login()">Entrar</button>
+  <p id="loginMsg"></p>
+ </div>
+</section>
+
+<section class="app" id="appPage">
+<header>
+ <div><h1>Distak ERP</h1><small id="roleLabel">Perfil</small></div>
+ <div><strong id="userName">Utilizador</strong><br><small id="userEmail"></small><br><button class="btn danger" onclick="logout()">Sair</button></div>
+</header>
+
+<div class="layout">
+<aside>
+ <div class="title">Menu</div>
+ <a class="active" onclick="showView('dashboard',this)">📊 Dashboard</a>
+ <a class="hide-funcionario hide-cliente" onclick="showView('clientes',this)">👥 Clientes</a>
+ <a onclick="showView('obras',this)">🏗️ Obras</a>
+ <a class="hide-funcionario hide-cliente" onclick="showView('orcamentos',this)">🧾 Orçamentos</a>
+ <a class="finance-only hide-funcionario hide-cliente" onclick="showView('custos',this)">📉 Custos</a>
+ <a class="finance-only hide-funcionario hide-cliente" onclick="showView('pagamentos',this)">💶 Pagamentos</a>
+ <a onclick="showView('fotos',this)">📷 Fotografias</a>
+</aside>
+
+<main>
+<section id="dashboard" class="view active">
+ <div class="top"><h2>Dashboard</h2><button class="btn dark" onclick="loadAll()">Atualizar</button></div>
+ <div id="msg"></div>
+ <div class="finance-only">
+  <div class="kpis">
+   <div class="card"><small>Clientes</small><strong id="kpiClientes">0</strong></div>
+   <div class="card"><small>Valor total das obras</small><strong id="kpiObras">0,00 €</strong></div>
+   <div class="card"><small>Custos registados</small><strong class="gold" id="kpiCustos">0,00 €</strong></div>
+   <div class="card"><small>Pagamentos recebidos</small><strong class="green" id="kpiPagos">0,00 €</strong></div>
+   <div class="card"><small>Por receber</small><strong class="red" id="kpiDivida">0,00 €</strong></div>
+  </div>
+ </div>
+ <div class="notice"><strong>Modo:</strong> <span id="modoTexto">—</span></div>
+ <div class="grid">
+   <div class="panel"><h3>Obras</h3><div id="dashObras"></div></div>
+   <div class="panel"><h3>Alertas</h3><div id="alertas"></div></div>
+ </div>
+</section>
+
+<section id="clientes" class="view hide-funcionario hide-cliente">
+ <div class="top"><h2>Clientes</h2><button class="btn primary" onclick="saveCliente()">Guardar</button></div>
+ <div class="panel"><div class="form"><input id="clienteNome" placeholder="Nome"><input id="clienteNif" placeholder="NIF"><input id="clienteEmail" placeholder="Email"><input id="clienteTelefone" placeholder="Telefone"><input id="clienteMorada" placeholder="Morada"></div></div>
+ <div class="panel"><h3>Lista</h3><div id="listaClientes"></div></div>
+</section>
+
+<section id="obras" class="view">
+ <div class="top"><h2>Obras</h2><button class="btn primary hide-funcionario hide-cliente" onclick="saveObra()">Guardar</button></div>
+ <div class="panel hide-funcionario hide-cliente">
+   <div class="form"><input id="obraNome" placeholder="Nome da obra"><select id="obraCliente"></select><input id="obraMorada" placeholder="Morada"><input id="obraValor" placeholder="Valor €"><input id="obraPrazo" placeholder="Prazo"><select id="obraEstado"><option>Orçamento</option><option>Aprovado</option><option>Em execução</option><option>Concluído</option><option>Suspenso</option><option>Pagamento em atraso</option></select></div>
+   <textarea id="obraNotas" placeholder="Notas"></textarea>
+ </div>
+ <div class="panel"><h3>Lista de obras</h3><div id="listaObras"></div></div>
+</section>
+
+<section id="orcamentos" class="view hide-funcionario hide-cliente">
+ <div class="panel"><h2>Orçamentos</h2><div id="listaOrcamentos"></div></div>
+</section>
+
+<section id="custos" class="view finance-only hide-funcionario hide-cliente">
+ <div class="panel"><h2>Custos</h2><div id="listaCustos"></div></div>
+</section>
+
+<section id="pagamentos" class="view finance-only hide-funcionario hide-cliente">
+ <div class="panel"><h2>Pagamentos</h2><div id="listaPagamentos"></div></div>
+</section>
+
+<section id="fotos" class="view">
+ <div class="panel"><h2>Fotografias da obra</h2><p>Área para fotografias da obra. Na próxima fase ligamos ao Supabase Storage.</p></div>
+</section>
+</main>
+</div>
+</section>
+
+<script>
+const SUPABASE_URL = "https://usaaiubvynxyfviwgogs.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzYWFpdWJ2eW54eWZ2aXdnb2dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NjExMzgsImV4cCI6MjA5NjMzNzEzOH0.iO3LELtHKemuVujtWuTeJYGxxIJ9lgUK_MGyOdhOCeg";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let db = {clientes:[],obras:[],orcamentos:[],custos:[],pagamentos:[]};
+let currentProfile = null;
+
+function euro(v){v=Number(v)||0;return v.toLocaleString('pt-PT',{style:'currency',currency:'EUR'});}
+function num(id){return parseFloat(String(document.getElementById(id).value||'0').replace(',','.'))||0;}
+function val(id){let e=document.getElementById(id);return e?e.value:''}
+function financeAllowed(){return currentProfile && ['admin','escritorio'].includes(currentProfile.role)}
+function showView(id,el){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('aside a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');}
+function getClienteName(id){return (db.clientes.find(c=>c.id===id)||{}).nome||'—'}
+function getObraName(id){return (db.obras.find(o=>o.id===id)||{}).nome||'—'}
+function table(rows,headers){if(!rows.length)return '<p style="color:#64748b">Sem registos.</p>';return '<table><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>'+rows.join('')+'</table>'}
+
+async function login(){
+ const {data,error}=await sb.auth.signInWithPassword({email:val('email'),password:val('password')});
+ if(error){document.getElementById('loginMsg').textContent='Erro: '+error.message;return}
+ await startApp(data.user);
+}
+
+async function logout(){await sb.auth.signOut();location.reload();}
+
+async function startApp(user){
+ const {data:profile,error}=await sb.from('profiles').select('*').eq('id',user.id).single();
+ if(error || !profile || !profile.ativo){
+   document.getElementById('loginMsg').textContent='Utilizador sem perfil ativo.';
+   await sb.auth.signOut();
+   return;
+ }
+ currentProfile=profile;
+ document.body.className='role-'+profile.role;
+ document.getElementById('loginPage').style.display='none';
+ document.getElementById('appPage').style.display='block';
+ document.getElementById('userName').textContent=profile.nome||profile.email;
+ document.getElementById('userEmail').textContent=profile.email;
+ document.getElementById('roleLabel').textContent='Perfil: '+profile.role;
+ document.getElementById('modoTexto').textContent = profile.role === 'funcionario'
+   ? 'funcionário sem acesso a valores financeiros'
+   : profile.role === 'cliente'
+   ? 'cliente: só vê orçamento e fotografias da obra'
+   : profile.role;
+ await loadAll();
+}
+
+async function loadAll(){
+ const res=await Promise.all(['clientes','obras','orcamentos','custos','pagamentos'].map(t=>sb.from(t).select('*')));
+ for(const r of res){if(r.error){alert(r.error.message);return}}
+ db.clientes=res[0].data||[];
+ db.obras=res[1].data||[];
+ db.orcamentos=res[2].data||[];
+ db.custos=res[3].data||[];
+ db.pagamentos=res[4].data||[];
+ render();
+}
+
+function refreshOptions(){
+ let c=document.getElementById('obraCliente');
+ if(c)c.innerHTML='<option value="">Cliente</option>'+db.clientes.map(x=>`<option value="${x.id}">${x.nome}</option>`).join('');
+}
+
+function render(){
+ refreshOptions();
+ let totalObras=db.obras.reduce((s,o)=>s+(Number(o.valor)||0),0);
+ let totalCustos=db.custos.reduce((s,c)=>s+(Number(c.valor)||0),0);
+ let totalPagos=db.pagamentos.reduce((s,p)=>s+(Number(p.valor)||0),0);
+
+ if(financeAllowed()){
+  document.getElementById('kpiClientes').textContent=db.clientes.length;
+  document.getElementById('kpiObras').textContent=euro(totalObras);
+  document.getElementById('kpiCustos').textContent=euro(totalCustos);
+  document.getElementById('kpiPagos').textContent=euro(totalPagos);
+  document.getElementById('kpiDivida').textContent=euro(totalObras-totalPagos);
+ }
+
+ if(document.getElementById('listaClientes')){
+   document.getElementById('listaClientes').innerHTML=table(
+     db.clientes.map(c=>`<tr><td>${c.nome||''}</td><td>${c.nif||''}</td><td>${c.email||''}</td></tr>`),
+     ['Nome','NIF','Email']
+   );
+ }
+
+ const headers=financeAllowed()?['Obra','Cliente','Valor','Estado','Prazo']:['Obra','Cliente','Estado','Prazo'];
+ const rows=db.obras.map(o=> financeAllowed()
+   ? `<tr><td>${o.nome||''}</td><td>${getClienteName(o.cliente_id)}</td><td>${euro(o.valor)}</td><td><span class="badge bblue">${o.estado||''}</span></td><td>${o.prazo||''}</td></tr>`
+   : `<tr><td>${o.nome||''}</td><td>${getClienteName(o.cliente_id)}</td><td><span class="badge bblue">${o.estado||''}</span></td><td>${o.prazo||''}</td></tr>`
+ );
+ document.getElementById('listaObras').innerHTML=table(rows,headers);
+ document.getElementById('dashObras').innerHTML=document.getElementById('listaObras').innerHTML;
+
+ if(financeAllowed()){
+  document.getElementById('listaCustos').innerHTML=table(
+    db.custos.map(c=>`<tr><td>${getObraName(c.obra_id)}</td><td>${c.descricao||''}</td><td>${euro(c.valor)}</td></tr>`),
+    ['Obra','Descrição','Valor']
+  );
+  document.getElementById('listaPagamentos').innerHTML=table(
+    db.pagamentos.map(p=>`<tr><td>${getObraName(p.obra_id)}</td><td>${euro(p.valor)}</td><td>${p.data||''}</td></tr>`),
+    ['Obra','Valor','Data']
+  );
+  document.getElementById('alertas').innerHTML=`<p><span class="badge bred">Atenção</span> Tem ${euro(totalObras-totalPagos)} por receber.</p>`;
+ } else {
+  document.getElementById('alertas').innerHTML='<p><span class="badge bgreen">Perfil protegido</span> Sem acesso a alertas financeiros.</p>';
+ }
+}
+
+async function saveCliente(){
+ const {error}=await sb.from('clientes').insert({
+   nome:val('clienteNome'),nif:val('clienteNif'),email:val('clienteEmail'),
+   telefone:val('clienteTelefone'),morada:val('clienteMorada')
+ });
+ if(error)return alert(error.message);
+ await loadAll();
+}
+
+async function saveObra(){
+ const {error}=await sb.from('obras').insert({
+   nome:val('obraNome'),cliente_id:val('obraCliente')||null,morada:val('obraMorada'),
+   valor:num('obraValor'),prazo:val('obraPrazo'),estado:val('obraEstado'),notas:val('obraNotas')
+ });
+ if(error)return alert(error.message);
+ await loadAll();
+}
+
+sb.auth.getUser().then(({data})=>{if(data && data.user) startApp(data.user);});
+</script>
+</body>
+</html>
