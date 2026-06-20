@@ -1,0 +1,15 @@
+{
+  "name": "Distak ERP Local",
+  "short_name": "Distak ERP",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#eef2f7",
+  "theme_color": "#07111f",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

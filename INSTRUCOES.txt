@@ -1,0 +1,30 @@
+DISTAK ERP LOCAL — VERSÃO FUNCIONAL
+
+O QUE ESTA VERSÃO JÁ FAZ
+- Login visual
+- Guardar clientes
+- Guardar obras
+- Guardar orçamentos
+- Calcular IVA 6% / 23%
+- Calcular subtotal, IVA e total
+- Gerar impressão/PDF pelo navegador
+- Guardar custos por obra
+- Guardar pagamentos por obra
+- Calcular total por receber e lucro estimado
+- Guardar referências de documentos
+- Exportar e importar backup JSON
+- Funciona em PC, tablet e telemóvel através do navegador
+
+COMO ABRIR NO PC
+1. Extraia o ZIP.
+2. Abra a pasta.
+3. Clique duas vezes em index.html.
+4. Use o Chrome ou Edge.
+5. Para instalar como aplicação: menu dos 3 pontos > Instalar aplicação.
+
+IMPORTANTE
+Os dados ficam guardados no navegador/equipamento.
+Para usar em vários computadores e telemóveis ao mesmo tempo, é necessário uma versão com servidor/base de dados em nuvem.
+
+VERSÃO PROFISSIONAL COM SERVIDOR
+Para isso é preciso contratar alojamento/domínio e fazer backend com base de dados, login seguro, anexos reais, multiutilizador e backups automáticos.
