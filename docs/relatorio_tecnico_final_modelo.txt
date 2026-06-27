@@ -1,0 +1,8 @@
+RELATÓRIO TÉCNICO FINAL – OBRA CONCLUÍDA E PATOLOGIA RESOLVIDA
+Cliente:
+Morada da obra:
+Data:
+Descrição da patologia:
+Trabalhos executados:
+Ensaios e verificação final:
+Conclusão técnica: Após os trabalhos executados, considera-se a patologia resolvida, sem sinais ativos na data da vistoria final.

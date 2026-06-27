@@ -1,75 +1,67 @@
 <!doctype html>
 <html lang="pt">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DISTAK ERP | Gestão de Obras</title>
-  <meta name="description" content="ERP DISTAK para gestão de obras, clientes, orçamentos, custos, equipas, documentos e relatórios.">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.svg" />
+  <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
   <div id="login" class="login-page">
     <div class="login-card">
-      <div class="brand">
-        <img src="icon.svg" alt="DISTAK">
-        <div><strong>DISTAK ERP</strong><span>Construção Civil</span></div>
-      </div>
-      <h1>Entrar na aplicação</h1>
-      <p>Gestão de obras, orçamentos, custos, faturação, documentos, fotografias e equipas.</p>
+      <img src="icon.svg" class="logo" alt="DISTAK" />
+      <h1>DISTAK ERP</h1>
+      <p>Gestão profissional de obras, orçamentos, custos, faturação, documentos, fotografias e equipas.</p>
       <label>Email</label>
-      <input id="email" value="d.geral2023@gmail.com">
+      <input id="email" value="d.geral2023@gmail.com" />
       <label>Password</label>
-      <input id="password" type="password" value="123456">
-      <button onclick="login()">Entrar</button>
+      <input id="password" type="password" value="123456" />
+      <button onclick="login()">Entrar na aplicação</button>
       <small>Perfis: Administrador · Escritório · Encarregado · Funcionário · Cliente</small>
     </div>
   </div>
 
   <div id="app" class="app hidden">
-    <aside class="sidebar">
-      <div class="brand side"><img src="icon.svg"><div><strong>DISTAK</strong><span>ERP Obras</span></div></div>
+    <aside>
+      <div class="brand"><img src="icon.svg" alt="DISTAK"><div><strong>DISTAK ERP</strong><span>Construção Civil</span></div></div>
       <nav>
-        <button class="active" data-page="dashboard">Dashboard</button>
-        <button data-page="clientes">Clientes</button>
-        <button data-page="obras">Obras</button>
-        <button data-page="orcamentos">Orçamentos</button>
-        <button data-page="custos">Custos e Lucro</button>
-        <button data-page="funcionarios">Funcionários</button>
-        <button data-page="documentos">Documentos</button>
-        <button data-page="relatorios">Relatórios</button>
-        <button data-page="config">Configuração</button>
+        <button onclick="show('dashboard')">Dashboard</button>
+        <button onclick="show('clientes')">Clientes</button>
+        <button onclick="show('obras')">Obras</button>
+        <button onclick="show('orcamentos')">Orçamentos</button>
+        <button onclick="show('custos')">Custos e Margem</button>
+        <button onclick="show('funcionarios')">Funcionários</button>
+        <button onclick="show('documentos')">Relatórios</button>
+        <button onclick="show('cliente')">Portal Cliente</button>
       </nav>
+      <button class="logout" onclick="logout()">Sair</button>
     </aside>
 
-    <main class="main">
-      <header>
-        <div><h2 id="pageTitle">Dashboard</h2><p>Distak Construção Civil Unipessoal, Lda · Alvará 116681-PAR · Seguro RC 1.000.000 €</p></div>
-        <button class="ghost" onclick="logout()">Sair</button>
-      </header>
+    <main>
+      <header><div><h2 id="pageTitle">Dashboard</h2><p>Administrador: José Filipe Alves Silva · Alvará 116681-PAR · Seguro RC 1.000.000 €</p></div><button onclick="window.print()">Imprimir / PDF</button></header>
 
-      <section id="dashboard" class="page active-page">
+      <section id="dashboard" class="page active">
         <div class="cards">
-          <div class="card"><span>Faturação mensal</span><strong>21.447,62 €</strong></div>
-          <div class="card"><span>Custos registados</span><strong>8.920,00 €</strong></div>
-          <div class="card"><span>Lucro estimado</span><strong class="green">12.527,62 €</strong></div>
-          <div class="card"><span>Valores em atraso</span><strong class="red">2.560,44 €</strong></div>
+          <div class="card"><small>Faturação mensal</small><strong>21.447,62 €</strong></div>
+          <div class="card"><small>Custos registados</small><strong>8.920,00 €</strong></div>
+          <div class="card"><small>Lucro estimado</small><strong>12.527,62 €</strong></div>
+          <div class="card danger"><small>Valores em atraso</small><strong>2.560,44 €</strong></div>
         </div>
-        <div class="grid two">
-          <div class="panel"><h3>Obras principais</h3><table id="tblObras"></table></div>
-          <div class="panel"><h3>Alertas</h3><p class="alert red">Fatura M/59 em atraso: 2.560,44 €</p><p class="alert yellow">Telhado Malveira aguarda sinal.</p><p class="alert blue">Obras grandes com contingência protegida.</p></div>
+        <div class="grid">
+          <div class="panel"><h3>Obras principais</h3><table><tr><th>Obra</th><th>Cliente</th><th>Estado</th><th>Valor</th></tr><tr><td>Reconstrução Moradia Paço de Arcos</td><td>José Manuel Rosado Gambôa</td><td><span class="badge blue">Orçamento enviado</span></td><td>258.500,00 €</td></tr><tr><td>Quiosque Paço de Arcos</td><td>ENTREMÁQUINAS LDA</td><td><span class="badge blue">Em análise</span></td><td>307.900,00 €</td></tr><tr><td>Telhado / Beirado Malveira</td><td>Condomínio Malveira</td><td><span class="badge yellow">Aguardar sinal</span></td><td>4.800,00 €</td></tr></table></div>
+          <div class="panel"><h3>Alertas</h3><p><span class="badge red">Urgente</span> Fatura M/59 em atraso: 2.560,44 €</p><p><span class="badge yellow">Ação</span> Confirmar sinal antes de iniciar obra.</p><p><span class="badge green">Margem</span> Obras grandes com contingência protegida.</p></div>
         </div>
       </section>
 
-      <section id="clientes" class="page"><div class="panel"><h3>Clientes</h3><div class="form"><input placeholder="Nome"><input placeholder="NIF"><input placeholder="Morada"><input placeholder="Telefone"><input placeholder="Email"><button>Guardar cliente</button></div><table id="tblClientes"></table></div></section>
-      <section id="obras" class="page"><div class="panel"><h3>Gestão de obras</h3><div class="form"><input placeholder="Cliente"><input placeholder="Morada da obra"><input placeholder="N.º orçamento"><select><option>Em execução</option><option>Orçamento</option><option>Concluída</option><option>Suspensa</option></select><input placeholder="Valor s/ IVA"><button>Guardar obra</button></div><table id="tblObras2"></table></div></section>
-      <section id="orcamentos" class="page"><div class="panel"><h3>Orçamento automático</h3><div class="form"><input id="mao" type="number" placeholder="Mão de obra €"><input id="mat" type="number" placeholder="Materiais €"><input id="log" type="number" placeholder="Logística €"><select id="iva"><option value="0.23">IVA 23%</option><option value="0.06">IVA 6%</option></select><button onclick="calcOrcamento()">Calcular</button></div><div id="orcResult" class="result">Total aparece aqui.</div></div></section>
-      <section id="custos" class="page"><div class="panel"><h3>Custos e margem</h3><div class="form"><input id="valorObra" type="number" placeholder="Valor orçamento"><input id="despesas" type="number" placeholder="Despesas / materiais"><button onclick="calcMargem()">Calcular margem</button></div><div id="margemResult" class="result">Margem aparece aqui.</div></div></section>
-      <section id="funcionarios" class="page"><div class="panel"><h3>Funcionários e horas</h3><div class="form"><input placeholder="Nome empregado"><input placeholder="Contacto"><input placeholder="Seguro"><input type="date"><input type="number" placeholder="Salário dia"><input type="number" placeholder="Dias trabalho"><input type="number" placeholder="Dias falta"><button>Guardar folha</button></div></div></section>
-      <section id="documentos" class="page"><div class="panel"><h3>Documentos</h3><div class="doc-grid"><div>Contratos</div><div>Garantias</div><div>Fotos antes/durante/depois</div><div>Relatórios técnicos</div><div>Autos de medição</div><div>Seguros</div></div></div></section>
-      <section id="relatorios" class="page"><div class="panel"><h3>Relatório Técnico Final</h3><textarea id="relatorio" rows="14"></textarea><button onclick="window.print()">Imprimir / PDF</button></div></section>
-      <section id="config" class="page"><div class="panel"><h3>Configuração</h3><p>Supabase preparado. Coloque URL e ANON KEY em <code>assets/js/config.js</code>.</p><pre>app.distaklda.com · GitHub Pages · Cloudflare</pre></div></section>
+      <section id="clientes" class="page"><h3>Clientes</h3><div class="form"><input placeholder="Nome do cliente"><input placeholder="NIF"><input placeholder="Telefone"><input placeholder="Email"><input placeholder="Morada"><button>Guardar cliente</button></div><table><tr><th>Cliente</th><th>Contacto</th><th>Obras</th><th>Estado</th></tr><tr><td>Condomínio Malveira</td><td>—</td><td>Telhado / Fachada</td><td>Ativo</td></tr><tr><td>José Manuel Rosado Gambôa</td><td>—</td><td>Paço de Arcos</td><td>Orçamento</td></tr></table></section>
+      <section id="obras" class="page"><h3>Gestão de Obras</h3><div class="form"><input placeholder="Nome da obra"><input placeholder="Cliente"><input placeholder="Morada da obra"><input placeholder="Valor s/ IVA"><select><option>Orçamento</option><option>Aprovado</option><option>Em execução</option><option>Concluído</option><option>Suspenso</option></select><button>Guardar obra</button></div><table><tr><th>Obra</th><th>Responsável</th><th>Início</th><th>Fim</th><th>Estado</th></tr><tr><td>Paço de Arcos</td><td>José Filipe</td><td>—</td><td>—</td><td>Orçamento</td></tr></table></section>
+      <section id="orcamentos" class="page"><h3>Orçamentos</h3><div class="form"><input placeholder="N.º orçamento"><input placeholder="Cliente"><input placeholder="Mão de obra €"><input placeholder="Materiais €"><input placeholder="Logística €"><select><option>IVA 6%</option><option>IVA 23%</option></select><textarea placeholder="Descrição técnica dos trabalhos"></textarea><button>Gerar orçamento / PDF</button></div></section>
+      <section id="custos" class="page"><h3>Custos e Margem</h3><div class="cards"><div class="card"><small>Orçamento</small><strong>50.000 €</strong></div><div class="card"><small>Despesas</small><strong>32.000 €</strong></div><div class="card"><small>Lucro</small><strong>18.000 €</strong></div><div class="card"><small>Margem</small><strong>36%</strong></div></div><div class="form"><input placeholder="Despesa"><input placeholder="Valor"><input placeholder="Obra"><button>Adicionar despesa</button></div></section>
+      <section id="funcionarios" class="page"><h3>Funcionários e Folhas de Horas</h3><div class="form"><input placeholder="Nome"><input placeholder="Contacto"><input placeholder="N.º seguro"><input placeholder="Salário dia"><input placeholder="Dias trabalho"><input placeholder="Dias falta"><button>Guardar</button></div><table><tr><th>Nome</th><th>Função</th><th>Estado</th><th>Pagamento</th></tr><tr><td>Encarregado</td><td>Obra</td><td>Ativo</td><td>Mensal</td></tr></table></section>
+      <section id="documentos" class="page"><h3>Relatórios Técnicos e Documentos</h3><div class="form"><input placeholder="Título do relatório"><input placeholder="Obra / Cliente"><textarea placeholder="Descrição técnica, patologias, intervenção e conclusão"></textarea><button>Guardar relatório</button><button onclick="window.print()">Exportar PDF</button></div><p><strong>Modelo incluído:</strong> Relatório Técnico Final – Obra Concluída e Patologia Resolvida.</p></section>
+      <section id="cliente" class="page"><h3>Portal do Cliente</h3><div class="panel"><p>Área para consulta de orçamentos, contratos, faturas, fotos da obra, autos de medição, relatórios técnicos e garantias.</p><p><span class="badge green">Assinatura digital</span> Aprovação de orçamento e confirmação de trabalhos concluídos.</p></div></section>
     </main>
   </div>
   <script src="assets/js/config.js"></script>
