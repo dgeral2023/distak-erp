@@ -1,2 +1,2 @@
-// Configuração Supabase futura
-window.DISTAK_CONFIG = { supabaseUrl: '', supabaseAnonKey: '' };
+const SUPABASE_URL='';
+const SUPABASE_ANON_KEY='';
