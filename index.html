@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DISTAK ERP | Gestão de Obras</title>
+  <meta name="description" content="ERP DISTAK para gestão de obras, clientes, orçamentos, custos, equipas, documentos e relatórios.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="login" class="login-page">
+    <div class="login-card">
+      <div class="brand">
+        <img src="icon.svg" alt="DISTAK">
+        <div><strong>DISTAK ERP</strong><span>Construção Civil</span></div>
+      </div>
+      <h1>Entrar na aplicação</h1>
+      <p>Gestão de obras, orçamentos, custos, faturação, documentos, fotografias e equipas.</p>
+      <label>Email</label>
+      <input id="email" value="d.geral2023@gmail.com">
+      <label>Password</label>
+      <input id="password" type="password" value="123456">
+      <button onclick="login()">Entrar</button>
+      <small>Perfis: Administrador · Escritório · Encarregado · Funcionário · Cliente</small>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="brand side"><img src="icon.svg"><div><strong>DISTAK</strong><span>ERP Obras</span></div></div>
+      <nav>
+        <button class="active" data-page="dashboard">Dashboard</button>
+        <button data-page="clientes">Clientes</button>
+        <button data-page="obras">Obras</button>
+        <button data-page="orcamentos">Orçamentos</button>
+        <button data-page="custos">Custos e Lucro</button>
+        <button data-page="funcionarios">Funcionários</button>
+        <button data-page="documentos">Documentos</button>
+        <button data-page="relatorios">Relatórios</button>
+        <button data-page="config">Configuração</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header>
+        <div><h2 id="pageTitle">Dashboard</h2><p>Distak Construção Civil Unipessoal, Lda · Alvará 116681-PAR · Seguro RC 1.000.000 €</p></div>
+        <button class="ghost" onclick="logout()">Sair</button>
+      </header>
+
+      <section id="dashboard" class="page active-page">
+        <div class="cards">
+          <div class="card"><span>Faturação mensal</span><strong>21.447,62 €</strong></div>
+          <div class="card"><span>Custos registados</span><strong>8.920,00 €</strong></div>
+          <div class="card"><span>Lucro estimado</span><strong class="green">12.527,62 €</strong></div>
+          <div class="card"><span>Valores em atraso</span><strong class="red">2.560,44 €</strong></div>
+        </div>
+        <div class="grid two">
+          <div class="panel"><h3>Obras principais</h3><table id="tblObras"></table></div>
+          <div class="panel"><h3>Alertas</h3><p class="alert red">Fatura M/59 em atraso: 2.560,44 €</p><p class="alert yellow">Telhado Malveira aguarda sinal.</p><p class="alert blue">Obras grandes com contingência protegida.</p></div>
+        </div>
+      </section>
+
+      <section id="clientes" class="page"><div class="panel"><h3>Clientes</h3><div class="form"><input placeholder="Nome"><input placeholder="NIF"><input placeholder="Morada"><input placeholder="Telefone"><input placeholder="Email"><button>Guardar cliente</button></div><table id="tblClientes"></table></div></section>
+      <section id="obras" class="page"><div class="panel"><h3>Gestão de obras</h3><div class="form"><input placeholder="Cliente"><input placeholder="Morada da obra"><input placeholder="N.º orçamento"><select><option>Em execução</option><option>Orçamento</option><option>Concluída</option><option>Suspensa</option></select><input placeholder="Valor s/ IVA"><button>Guardar obra</button></div><table id="tblObras2"></table></div></section>
+      <section id="orcamentos" class="page"><div class="panel"><h3>Orçamento automático</h3><div class="form"><input id="mao" type="number" placeholder="Mão de obra €"><input id="mat" type="number" placeholder="Materiais €"><input id="log" type="number" placeholder="Logística €"><select id="iva"><option value="0.23">IVA 23%</option><option value="0.06">IVA 6%</option></select><button onclick="calcOrcamento()">Calcular</button></div><div id="orcResult" class="result">Total aparece aqui.</div></div></section>
+      <section id="custos" class="page"><div class="panel"><h3>Custos e margem</h3><div class="form"><input id="valorObra" type="number" placeholder="Valor orçamento"><input id="despesas" type="number" placeholder="Despesas / materiais"><button onclick="calcMargem()">Calcular margem</button></div><div id="margemResult" class="result">Margem aparece aqui.</div></div></section>
+      <section id="funcionarios" class="page"><div class="panel"><h3>Funcionários e horas</h3><div class="form"><input placeholder="Nome empregado"><input placeholder="Contacto"><input placeholder="Seguro"><input type="date"><input type="number" placeholder="Salário dia"><input type="number" placeholder="Dias trabalho"><input type="number" placeholder="Dias falta"><button>Guardar folha</button></div></div></section>
+      <section id="documentos" class="page"><div class="panel"><h3>Documentos</h3><div class="doc-grid"><div>Contratos</div><div>Garantias</div><div>Fotos antes/durante/depois</div><div>Relatórios técnicos</div><div>Autos de medição</div><div>Seguros</div></div></div></section>
+      <section id="relatorios" class="page"><div class="panel"><h3>Relatório Técnico Final</h3><textarea id="relatorio" rows="14"></textarea><button onclick="window.print()">Imprimir / PDF</button></div></section>
+      <section id="config" class="page"><div class="panel"><h3>Configuração</h3><p>Supabase preparado. Coloque URL e ANON KEY em <code>assets/js/config.js</code>.</p><pre>app.distaklda.com · GitHub Pages · Cloudflare</pre></div></section>
+    </main>
+  </div>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
