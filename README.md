@@ -1,13 +1,7 @@
-# DISTAK ERP v2.0
+# DISTAK ERP — Sprint 1
 
-Aplicação de gestão para DISTAK com Supabase, perfis e permissões.
+Versão com interface profissional, login Supabase, perfis, Dashboard, Clientes e Obras com CRUD funcional.
 
-## Perfis
-- admin / administrador: acesso total
-- escritorio: gestão operacional
-- encarregado: obras e equipa
-- funcionario: área limitada, sem dados financeiros
-- cliente: portal cliente
+## Commit sugerido
 
-## Configuração Supabase
-Ficheiro: assets/js/config.js
+`Sprint 1 - Clientes e Obras 100% funcionais`

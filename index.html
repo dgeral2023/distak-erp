@@ -14,16 +14,23 @@
     <section class="login-card">
       <div class="brand-row">
         <div class="brand-mark">D</div>
-        <div><h1>DISTAK ERP</h1><p>Gestão profissional de obras</p></div>
+        <div>
+          <h1>DISTAK ERP</h1>
+          <p>Gestão profissional de obras</p>
+        </div>
       </div>
       <h2>Entrar na aplicação</h2>
       <form id="loginForm">
-        <label>Email<input id="email" type="email" placeholder="Digite o seu email" autocomplete="username" required /></label>
-        <label>Palavra-passe<input id="password" type="password" placeholder="Digite a sua senha" autocomplete="current-password" required /></label>
+        <label>Email
+          <input id="email" type="email" placeholder="Digite o seu email" autocomplete="username" required />
+        </label>
+        <label>Palavra-passe
+          <input id="password" type="password" placeholder="Digite a sua senha" autocomplete="current-password" required />
+        </label>
         <button type="submit">Entrar</button>
       </form>
       <p id="loginMessage" class="message"></p>
-      <small>Perfis: Administrador · Escritório · Encarregado · Funcionário · Cliente</small>
+      <small>Administrador · Funcionário · Cliente</small>
     </section>
   </main>
 
@@ -36,15 +43,22 @@
     </aside>
     <section class="content">
       <header class="topbar">
-        <div><h1 id="pageTitle">Dashboard</h1><p id="pageSubtitle">Resumo operacional</p></div>
-        <div class="user-box"><strong id="userName">Utilizador</strong><span id="userEmail"></span></div>
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageSubtitle">Resumo operacional</p>
+        </div>
+        <div class="user-box">
+          <strong id="userName">Utilizador</strong>
+          <span id="userEmail"></span>
+        </div>
       </header>
       <section id="view" class="view"></section>
     </section>
   </main>
 
+  <div id="toast" class="toast hidden"></div>
+
   <script src="assets/js/config.js"></script>
-  <script src="assets/js/data.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>

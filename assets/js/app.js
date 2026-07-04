@@ -1,370 +1,286 @@
 (() => {
-  'use strict';
-
   const cfg = window.DISTAK_CONFIG || {};
-  const supabaseClient = (cfg.SUPABASE_URL && cfg.SUPABASE_KEY && window.supabase)
-    ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY)
-    : null;
+  const client = window.supabase?.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
 
   const $ = (id) => document.getElementById(id);
-  const loginScreen = $('loginScreen');
-  const appScreen = $('appScreen');
-  const loginForm = $('loginForm');
-  const loginMessage = $('loginMessage');
-  const menu = $('menu');
-  const view = $('view');
-  const pageTitle = $('pageTitle');
-  const pageSubtitle = $('pageSubtitle');
-  const roleBadge = $('roleBadge');
-  const userName = $('userName');
-  const userEmail = $('userEmail');
-  const logoutBtn = $('logoutBtn');
+  const el = {
+    loginScreen: $('loginScreen'), appScreen: $('appScreen'), loginForm: $('loginForm'), loginMessage: $('loginMessage'),
+    menu: $('menu'), view: $('view'), pageTitle: $('pageTitle'), pageSubtitle: $('pageSubtitle'), roleBadge: $('roleBadge'),
+    userName: $('userName'), userEmail: $('userEmail'), logoutBtn: $('logoutBtn'), toast: $('toast')
+  };
 
   let currentUser = null;
   let currentProfile = null;
-  let currentRoute = 'dashboard';
-  const state = { clientes: [], obras: [], loading: false };
+  let clientesCache = [];
+  let obrasCache = [];
+  let activeView = 'dashboard';
 
-  const labels = {
-    admin: 'Administrador', administrador: 'Administrador', escritorio: 'Escritório',
-    encarregado: 'Encarregado', funcionario: 'Funcionário', cliente: 'Cliente'
+  const ROLE_LABEL = { admin:'Administrador', administrador:'Administrador', funcionario:'Funcionário', cliente:'Cliente', escritorio:'Escritório', encarregado:'Encarregado' };
+  const MENUS = {
+    admin: [
+      ['dashboard','🏠 Dashboard'], ['clientes','👥 Clientes'], ['obras','🏗 Obras'], ['orcamentos','💰 Orçamentos'],
+      ['custos','💳 Custos'], ['pagamentos','💵 Pagamentos'], ['funcionarios','👷 Funcionários'], ['agenda','📅 Agenda'],
+      ['fotografias','📷 Fotografias'], ['documentos','📄 Documentos'], ['relatorios','📊 Relatórios'], ['administracao','⚙ Administração']
+    ],
+    administrador: null,
+    funcionario: [
+      ['painelFuncionario','🏠 Painel'], ['minhasObras','🏗 Minhas Obras'], ['checkin','⏱ Check-in'], ['fotografias','📷 Fotografias'],
+      ['materiais','📦 Pedir Material'], ['incidentes','⚠ Incidentes'], ['perfil','👤 Perfil']
+    ],
+    cliente: [['portal','🏠 Portal Cliente'], ['minhasObras','🏗 Minha Obra'], ['documentos','📄 Documentos'], ['perfil','👤 Perfil']]
   };
+  MENUS.administrador = MENUS.admin;
 
-  const permissions = {
-    admin: ['dashboard','clientes','obras','orcamentos','custos','pagamentos','funcionarios','documentos','relatorios','agenda','portal','administracao'],
-    administrador: ['dashboard','clientes','obras','orcamentos','custos','pagamentos','funcionarios','documentos','relatorios','agenda','portal','administracao'],
-    escritorio: ['dashboard','clientes','obras','orcamentos','pagamentos','documentos','relatorios','agenda'],
-    encarregado: ['dashboard','obras','tarefas','fotografias','materiais','incidentes','documentos','agenda'],
-    funcionario: ['painel-funcionario','minhas-obras','tarefas','fotografias','checkin','materiais','incidentes','perfil'],
-    cliente: ['portal','minhas-obras','fotografias','documentos','perfil']
-  };
-
-  const menuLabels = {
-    dashboard:'Dashboard', clientes:'Clientes', obras:'Obras', orcamentos:'Orçamentos', custos:'Custos', pagamentos:'Pagamentos', funcionarios:'Funcionários', documentos:'Documentos', relatorios:'Relatórios', agenda:'Agenda', portal:'Portal Cliente', administracao:'Administração',
-    'painel-funcionario':'Painel Funcionário', 'minhas-obras':'Minhas Obras', tarefas:'Tarefas', fotografias:'Fotografias', checkin:'Check-in / Check-out', materiais:'Materiais', incidentes:'Incidentes', perfil:'Meu Perfil'
-  };
-
-  const html = (s) => String(s ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-  const role = () => normalizeRole(currentProfile?.role || currentProfile?.papel || 'funcionario');
-  const isAdmin = () => ['admin', 'administrador'].includes(role());
-  const money = (v) => Number(v || 0).toLocaleString('pt-PT', {style:'currency', currency:'EUR'});
-  function normalizeRole(value){ return String(value || 'funcionario').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
-  function setPage(title, subtitle){ pageTitle.textContent = title; pageSubtitle.textContent = subtitle || ''; }
-  function showLogin(){ loginScreen.classList.remove('hidden'); appScreen.classList.add('hidden'); }
-  function showApp(){ loginScreen.classList.add('hidden'); appScreen.classList.remove('hidden'); }
-
-  function toast(message, type = 'ok') {
-    let el = $('distakToast');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'distakToast';
-      el.style.cssText = 'position:fixed;right:22px;bottom:22px;z-index:9999;max-width:420px;padding:14px 18px;border-radius:14px;box-shadow:0 12px 35px #0003;font-weight:800;transition:.2s;';
-      document.body.appendChild(el);
-    }
-    el.textContent = message;
-    el.style.background = type === 'error' ? '#fee2e2' : type === 'warn' ? '#fef3c7' : '#dcfce7';
-    el.style.color = type === 'error' ? '#991b1b' : type === 'warn' ? '#92400e' : '#166534';
-    clearTimeout(el._t);
-    el._t = setTimeout(() => el.remove(), 3500);
+  function normalizeRole(role){ return String(role || 'funcionario').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
+  function isAdmin(){ return ['admin','administrador'].includes(normalizeRole(currentProfile?.role || currentProfile?.papel)); }
+  function setPage(title, subtitle=''){ el.pageTitle.textContent = title; el.pageSubtitle.textContent = subtitle; }
+  function toast(msg, error=false){ el.toast.textContent = msg; el.toast.className = 'toast' + (error ? ' error' : ''); setTimeout(()=>el.toast.classList.add('hidden'), 3200); }
+  function showLogin(){ el.loginScreen.classList.remove('hidden'); el.appScreen.classList.add('hidden'); }
+  function showApp(){ el.loginScreen.classList.add('hidden'); el.appScreen.classList.remove('hidden'); }
+  function escapeHtml(value){ return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+  function estadoTag(estado){
+    const e = String(estado || 'sem estado').toLowerCase();
+    const cls = e.includes('concl') ? 'green' : e.includes('atras') ? 'red' : e.includes('exec') ? 'blue' : 'gold';
+    return `<span class="tag ${cls}">${escapeHtml(estado || '—')}</span>`;
   }
 
-  function injectModalStyles(){
-    if ($('distakCrudStyles')) return;
-    const st = document.createElement('style');
-    st.id = 'distakCrudStyles';
-    st.textContent = `
-      .distak-modal{position:fixed;inset:0;background:#02061799;display:grid;place-items:center;z-index:9998;padding:18px}.distak-modal-card{background:#fff;border-radius:22px;width:min(760px,96vw);max-height:92vh;overflow:auto;padding:24px;box-shadow:0 28px 90px #0008}.distak-modal-head{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:16px}.distak-modal-head h2{margin:0}.distak-close{border:0;background:#e5e7eb;border-radius:10px;padding:9px 12px;font-weight:900;cursor:pointer}.distak-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.btn.small{padding:8px 11px;font-size:13px}.btn.red{background:#fee2e2;color:#991b1b}.btn.green{background:#dcfce7;color:#166534}.input-error{border-color:#dc2626!important;background:#fef2f2}.empty-box{border:1px dashed #cbd5e1;border-radius:16px;padding:22px;color:#64748b;background:#f8fafc}.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.toolbar input{padding:12px;border:1px solid #dbe3ef;border-radius:12px;min-width:260px}.status-line{font-size:13px;color:#64748b;margin-top:8px}.clickable{cursor:pointer}`;
-    document.head.appendChild(st);
+  async function supa(query, fallbackMsg){
+    const { data, error } = await query;
+    if(error) throw new Error(error.message || fallbackMsg || 'Erro Supabase');
+    return data;
   }
 
   async function getProfile(user){
-    if (!supabaseClient || !user) return demoProfile(user?.email || 'demo@distaklda.com');
-    const { data, error } = await supabaseClient.from('profiles').select('*').eq('id', user.id).maybeSingle();
-    if (data) return data;
-    const byEmail = await supabaseClient.from('profiles').select('*').eq('email', user.email).maybeSingle();
-    if (byEmail.data) return byEmail.data;
-    throw new Error(error?.message || byEmail.error?.message || 'Perfil não encontrado na tabela profiles.');
+    let profile = await supa(client.from('profiles').select('*').eq('id', user.id).maybeSingle(), 'Perfil não encontrado');
+    if(!profile) profile = await supa(client.from('profiles').select('*').eq('email', user.email).maybeSingle(), 'Perfil não encontrado');
+    if(!profile) throw new Error('Perfil não encontrado na tabela profiles.');
+    return profile;
   }
 
-  function demoProfile(email){
-    return /obras/i.test(email)
-      ? { email, nome:'Funcionário Obras', role:'funcionario', ativo:true }
-      : { email, nome:'Administrador Principal', role:'admin', ativo:true };
+  async function loadData(){
+    clientesCache = await supa(client.from('clientes').select('*').order('nome', { ascending:true }), 'Erro ao carregar clientes');
+    obrasCache = await supa(client.from('obras').select('*, clientes(nome)').order('nome', { ascending:true }), 'Erro ao carregar obras');
   }
 
-  async function loadCoreData(){
-    if (!supabaseClient) {
-      state.clientes = [{id:'demo1', nome:'Condomínio Malveira', nif:'', morada:'Malveira', email:'admin@condominio.pt'}];
-      state.obras = [{id:'obra1', cliente_id:'demo1', nome:'Telhado / Beirado Malveira', morada:'Malveira', estado:'Em curso'}];
-      return;
-    }
-    const [clientesRes, obrasRes] = await Promise.all([
-      supabaseClient.from('clientes').select('*').order('nome', { ascending: true }),
-      supabaseClient.from('obras').select('*, clientes(nome,email,nif)').order('nome', { ascending: true })
-    ]);
-    if (clientesRes.error) throw clientesRes.error;
-    if (obrasRes.error) throw obrasRes.error;
-    state.clientes = clientesRes.data || [];
-    state.obras = obrasRes.data || [];
-  }
-
-  loginForm.addEventListener('submit', async (e) => {
+  el.loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    loginMessage.textContent = 'A entrar...';
-    const email = $('email').value.trim();
-    const password = $('password').value;
-    try {
-      let user;
-      if (supabaseClient) {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        user = data.user;
-      } else user = { email, id:'demo' };
-      currentUser = user;
-      currentProfile = await getProfile(user);
-      if (currentProfile.ativo === false) throw new Error('Utilizador inativo.');
-      await loadCoreData();
-      renderApp();
-    } catch (err) {
-      loginMessage.textContent = err.message || 'Erro ao iniciar sessão.';
-    }
+    el.loginMessage.textContent = 'A entrar...';
+    try{
+      const email = $('email').value.trim();
+      const password = $('password').value;
+      const { data, error } = await client.auth.signInWithPassword({email, password});
+      if(error) throw error;
+      currentUser = data.user;
+      currentProfile = await getProfile(currentUser);
+      if(currentProfile.ativo === false) throw new Error('Utilizador inativo.');
+      await loadData();
+      renderShell();
+      toast('Sessão iniciada com sucesso.');
+    }catch(err){ el.loginMessage.textContent = err.message || 'Erro ao iniciar sessão.'; }
   });
 
-  logoutBtn.addEventListener('click', async () => {
-    if (supabaseClient) await supabaseClient.auth.signOut();
-    currentUser = null; currentProfile = null; state.clientes = []; state.obras = [];
-    showLogin();
-  });
+  el.logoutBtn.addEventListener('click', async () => { await client.auth.signOut(); currentUser=null; currentProfile=null; showLogin(); });
 
   async function boot(){
-    injectModalStyles();
-    if (supabaseClient) {
-      const { data } = await supabaseClient.auth.getSession();
-      if (data.session?.user) {
-        try {
-          currentUser = data.session.user;
-          currentProfile = await getProfile(currentUser);
-          await loadCoreData();
-          renderApp();
-          return;
-        } catch (e) { console.warn(e); }
-      }
+    if(!client){ el.loginMessage.textContent = 'Supabase não configurado.'; showLogin(); return; }
+    const { data } = await client.auth.getSession();
+    if(data.session?.user){
+      try{ currentUser = data.session.user; currentProfile = await getProfile(currentUser); await loadData(); renderShell(); return; }
+      catch(e){ console.warn(e); }
     }
     showLogin();
   }
 
-  function renderApp(){
-    const r = role();
-    const available = permissions[r] || permissions.funcionario;
-    roleBadge.textContent = labels[r] || r;
-    userName.textContent = currentProfile.nome || currentProfile.name || currentUser.email;
-    userEmail.textContent = currentProfile.email || currentUser.email;
-    menu.innerHTML = '';
-    available.forEach((key, idx) => {
-      const btn = document.createElement('button');
-      btn.textContent = menuLabels[key] || key;
-      btn.dataset.route = key;
-      btn.onclick = () => renderView(key);
-      menu.appendChild(btn);
-      if (idx === 0) btn.classList.add('active');
-    });
+  function renderShell(){
+    const role = normalizeRole(currentProfile.role || currentProfile.papel);
+    const menuItems = MENUS[role] || MENUS.funcionario;
+    el.roleBadge.textContent = ROLE_LABEL[role] || role;
+    el.userName.textContent = currentProfile.nome || currentProfile.name || currentUser.email;
+    el.userEmail.textContent = currentProfile.email || currentUser.email;
+    el.menu.innerHTML = menuItems.map(([key,label]) => `<button data-view="${key}">${label}</button>`).join('');
+    el.menu.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => renderView(btn.dataset.view)));
     showApp();
-    renderView(available.includes(currentRoute) ? currentRoute : available[0]);
+    renderView(menuItems[0][0]);
   }
 
-  function activate(key){ [...menu.children].forEach(b => b.classList.toggle('active', b.dataset.route === key)); }
-
+  function activate(key){ el.menu.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.view === key)); }
   function renderView(key){
-    currentRoute = key;
-    activate(key);
-    view.innerHTML = '';
-    if (role() === 'funcionario' && ['clientes','custos','pagamentos','funcionarios','administracao','orcamentos'].includes(key)) return renderBlocked();
-    const routes = { dashboard, clientes, obras, orcamentos, custos, pagamentos, funcionarios, documentos, relatorios, agenda, portal, administracao,
-      'painel-funcionario': funcPainel, 'minhas-obras': minhasObras, tarefas, fotografias, checkin, materiais, incidentes, perfil };
+    activeView = key; activate(key);
+    const routes = { dashboard, clientes, obras, orcamentos, custos, pagamentos, funcionarios, agenda, fotografias, documentos, relatorios, administracao, painelFuncionario, minhasObras, checkin, materiais, incidentes, perfil, portal };
+    if(!isAdmin() && ['clientes','orcamentos','custos','pagamentos','funcionarios','administracao'].includes(key)) return blocked();
     (routes[key] || dashboard)();
   }
 
-  async function refreshAndRender(route = currentRoute){
-    try { await loadCoreData(); renderView(route); }
-    catch (err) { toast(err.message || 'Erro ao atualizar dados.', 'error'); }
-  }
-
   function dashboard(){
-    setPage('Dashboard','Resumo operacional em tempo real');
-    const totalClientes = state.clientes.length;
-    const totalObras = state.obras.length;
-    const emCurso = state.obras.filter(o => String(o.estado || '').toLowerCase().includes('curso')).length;
-    const concluidas = state.obras.filter(o => String(o.estado || '').toLowerCase().includes('concl')).length;
-    view.innerHTML = `
+    setPage('Dashboard', 'Resumo em tempo real');
+    const total = obrasCache.length;
+    const exec = obrasCache.filter(o => String(o.estado||'').toLowerCase().includes('exec')).length;
+    const concl = obrasCache.filter(o => String(o.estado||'').toLowerCase().includes('concl')).length;
+    const orc = obrasCache.filter(o => String(o.estado||'').toLowerCase().includes('orc')).length;
+    el.view.innerHTML = `
       <div class="cards">
-        <div class="card"><span>Clientes</span><strong>${totalClientes}</strong></div>
-        <div class="card"><span>Obras</span><strong>${totalObras}</strong></div>
-        <div class="card"><span>Em curso</span><strong>${emCurso}</strong></div>
-        <div class="card"><span>Concluídas</span><strong>${concluidas}</strong></div>
+        <div class="card"><span>Clientes</span><strong>${clientesCache.length}</strong></div>
+        <div class="card"><span>Obras</span><strong>${total}</strong></div>
+        <div class="card"><span>Em execução</span><strong>${exec}</strong></div>
+        <div class="card"><span>Concluídas</span><strong>${concl}</strong></div>
       </div>
       <div class="grid">
-        <div class="panel"><div class="toolbar"><h2>Últimas obras</h2>${isAdmin()?'<button class="btn" data-action="nova-obra">+ Nova obra</button>':''}</div>${obrasTable(isAdmin())}</div>
-        <div class="panel"><h2>Ações rápidas</h2><div class="distak-actions">${isAdmin()?'<button class="btn" data-action="novo-cliente">+ Cliente</button><button class="btn secondary" data-action="nova-obra">+ Obra</button>':''}<button class="btn secondary" data-action="recarregar">Recarregar dados</button></div><p class="notice">Funcionários não têm acesso a custos, pagamentos, lucros ou administração.</p></div>
+        <div class="panel"><h2>Obras recentes</h2>${obrasTable(obrasCache.slice(0,8), false)}</div>
+        <div class="panel"><h2>Avisos</h2><p class="notice">Admin pode criar, editar e apagar clientes e obras.</p><p class="notice">Funcionário não vê custos, pagamentos ou administração.</p><p class="notice">Obras em orçamento: <strong>${orc}</strong></p></div>
       </div>`;
   }
 
   function clientes(){
-    setPage('Clientes','Adicionar, editar e consultar clientes');
-    if (!isAdmin()) return renderBlocked();
-    view.innerHTML = `
+    setPage('Clientes', 'Criar, editar, apagar e pesquisar clientes');
+    el.view.innerHTML = `
       <div class="panel">
-        <div class="toolbar"><h2>Clientes</h2><button class="btn" data-action="novo-cliente">+ Adicionar cliente</button></div>
-        <input id="clientSearch" placeholder="Pesquisar cliente, NIF ou email..." />
-        <div id="clientesList">${clientesTable(state.clientes)}</div>
+        <div class="toolbar">
+          <input id="clienteSearch" class="search" placeholder="Pesquisar cliente, NIF ou email...">
+          <div class="actions"><button id="novoClienteBtn" class="btn">+ Novo cliente</button><button id="refreshClientesBtn" class="btn secondary">Atualizar</button></div>
+        </div>
+        <div id="clienteFormWrap" class="hidden"></div>
+        <div id="clientesTable"></div>
       </div>`;
-    $('clientSearch').addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase();
-      const filtered = state.clientes.filter(c => [c.nome,c.nif,c.email,c.morada].some(v => String(v || '').toLowerCase().includes(q)));
-      $('clientesList').innerHTML = clientesTable(filtered);
-    });
+    $('novoClienteBtn').onclick = () => showClienteForm();
+    $('refreshClientesBtn').onclick = refresh;
+    $('clienteSearch').oninput = renderClientesTable;
+    renderClientesTable();
   }
 
-  function obras(){
-    setPage('Obras','Criar, editar e acompanhar obras');
-    view.innerHTML = `
-      <div class="panel">
-        <div class="toolbar"><h2>Obras</h2>${isAdmin()?'<button class="btn" data-action="nova-obra">+ Adicionar obra</button>':''}</div>
-        ${obrasTable(isAdmin())}
-      </div>`;
-  }
-
-  function clientesTable(list){
-    if (!list.length) return '<div class="empty-box">Ainda não existem clientes. Clique em “Adicionar cliente”.</div>';
-    return `<table><tr><th>Nome</th><th>NIF</th><th>Email</th><th>Morada</th><th>Ações</th></tr>${list.map(c => `
-      <tr>
-        <td>${html(c.nome)}</td><td>${html(c.nif)}</td><td>${html(c.email)}</td><td>${html(c.morada)}</td>
-        <td><button class="btn small secondary" data-action="editar-cliente" data-id="${html(c.id)}">Editar</button> <button class="btn small red" data-action="apagar-cliente" data-id="${html(c.id)}">Apagar</button></td>
-      </tr>`).join('')}</table>`;
-  }
-
-  function obrasTable(showActions){
-    if (!state.obras.length) return '<div class="empty-box">Ainda não existem obras registadas.</div>';
-    return `<table><tr><th>Obra</th><th>Cliente</th><th>Morada</th><th>Estado</th>${showActions?'<th>Ações</th>':''}</tr>${state.obras.map(o => `
-      <tr>
-        <td>${html(o.nome)}</td><td>${html(o.clientes?.nome || clienteNome(o.cliente_id) || '—')}</td><td>${html(o.morada)}</td><td><span class="tag gold">${html(o.estado || '—')}</span></td>
-        ${showActions?`<td><button class="btn small secondary" data-action="editar-obra" data-id="${html(o.id)}">Editar</button> <button class="btn small red" data-action="apagar-obra" data-id="${html(o.id)}">Apagar</button></td>`:''}
-      </tr>`).join('')}</table>`;
-  }
-
-  function clienteNome(id){ return state.clientes.find(c => String(c.id) === String(id))?.nome; }
-
-  function openModal(title, body, onSubmit){
-    const wrap = document.createElement('div');
-    wrap.className = 'distak-modal';
-    wrap.innerHTML = `<div class="distak-modal-card"><div class="distak-modal-head"><h2>${html(title)}</h2><button class="distak-close" type="button">Fechar</button></div><form id="distakModalForm">${body}<div class="distak-actions"><button class="btn" type="submit">Guardar</button><button class="btn secondary" type="button" data-close="1">Cancelar</button></div><p class="status-line" id="modalStatus"></p></form></div>`;
-    document.body.appendChild(wrap);
-    const close = () => wrap.remove();
-    wrap.querySelector('.distak-close').onclick = close;
-    wrap.querySelector('[data-close]').onclick = close;
-    wrap.addEventListener('click', (e) => { if (e.target === wrap) close(); });
-    wrap.querySelector('form').addEventListener('submit', async (e) => {
+  function showClienteForm(cliente={}){
+    if(!isAdmin()) return blocked();
+    $('clienteFormWrap').classList.remove('hidden');
+    $('clienteFormWrap').innerHTML = `
+      <h2>${cliente.id ? 'Editar cliente' : 'Novo cliente'}</h2>
+      <form id="clienteForm" class="form-grid">
+        <input id="clienteNome" placeholder="Nome" value="${escapeHtml(cliente.nome)}" required>
+        <input id="clienteNif" placeholder="NIF" value="${escapeHtml(cliente.nif)}">
+        <input id="clienteEmail" placeholder="Email" value="${escapeHtml(cliente.email)}">
+        <textarea id="clienteMorada" placeholder="Morada / observações">${escapeHtml(cliente.morada)}</textarea>
+        <div class="actions"><button class="btn" type="submit">Guardar cliente</button><button id="cancelClienteBtn" class="btn secondary" type="button">Cancelar</button></div>
+      </form>`;
+    $('cancelClienteBtn').onclick = () => $('clienteFormWrap').classList.add('hidden');
+    $('clienteForm').onsubmit = async (e) => {
       e.preventDefault();
-      const status = wrap.querySelector('#modalStatus');
-      status.textContent = 'A guardar...';
-      try { await onSubmit(new FormData(e.currentTarget)); close(); }
-      catch (err) { status.textContent = err.message || 'Erro ao guardar.'; status.style.color = '#dc2626'; }
-    });
+      const payload = { nome:$('clienteNome').value.trim(), nif:$('clienteNif').value.trim(), email:$('clienteEmail').value.trim(), morada:$('clienteMorada').value.trim() };
+      if(!payload.nome) return toast('Indique o nome do cliente.', true);
+      try{
+        if(cliente.id) await supa(client.from('clientes').update(payload).eq('id', cliente.id).select(), 'Erro ao editar cliente');
+        else await supa(client.from('clientes').insert(payload).select(), 'Erro ao criar cliente');
+        toast(cliente.id ? 'Cliente atualizado.' : 'Cliente criado.');
+        $('clienteFormWrap').classList.add('hidden');
+        await refresh('clientes');
+      }catch(err){ toast(err.message, true); }
+    };
   }
 
-  function clienteForm(c = {}){
-    openModal(c.id ? 'Editar cliente' : 'Adicionar cliente', `
-      <div class="form-grid">
-        <input name="nome" placeholder="Nome do cliente" value="${html(c.nome)}" required>
-        <input name="nif" placeholder="NIF" value="${html(c.nif)}">
-        <input name="email" type="email" placeholder="Email" value="${html(c.email)}">
-        <textarea name="morada" placeholder="Morada">${html(c.morada)}</textarea>
-      </div>`, async (fd) => {
-        const payload = { nome: fd.get('nome')?.trim(), nif: fd.get('nif')?.trim() || null, email: fd.get('email')?.trim() || null, morada: fd.get('morada')?.trim() || null };
-        if (!payload.nome) throw new Error('O nome é obrigatório.');
-        if (!supabaseClient) { toast('Modo demonstração: cliente guardado visualmente.'); return; }
-        const res = c.id
-          ? await supabaseClient.from('clientes').update(payload).eq('id', c.id)
-          : await supabaseClient.from('clientes').insert(payload);
-        if (res.error) throw res.error;
-        toast(c.id ? 'Cliente atualizado.' : 'Cliente criado.');
-        await refreshAndRender('clientes');
-      });
-  }
-
-  function obraForm(o = {}){
-    const opts = state.clientes.map(c => `<option value="${html(c.id)}" ${String(c.id)===String(o.cliente_id)?'selected':''}>${html(c.nome)}</option>`).join('');
-    openModal(o.id ? 'Editar obra' : 'Adicionar obra', `
-      <div class="form-grid">
-        <select name="cliente_id" required><option value="">Escolha o cliente</option>${opts}</select>
-        <input name="nome" placeholder="Nome da obra" value="${html(o.nome)}" required>
-        <input name="estado" placeholder="Estado" value="${html(o.estado || 'Em curso')}">
-        <textarea name="morada" placeholder="Morada da obra">${html(o.morada)}</textarea>
-      </div>`, async (fd) => {
-        const payload = { cliente_id: fd.get('cliente_id'), nome: fd.get('nome')?.trim(), morada: fd.get('morada')?.trim() || null, estado: fd.get('estado')?.trim() || 'Em curso' };
-        if (!payload.cliente_id) throw new Error('Escolha um cliente.');
-        if (!payload.nome) throw new Error('O nome da obra é obrigatório.');
-        if (!supabaseClient) { toast('Modo demonstração: obra guardada visualmente.'); return; }
-        const res = o.id
-          ? await supabaseClient.from('obras').update(payload).eq('id', o.id)
-          : await supabaseClient.from('obras').insert(payload);
-        if (res.error) throw res.error;
-        toast(o.id ? 'Obra atualizada.' : 'Obra criada.');
-        await refreshAndRender('obras');
-      });
+  function renderClientesTable(){
+    const q = ($('clienteSearch')?.value || '').toLowerCase();
+    const rows = clientesCache.filter(c => [c.nome,c.nif,c.email,c.morada].join(' ').toLowerCase().includes(q));
+    $('clientesTable').innerHTML = rows.length ? `<table><tr><th>Nome</th><th>NIF</th><th>Email</th><th>Morada</th><th>Ações</th></tr>${rows.map(c=>`
+      <tr><td>${escapeHtml(c.nome)}</td><td>${escapeHtml(c.nif)}</td><td>${escapeHtml(c.email)}</td><td>${escapeHtml(c.morada)}</td><td class="actions"><button class="btn small secondary" data-edit-cliente="${c.id}">Editar</button><button class="btn small danger" data-del-cliente="${c.id}">Apagar</button></td></tr>`).join('')}</table>` : '<div class="empty">Nenhum cliente encontrado.</div>';
+    document.querySelectorAll('[data-edit-cliente]').forEach(b => b.onclick = () => showClienteForm(clientesCache.find(c => String(c.id) === b.dataset.editCliente)));
+    document.querySelectorAll('[data-del-cliente]').forEach(b => b.onclick = () => deleteCliente(b.dataset.delCliente));
   }
 
   async function deleteCliente(id){
-    const c = state.clientes.find(x => String(x.id) === String(id));
-    if (!c || !confirm(`Apagar cliente “${c.nome}”?`)) return;
-    if (!supabaseClient) return toast('Modo demonstração.');
-    const { error } = await supabaseClient.from('clientes').delete().eq('id', id);
-    if (error) return toast(error.message, 'error');
-    toast('Cliente apagado.');
-    await refreshAndRender('clientes');
+    if(!isAdmin()) return blocked();
+    const c = clientesCache.find(x => String(x.id) === String(id));
+    if(!confirm(`Apagar cliente "${c?.nome || id}"?`)) return;
+    try{ await supa(client.from('clientes').delete().eq('id', id), 'Erro ao apagar cliente'); toast('Cliente apagado.'); await refresh('clientes'); }
+    catch(err){ toast(err.message, true); }
   }
+
+  function obras(){
+    setPage('Obras', 'Criar, editar, apagar e acompanhar obras');
+    el.view.innerHTML = `
+      <div class="panel">
+        <div class="toolbar">
+          <input id="obraSearch" class="search" placeholder="Pesquisar obra, cliente, morada ou estado...">
+          <div class="actions"><button id="novaObraBtn" class="btn">+ Nova obra</button><button id="refreshObrasBtn" class="btn secondary">Atualizar</button></div>
+        </div>
+        <div id="obraFormWrap" class="hidden"></div>
+        <div id="obrasTable"></div>
+      </div>`;
+    $('novaObraBtn').onclick = () => showObraForm();
+    $('refreshObrasBtn').onclick = refresh;
+    $('obraSearch').oninput = renderObrasTable;
+    renderObrasTable();
+  }
+
+  function showObraForm(obra={}){
+    if(!isAdmin()) return blocked();
+    $('obraFormWrap').classList.remove('hidden');
+    const options = clientesCache.map(c => `<option value="${c.id}" ${String(c.id)===String(obra.cliente_id)?'selected':''}>${escapeHtml(c.nome)}</option>`).join('');
+    $('obraFormWrap').innerHTML = `
+      <h2>${obra.id ? 'Editar obra' : 'Nova obra'}</h2>
+      <form id="obraForm" class="form-grid">
+        <select id="obraCliente" required><option value="">Selecionar cliente</option>${options}</select>
+        <input id="obraNome" placeholder="Nome da obra" value="${escapeHtml(obra.nome)}" required>
+        <input id="obraEstado" placeholder="Estado" value="${escapeHtml(obra.estado || 'Orçamento')}">
+        <textarea id="obraMorada" placeholder="Morada da obra">${escapeHtml(obra.morada)}</textarea>
+        <div class="actions"><button class="btn" type="submit">Guardar obra</button><button id="cancelObraBtn" class="btn secondary" type="button">Cancelar</button></div>
+      </form>`;
+    $('cancelObraBtn').onclick = () => $('obraFormWrap').classList.add('hidden');
+    $('obraForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const payload = { cliente_id:$('obraCliente').value, nome:$('obraNome').value.trim(), morada:$('obraMorada').value.trim(), estado:$('obraEstado').value.trim() || 'Orçamento' };
+      if(!payload.cliente_id || !payload.nome) return toast('Indique cliente e nome da obra.', true);
+      try{
+        if(obra.id) await supa(client.from('obras').update(payload).eq('id', obra.id).select(), 'Erro ao editar obra');
+        else await supa(client.from('obras').insert(payload).select(), 'Erro ao criar obra');
+        toast(obra.id ? 'Obra atualizada.' : 'Obra criada.');
+        $('obraFormWrap').classList.add('hidden');
+        await refresh('obras');
+      }catch(err){ toast(err.message, true); }
+    };
+  }
+
+  function renderObrasTable(){
+    const q = ($('obraSearch')?.value || '').toLowerCase();
+    const rows = obrasCache.filter(o => [o.nome,o.morada,o.estado,o.clientes?.nome].join(' ').toLowerCase().includes(q));
+    $('obrasTable').innerHTML = obrasTable(rows, true);
+    document.querySelectorAll('[data-edit-obra]').forEach(b => b.onclick = () => showObraForm(obrasCache.find(o => String(o.id) === b.dataset.editObra)));
+    document.querySelectorAll('[data-del-obra]').forEach(b => b.onclick = () => deleteObra(b.dataset.delObra));
+  }
+
+  function obrasTable(rows, actions){
+    return rows.length ? `<table><tr><th>Obra</th><th>Cliente</th><th>Morada</th><th>Estado</th>${actions?'<th>Ações</th>':''}</tr>${rows.map(o=>`
+      <tr><td>${escapeHtml(o.nome)}</td><td>${escapeHtml(o.clientes?.nome || clienteNome(o.cliente_id) || '—')}</td><td>${escapeHtml(o.morada)}</td><td>${estadoTag(o.estado)}</td>${actions?`<td class="actions"><button class="btn small secondary" data-edit-obra="${o.id}">Editar</button><button class="btn small danger" data-del-obra="${o.id}">Apagar</button></td>`:''}</tr>`).join('')}</table>` : '<div class="empty">Nenhuma obra encontrada.</div>';
+  }
+  function clienteNome(id){ return clientesCache.find(c => String(c.id) === String(id))?.nome; }
 
   async function deleteObra(id){
-    const o = state.obras.find(x => String(x.id) === String(id));
-    if (!o || !confirm(`Apagar obra “${o.nome}”?`)) return;
-    if (!supabaseClient) return toast('Modo demonstração.');
-    const { error } = await supabaseClient.from('obras').delete().eq('id', id);
-    if (error) return toast(error.message, 'error');
-    toast('Obra apagada.');
-    await refreshAndRender('obras');
+    if(!isAdmin()) return blocked();
+    const o = obrasCache.find(x => String(x.id) === String(id));
+    if(!confirm(`Apagar obra "${o?.nome || id}"?`)) return;
+    try{ await supa(client.from('obras').delete().eq('id', id), 'Erro ao apagar obra'); toast('Obra apagada.'); await refresh('obras'); }
+    catch(err){ toast(err.message, true); }
   }
 
-  document.addEventListener('click', async (e) => {
-    const el = e.target.closest('[data-action]');
-    if (!el) return;
-    const action = el.dataset.action;
-    const id = el.dataset.id;
-    if (action === 'novo-cliente') return clienteForm();
-    if (action === 'editar-cliente') return clienteForm(state.clientes.find(c => String(c.id) === String(id)) || {});
-    if (action === 'apagar-cliente') return deleteCliente(id);
-    if (action === 'nova-obra') return obraForm();
-    if (action === 'editar-obra') return obraForm(state.obras.find(o => String(o.id) === String(id)) || {});
-    if (action === 'apagar-obra') return deleteObra(id);
-    if (action === 'recarregar') return refreshAndRender(currentRoute);
-  });
+  async function refresh(next=activeView){
+    try{ await loadData(); renderView(next); toast('Dados atualizados.'); }
+    catch(err){ toast(err.message, true); }
+  }
 
-  function funcPainel(){ setPage('Painel Funcionário','Área limitada ao funcionário'); view.innerHTML = `<div class="cards"><div class="card"><span>Minhas obras</span><strong>${state.obras.length}</strong></div><div class="card"><span>Tarefas hoje</span><strong>4</strong></div><div class="card"><span>Fotos enviadas</span><strong>0</strong></div><div class="card"><span>Estado</span><strong>Ativo</strong></div></div><div class="panel"><h2>Acesso Funcionário</h2><p>Este perfil não tem acesso a faturação, custos, lucros, clientes, pagamentos ou administração.</p><div class="actions"><button class="btn" onclick="alert('Check-in registado em modo inicial.')">Iniciar jornada</button><button class="btn secondary" onclick="alert('Módulo de fotografias será ligado ao Storage.')">Enviar fotografia</button><button class="btn secondary" onclick="alert('Pedido de material registado em modo inicial.')">Pedir material</button><button class="btn danger" onclick="alert('Incidente registado em modo inicial.')">Comunicar incidente</button></div></div>`; }
-  function orcamentos(){ setPage('Orçamentos','Criação e aprovação'); view.innerHTML=`<div class="panel"><h2>Novo orçamento</h2><div class="form-grid"><input placeholder="Cliente"><input placeholder="Morada da obra"><input placeholder="Valor sem IVA"><textarea placeholder="Descrição técnica dos trabalhos"></textarea></div><br><button class="btn" onclick="alert('Módulo de orçamentos será ligado na próxima fase.')">Gerar orçamento</button></div>`; }
-  function custos(){ setPage('Custos','Materiais, subempreiteiros e logística'); view.innerHTML=`<div class="panel"><h2>Registo de custos</h2><div class="form-grid"><input placeholder="Obra"><input placeholder="Categoria"><input placeholder="Valor"><textarea placeholder="Observação"></textarea></div><br><button class="btn" onclick="alert('Módulo de custos será ligado na próxima fase.')">Guardar custo</button></div>`; }
-  function pagamentos(){ setPage('Pagamentos','Controlo financeiro'); view.innerHTML=`<div class="panel"><h2>Pagamentos e faturas</h2><table><tr><th>Fatura</th><th>Cliente</th><th>Total</th><th>Estado</th></tr><tr><td>M/59</td><td>Rua Veiga Beirão</td><td>${money(2560.44)}</td><td><span class="tag red">Em atraso</span></td></tr></table></div>`; }
-  function funcionarios(){ setPage('Funcionários','Equipa e permissões'); view.innerHTML=`<div class="panel"><h2>Funcionários</h2><table><tr><th>Nome</th><th>Email</th><th>Perfil</th><th>Estado</th></tr><tr><td>Funcionário</td><td>obras@distak.com</td><td>funcionario</td><td><span class="tag green">Ativo</span></td></tr></table></div>`; }
-  function documentos(){ setPage('Documentos','Contratos, garantias e relatórios'); view.innerHTML=`<div class="panel"><h2>Documentos</h2><p>Área para anexar contratos, garantias, fotos antes/depois e relatórios técnicos.</p><button class="btn secondary" onclick="alert('Upload de documentos será ligado ao Supabase Storage.')">Anexar documento</button></div>`; }
-  function relatorios(){ setPage('Relatórios','Relatórios técnicos e PDF'); view.innerHTML=`<div class="panel"><h2>Relatório técnico</h2><textarea style="width:100%;min-height:150px;border:1px solid #dbe3ef;border-radius:12px;padding:12px" placeholder="Descrição técnica, patologias, trabalhos executados e conclusão..."></textarea><br><br><button class="btn" onclick="alert('PDF será ativado na fase de relatórios.')">Gerar PDF</button></div>`; }
-  function agenda(){ setPage('Agenda','Calendário de obras'); view.innerHTML=`<div class="panel"><h2>Agenda</h2><table><tr><th>Dia</th><th>Obra</th><th>Equipa</th></tr><tr><td>Hoje</td><td>${html(state.obras[0]?.nome || 'Sem obra')}</td><td>Funcionário</td></tr></table></div>`; }
-  function portal(){ setPage('Portal Cliente','Área reservada ao cliente'); view.innerHTML=`<div class="panel"><h2>Portal Cliente</h2><p>Cliente vê apenas a sua obra, fotografias, orçamento, faturas, garantias e relatórios autorizados.</p></div>`; }
-  function administracao(){ setPage('Administração','Utilizadores e configurações'); view.innerHTML=`<div class="panel"><h2>Administração</h2><p>Gestão de perfis, permissões, empresa, backups e configurações do ERP.</p><button class="btn" onclick="alert('Gestão de utilizadores será criada na próxima fase.')">Gestão de utilizadores</button></div>`; }
-  function minhasObras(){ setPage('Minhas Obras','Obras atribuídas ao funcionário'); view.innerHTML=`<div class="panel"><h2>Minhas obras</h2>${obrasTable(false)}</div>`; }
-  function tarefas(){ setPage('Tarefas','Tarefas do dia'); view.innerHTML=`<div class="panel"><h2>Tarefas de hoje</h2><ul><li>Verificar obra atribuída</li><li>Enviar fotografias antes/durante/depois</li><li>Confirmar materiais necessários</li><li>Comunicar incidente ou avaria</li></ul></div>`; }
-  function fotografias(){ setPage('Fotografias','Registo fotográfico da obra'); view.innerHTML=`<div class="panel"><h2>Enviar fotografias</h2><input type="file" multiple accept="image/*"><p>As fotografias serão associadas à obra selecionada quando ligarmos o Storage.</p></div>`; }
-  function checkin(){ setPage('Check-in / Check-out','Registo de jornada'); view.innerHTML=`<div class="panel"><h2>Registo de presença</h2><div class="actions"><button class="btn" onclick="alert('Check-in registado em modo inicial.')">Iniciar jornada</button><button class="btn secondary" onclick="alert('Check-out registado em modo inicial.')">Terminar jornada</button></div></div>`; }
-  function materiais(){ setPage('Materiais','Pedidos e materiais atribuídos'); view.innerHTML=`<div class="panel"><h2>Pedir material</h2><div class="form-grid"><input placeholder="Obra"><input placeholder="Material"><input placeholder="Quantidade"><textarea placeholder="Observação"></textarea></div><br><button class="btn" onclick="alert('Pedido de material registado em modo inicial.')">Enviar pedido</button></div>`; }
-  function incidentes(){ setPage('Incidentes','Comunicar avarias ou problemas'); view.innerHTML=`<div class="panel"><h2>Comunicar incidente</h2><div class="form-grid"><input placeholder="Obra"><input placeholder="Tipo de incidente"><textarea placeholder="Descreva o problema"></textarea></div><br><button class="btn danger" onclick="alert('Incidente registado em modo inicial.')">Comunicar</button></div>`; }
-  function perfil(){ setPage('Meu Perfil','Dados do utilizador'); view.innerHTML=`<div class="panel"><h2>${html(currentProfile.nome || 'Utilizador')}</h2><p>Email: ${html(currentProfile.email || currentUser.email)}</p><p>Perfil: ${html(labels[role()] || role())}</p></div>`; }
-  function renderBlocked(){ setPage('Acesso bloqueado','Permissão insuficiente'); view.innerHTML=`<div class="panel"><h2>Acesso bloqueado</h2><p>O seu perfil não tem autorização para ver esta área.</p></div>`; }
+  function painelFuncionario(){ setPage('Painel Funcionário','Área limitada'); el.view.innerHTML = `<div class="cards"><div class="card"><span>Minhas obras</span><strong>${obrasCache.length}</strong></div><div class="card"><span>Tarefas</span><strong>0</strong></div><div class="card"><span>Fotos</span><strong>0</strong></div><div class="card"><span>Estado</span><strong>Ativo</strong></div></div><div class="panel"><h2>Acesso Funcionário</h2><p>Sem acesso a clientes, custos, pagamentos, orçamentos, funcionários ou administração.</p></div>`; }
+  function minhasObras(){ setPage('Minhas Obras','Obras disponíveis para consulta'); el.view.innerHTML = `<div class="panel"><h2>Obras</h2>${obrasTable(obrasCache, false)}</div>`; }
+  function checkin(){ setPage('Check-in / Check-out','Registo de jornada'); el.view.innerHTML = `<div class="panel"><div class="actions"><button class="btn">Iniciar jornada</button><button class="btn secondary">Terminar jornada</button></div><p class="muted">Este módulo será ligado ao GPS na próxima fase.</p></div>`; }
+  function fotografias(){ setPage('Fotografias','Registo fotográfico'); el.view.innerHTML = `<div class="panel"><input type="file" multiple accept="image/*"><p class="muted">Upload real será ligado ao Supabase Storage na fase de documentos.</p></div>`; }
+  function materiais(){ setPage('Materiais','Pedidos de material'); el.view.innerHTML = `<div class="panel"><div class="form-grid"><input placeholder="Material"><input placeholder="Quantidade"><textarea placeholder="Observações"></textarea></div><br><button class="btn">Enviar pedido</button></div>`; }
+  function incidentes(){ setPage('Incidentes','Comunicar problemas'); el.view.innerHTML = `<div class="panel"><div class="form-grid"><input placeholder="Tipo"><textarea placeholder="Descreva o incidente"></textarea></div><br><button class="btn danger">Comunicar</button></div>`; }
+  function perfil(){ setPage('Perfil','Dados do utilizador'); el.view.innerHTML = `<div class="panel"><h2>${escapeHtml(currentProfile.nome || 'Utilizador')}</h2><p>Email: ${escapeHtml(currentProfile.email || currentUser.email)}</p><p>Perfil: ${escapeHtml(ROLE_LABEL[normalizeRole(currentProfile.role || currentProfile.papel)] || currentProfile.role)}</p></div>`; }
+  function portal(){ setPage('Portal Cliente','Área do cliente'); el.view.innerHTML = `<div class="panel"><p>O cliente verá apenas obras, documentos e fotografias autorizados.</p></div>`; }
+  function orcamentos(){ setPage('Orçamentos','Próxima fase'); placeholder('Módulo de orçamentos será ligado após Clientes e Obras ficarem 100% concluídos.'); }
+  function custos(){ setPage('Custos','Próxima fase'); placeholder('Aqui serão registados materiais, subempreiteiros, logística e mão de obra.'); }
+  function pagamentos(){ setPage('Pagamentos','Próxima fase'); placeholder('Aqui ficará o controlo de faturas, recebimentos e valores em atraso.'); }
+  function funcionarios(){ setPage('Funcionários','Próxima fase'); placeholder('Aqui poderás gerir funcionários, perfis, horários e permissões.'); }
+  function agenda(){ setPage('Agenda','Próxima fase'); placeholder('Calendário de obras, visitas, tarefas e equipas.'); }
+  function documentos(){ setPage('Documentos','Próxima fase'); placeholder('Contratos, garantias, relatórios e fotografias serão anexados por obra.'); }
+  function relatorios(){ setPage('Relatórios','Próxima fase'); placeholder('Relatórios técnicos e PDFs automáticos.'); }
+  function administracao(){ setPage('Administração','Próxima fase'); placeholder('Gestão de utilizadores, permissões e configurações do ERP.'); }
+  function placeholder(txt){ el.view.innerHTML = `<div class="panel"><h2>Em desenvolvimento</h2><p>${escapeHtml(txt)}</p></div>`; }
+  function blocked(){ setPage('Acesso bloqueado','Permissão insuficiente'); el.view.innerHTML = `<div class="panel"><h2>Acesso bloqueado</h2><p>O seu perfil não tem autorização para ver esta área.</p></div>`; }
 
   boot();
 })();
