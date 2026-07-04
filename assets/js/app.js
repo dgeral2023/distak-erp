@@ -1,425 +1,138 @@
-/* DISTAK ERP - app.js v1.2
-   Controlo de login, perfis e permissões com Supabase
-   Perfis suportados: admin, administrador, escritorio, encarregado, funcionario, cliente
-*/
-
-(function () {
-  'use strict';
-
+(() => {
   const cfg = window.DISTAK_CONFIG || {};
-  const SUPABASE_URL = cfg.SUPABASE_URL;
-  const SUPABASE_KEY = cfg.SUPABASE_KEY;
+  const hasConfig = cfg.SUPABASE_URL && cfg.SUPABASE_KEY;
+  const client = hasConfig && window.supabase ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY) : null;
 
-  let supabaseClient = null;
+  const $ = (id) => document.getElementById(id);
+  const loginScreen = $('loginScreen');
+  const appScreen = $('appScreen');
+  const loginForm = $('loginForm');
+  const loginMessage = $('loginMessage');
+  const menu = $('menu');
+  const view = $('view');
+  const pageTitle = $('pageTitle');
+  const pageSubtitle = $('pageSubtitle');
+  const roleBadge = $('roleBadge');
+  const userName = $('userName');
+  const userEmail = $('userEmail');
+  const logoutBtn = $('logoutBtn');
+
   let currentUser = null;
   let currentProfile = null;
 
-  const ROLE_ALIASES = {
-    admin: 'admin',
-    administrador: 'admin',
-    escritorio: 'escritorio',
-    escritório: 'escritorio',
-    encarregado: 'encarregado',
-    funcionario: 'funcionario',
-    funcionário: 'funcionario',
-    cliente: 'cliente'
+  const labels = {
+    admin:'Administrador', administrador:'Administrador', escritorio:'Escritório', encarregado:'Encarregado', funcionario:'Funcionário', cliente:'Cliente'
   };
 
-  const ROLE_LABELS = {
-    admin: 'Administrador',
-    escritorio: 'Escritório',
-    encarregado: 'Encarregado',
-    funcionario: 'Funcionário',
-    cliente: 'Cliente'
+  const permissions = {
+    admin:['dashboard','clientes','obras','orcamentos','custos','pagamentos','funcionarios','documentos','relatorios','agenda','portal','administracao'],
+    administrador:['dashboard','clientes','obras','orcamentos','custos','pagamentos','funcionarios','documentos','relatorios','agenda','portal','administracao'],
+    escritorio:['dashboard','clientes','obras','orcamentos','pagamentos','documentos','relatorios','agenda'],
+    encarregado:['dashboard','obras','tarefas','fotografias','materiais','incidentes','documentos','agenda'],
+    funcionario:['painel-funcionario','minhas-obras','tarefas','fotografias','checkin','materiais','incidentes','perfil'],
+    cliente:['portal','minhas-obras','fotografias','documentos','perfil']
   };
 
-  const PERMISSIONS = {
-    admin: {
-      modules: ['dashboard', 'clientes', 'obras', 'orcamentos', 'custos', 'pagamentos', 'funcionarios', 'documentos', 'relatorios', 'agenda', 'portal-cliente', 'administracao'],
-      canSeeFinancial: true,
-      canEdit: true,
-      canAdmin: true
-    },
-    escritorio: {
-      modules: ['dashboard', 'clientes', 'obras', 'orcamentos', 'custos', 'pagamentos', 'documentos', 'relatorios', 'agenda'],
-      canSeeFinancial: true,
-      canEdit: true,
-      canAdmin: false
-    },
-    encarregado: {
-      modules: ['dashboard', 'obras', 'documentos', 'relatorios', 'agenda'],
-      canSeeFinancial: false,
-      canEdit: true,
-      canAdmin: false
-    },
-    funcionario: {
-      modules: ['dashboard-funcionario', 'minhas-obras', 'tarefas', 'checkin', 'fotografias', 'materiais', 'documentos-autorizados', 'perfil'],
-      canSeeFinancial: false,
-      canEdit: false,
-      canAdmin: false
-    },
-    cliente: {
-      modules: ['portal-cliente', 'minhas-obras', 'fotografias', 'documentos-autorizados', 'perfil'],
-      canSeeFinancial: false,
-      canEdit: false,
-      canAdmin: false
-    }
+  const menuLabels = {
+    dashboard:'Dashboard', clientes:'Clientes', obras:'Obras', orcamentos:'Orçamentos', custos:'Custos', pagamentos:'Pagamentos', funcionarios:'Funcionários', documentos:'Documentos', relatorios:'Relatórios', agenda:'Agenda', portal:'Portal Cliente', administracao:'Administração',
+    'painel-funcionario':'Painel Funcionário', 'minhas-obras':'Minhas Obras', tarefas:'Tarefas', fotografias:'Fotografias', checkin:'Check-in / Check-out', materiais:'Materiais', incidentes:'Incidentes', perfil:'Meu Perfil'
   };
 
-  const DEMO_DATA = {
-    obras: [
-      { id: 'O001', cliente: 'Condomínio Malveira', morada: 'Malveira', estado: 'Em curso', responsavel: 'José Filipe', funcionarioEmail: 'obras2015@distak.com', tarefa: 'Revisão de cobertura e recolha fotográfica' },
-      { id: 'O002', cliente: 'Paço de Arcos', morada: 'Paço de Arcos', estado: 'Orçamento enviado', responsavel: 'José Filipe', funcionarioEmail: '', tarefa: 'Aguardar adjudicação' },
-      { id: 'O003', cliente: 'Rua Veiga Beirão', morada: 'Almada', estado: 'Pagamento em atraso', responsavel: 'Escritório', funcionarioEmail: '', tarefa: 'Cobrança e acompanhamento' }
-    ],
-    clientes: [
-      { nome: 'Condomínio Malveira', contacto: 'Administração', estado: 'Ativo' },
-      { nome: 'José Manuel Rosado Gambôa', contacto: 'Cliente', estado: 'Em análise' }
-    ],
-    orcamentos: [
-      { numero: '1996', cliente: 'Condomínio Malveira', valor: '4.800,00 €', estado: 'Aguarda sinal' },
-      { numero: '2389', cliente: 'Condomínio Malveira', valor: '—', estado: 'Aceite' }
-    ]
-  };
+  function normalizeRole(role){ return String(role || 'funcionario').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
+  function money(v){ return Number(v||0).toLocaleString('pt-PT',{style:'currency',currency:'EUR'}); }
+  function setPage(title, subtitle){ pageTitle.textContent = title; pageSubtitle.textContent = subtitle || ''; }
 
-  function normalizeRole(role) {
-    if (!role) return 'funcionario';
-    const key = String(role).trim().toLowerCase();
-    return ROLE_ALIASES[key] || key;
+  function showLogin(){ loginScreen.classList.remove('hidden'); appScreen.classList.add('hidden'); }
+  function showApp(){ loginScreen.classList.add('hidden'); appScreen.classList.remove('hidden'); }
+
+  async function getProfile(user){
+    if(!client || !user) return demoProfile(user?.email || 'demo@distaklda.com');
+    const { data, error } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    if(data) return data;
+    const byEmail = await client.from('profiles').select('*').eq('email', user.email).maybeSingle();
+    if(byEmail.data) return byEmail.data;
+    throw new Error(error?.message || byEmail.error?.message || 'Perfil não encontrado na tabela profiles.');
   }
 
-  function qs(selector) { return document.querySelector(selector); }
-  function qsa(selector) { return Array.from(document.querySelectorAll(selector)); }
+  function demoProfile(email){
+    return email === 'obras2015@distak.com'
+      ? {email,nome:'Funcionário Obras',role:'funcionario',ativo:true}
+      : {email,nome:'José Filipe Alves Silva',role:'admin',ativo:true};
+  }
 
-  function initSupabase() {
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-      showMessage('Configuração Supabase em falta no ficheiro assets/js/config.js.', 'error');
-      return false;
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); loginMessage.textContent = 'A entrar...';
+    const email = $('email').value.trim(); const password = $('password').value;
+    try{
+      let user;
+      if(client){
+        const { data, error } = await client.auth.signInWithPassword({email,password});
+        if(error) throw error;
+        user = data.user;
+      } else { user = { email, id:'demo' }; }
+      currentUser = user; currentProfile = await getProfile(user);
+      if(currentProfile.ativo === false) throw new Error('Utilizador inativo.');
+      renderApp();
+    }catch(err){ loginMessage.textContent = err.message || 'Erro ao iniciar sessão.'; }
+  });
+
+  logoutBtn.addEventListener('click', async () => { if(client) await client.auth.signOut(); currentUser=null; currentProfile=null; showLogin(); });
+
+  async function boot(){
+    if(client){
+      const { data } = await client.auth.getSession();
+      if(data.session?.user){
+        try{ currentUser=data.session.user; currentProfile=await getProfile(currentUser); renderApp(); return; }catch(e){ console.warn(e); }
+      }
     }
-
-    if (!window.supabase || !window.supabase.createClient) {
-      showMessage('Biblioteca Supabase não carregada. Confirma o script no index.html.', 'error');
-      return false;
-    }
-
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    return true;
+    showLogin();
   }
 
-  function showMessage(text, type = 'info') {
-    let box = qs('#app-message');
-    if (!box) {
-      box = document.createElement('div');
-      box.id = 'app-message';
-      box.style.position = 'fixed';
-      box.style.right = '20px';
-      box.style.bottom = '20px';
-      box.style.zIndex = '9999';
-      box.style.padding = '14px 16px';
-      box.style.borderRadius = '12px';
-      box.style.boxShadow = '0 12px 35px rgba(0,0,0,.18)';
-      box.style.fontWeight = '700';
-      document.body.appendChild(box);
-    }
-
-    const colors = {
-      info: ['#0f172a', '#fff'],
-      success: ['#15803d', '#fff'],
-      error: ['#b91c1c', '#fff'],
-      warning: ['#ca8a04', '#111827']
-    };
-    const [bg, color] = colors[type] || colors.info;
-    box.style.background = bg;
-    box.style.color = color;
-    box.textContent = text;
-    box.hidden = false;
-    clearTimeout(box._timer);
-    box._timer = setTimeout(() => { box.hidden = true; }, 4500);
-  }
-
-  function getLoginFields() {
-    return {
-      email: qs('#email') || qs('input[type="email"]') || qs('input[name="email"]'),
-      password: qs('#password') || qs('input[type="password"]') || qs('input[name="password"]'),
-      form: qs('#login-form') || qs('form'),
-      button: qs('#login-button') || qs('button[type="submit"]') || qs('button')
-    };
-  }
-
-  async function login(email, password) {
-    if (!supabaseClient && !initSupabase()) return;
-    if (!email || !password) {
-      showMessage('Insere email e palavra-passe.', 'warning');
-      return;
-    }
-
-    setLoading(true);
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    setLoading(false);
-
-    if (error) {
-      showMessage('Login inválido: ' + error.message, 'error');
-      return;
-    }
-
-    currentUser = data.user;
-    await loadProfileAndRender();
-  }
-
-  async function logout() {
-    if (supabaseClient) await supabaseClient.auth.signOut();
-    currentUser = null;
-    currentProfile = null;
-    localStorage.removeItem('distak_current_role');
-    renderLogin();
-  }
-
-  function setLoading(isLoading) {
-    const { button } = getLoginFields();
-    if (!button) return;
-    button.disabled = isLoading;
-    button.textContent = isLoading ? 'A entrar...' : 'Entrar';
-  }
-
-  async function loadProfileAndRender() {
-    if (!currentUser) return renderLogin();
-
-    const { data: profile, error } = await supabaseClient
-      .from('profiles')
-      .select('*')
-      .eq('id', currentUser.id)
-      .maybeSingle();
-
-    if (error) {
-      showMessage('Erro ao carregar perfil: ' + error.message, 'error');
-      return;
-    }
-
-    if (!profile) {
-      showMessage('Perfil não encontrado na tabela profiles.', 'error');
-      await supabaseClient.auth.signOut();
-      return renderLogin();
-    }
-
-    const role = normalizeRole(profile.role || profile.papel || profile.tipo);
-    currentProfile = { ...profile, role };
-    localStorage.setItem('distak_current_role', role);
-    renderApp(role);
-  }
-
-  function renderLogin() {
-    const app = qs('#app') || document.body;
-    app.innerHTML = `
-      <main class="login-page">
-        <section class="login-card">
-          <div class="brand-row">
-            <div class="logo-box small">D</div>
-            <div>
-              <h1>DISTAK ERP</h1>
-              <p>Gestão profissional de obras</p>
-            </div>
-          </div>
-          <form id="login-form" class="login-form">
-            <h2>Entrar na aplicação</h2>
-            <label>Email</label>
-            <input id="email" type="email" placeholder="Digite o seu email" autocomplete="username" required>
-            <label>Palavra-passe</label>
-            <input id="password" type="password" placeholder="Digite a sua senha" autocomplete="current-password" required>
-            <button id="login-button" type="submit">Entrar</button>
-            <p class="muted">Perfis: Administrador · Escritório · Encarregado · Funcionário · Cliente</p>
-          </form>
-        </section>
-      </main>`;
-    bindLogin();
-  }
-
-  function bindLogin() {
-    const { form, email, password } = getLoginFields();
-    if (!form) return;
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      login(email.value.trim(), password.value);
+  function renderApp(){
+    const role = normalizeRole(currentProfile.role || currentProfile.papel);
+    const available = permissions[role] || permissions.funcionario;
+    roleBadge.textContent = labels[role] || role;
+    userName.textContent = currentProfile.nome || currentProfile.name || currentUser.email;
+    userEmail.textContent = currentProfile.email || currentUser.email;
+    menu.innerHTML = '';
+    available.forEach((key, idx) => {
+      const btn = document.createElement('button'); btn.textContent = menuLabels[key] || key; btn.onclick = () => renderView(key); menu.appendChild(btn); if(idx===0) btn.classList.add('active');
     });
+    showApp(); renderView(available[0]);
   }
 
-  function moduleLabel(module) {
-    const labels = {
-      dashboard: 'Dashboard',
-      'dashboard-funcionario': 'Painel Funcionário',
-      clientes: 'Clientes',
-      obras: 'Obras',
-      'minhas-obras': 'Minhas Obras',
-      tarefas: 'Tarefas',
-      checkin: 'Check-in / Check-out',
-      fotografias: 'Fotografias',
-      materiais: 'Materiais',
-      orcamentos: 'Orçamentos',
-      custos: 'Custos',
-      pagamentos: 'Pagamentos',
-      funcionarios: 'Funcionários',
-      documentos: 'Documentos',
-      'documentos-autorizados': 'Documentos',
-      relatorios: 'Relatórios',
-      agenda: 'Agenda',
-      'portal-cliente': 'Portal Cliente',
-      administracao: 'Administração',
-      perfil: 'Perfil'
-    };
-    return labels[module] || module;
+  function activate(key){ [...menu.children].forEach(b=>b.classList.toggle('active', b.textContent === (menuLabels[key]||key))); }
+
+  function renderView(key){ activate(key); view.innerHTML=''; const role = normalizeRole(currentProfile.role || currentProfile.papel);
+    if(role === 'funcionario' && ['clientes','custos','pagamentos','funcionarios','administracao','orcamentos'].includes(key)) return renderBlocked();
+    const routes = {dashboard,clientes,obras,orcamentos,custos,pagamentos,funcionarios,documentos,relatorios,agenda,portal,administracao,
+      'painel-funcionario':funcPainel,'minhas-obras':minhasObras,tarefas,fotografias,checkin,materiais,incidentes,perfil};
+    (routes[key] || dashboard)();
   }
 
-  function renderApp(role) {
-    const app = qs('#app') || document.body;
-    const permissions = PERMISSIONS[role] || PERMISSIONS.funcionario;
-    const name = currentProfile?.nome || currentUser?.email || 'Utilizador';
-
-    app.innerHTML = `
-      <div class="erp-shell">
-        <aside class="sidebar">
-          <div class="brand-row side-brand">
-            <div class="logo-box small">D</div>
-            <div><strong>DISTAK ERP</strong><span>${ROLE_LABELS[role] || role}</span></div>
-          </div>
-          <nav id="main-menu">
-            ${permissions.modules.map((m, i) => `<button class="menu-item ${i === 0 ? 'active' : ''}" data-module="${m}">${moduleLabel(m)}</button>`).join('')}
-          </nav>
-          <button id="logout-button" class="logout-button">Sair</button>
-        </aside>
-        <main class="main-content">
-          <header class="topbar">
-            <div><h1 id="page-title">${moduleLabel(permissions.modules[0])}</h1><p>${name}</p></div>
-            <span class="badge">${ROLE_LABELS[role] || role}</span>
-          </header>
-          <section id="module-content"></section>
-        </main>
-      </div>`;
-
-    bindAppEvents();
-    renderModule(permissions.modules[0], role);
-  }
-
-  function bindAppEvents() {
-    qsa('.menu-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        qsa('.menu-item').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderModule(btn.dataset.module, currentProfile.role);
-      });
-    });
-    const logoutBtn = qs('#logout-button');
-    if (logoutBtn) logoutBtn.addEventListener('click', logout);
-  }
-
-  function renderModule(module, role) {
-    const title = qs('#page-title');
-    const content = qs('#module-content');
-    if (!content) return;
-    if (title) title.textContent = moduleLabel(module);
-
-    if (role === 'funcionario') return renderFuncionarioModule(module, content);
-    if (role === 'cliente') return renderClienteModule(module, content);
-    return renderAdminModule(module, content, role);
-  }
-
-  function card(title, value, note = '') {
-    return `<div class="card"><span>${title}</span><strong>${value}</strong><small>${note}</small></div>`;
-  }
-
-  function table(headers, rows) {
-    return `<div class="panel"><table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
-  }
-
-  function renderAdminModule(module, content, role) {
-    if (module === 'dashboard') {
-      content.innerHTML = `
-        <div class="cards">
-          ${card('Obras ativas', '7', 'em acompanhamento')}
-          ${card('Faturação mensal', '21.447,62 €', 'valores registados')}
-          ${card('Custos registados', '8.920,00 €', 'mês atual')}
-          ${card('Lucro estimado', '12.527,62 €', 'margem protegida')}
-        </div>
-        ${table(['Obra', 'Cliente', 'Estado', 'Responsável'], DEMO_DATA.obras.map(o => [o.id, o.cliente, o.estado, o.responsavel]))}`;
-      return;
-    }
-
-    if (module === 'clientes') {
-      content.innerHTML = table(['Cliente', 'Contacto', 'Estado'], DEMO_DATA.clientes.map(c => [c.nome, c.contacto, c.estado]));
-      return;
-    }
-
-    if (module === 'obras') {
-      content.innerHTML = table(['ID', 'Cliente', 'Morada', 'Estado', 'Tarefa'], DEMO_DATA.obras.map(o => [o.id, o.cliente, o.morada, o.estado, o.tarefa]));
-      return;
-    }
-
-    if (module === 'orcamentos') {
-      content.innerHTML = table(['Nº', 'Cliente', 'Valor', 'Estado'], DEMO_DATA.orcamentos.map(o => [o.numero, o.cliente, o.valor, o.estado]));
-      return;
-    }
-
-    if (['custos', 'pagamentos'].includes(module)) {
-      content.innerHTML = `<div class="cards">${card('Total registado', module === 'custos' ? '8.920,00 €' : '2.560,44 €', 'Apenas perfis autorizados')}</div>`;
-      return;
-    }
-
-    content.innerHTML = `<div class="panel"><h2>${moduleLabel(module)}</h2><p>Módulo disponível para ${ROLE_LABELS[role] || role}. Esta área será expandida com formulários, anexos, PDF e ligação total ao Supabase.</p></div>`;
-  }
-
-  function renderFuncionarioModule(module, content) {
-    const email = currentProfile?.email || currentUser?.email;
-    const obras = DEMO_DATA.obras.filter(o => !o.funcionarioEmail || o.funcionarioEmail === email || o.id === 'O001');
-
-    if (module === 'dashboard-funcionario') {
-      content.innerHTML = `
-        <div class="cards">
-          ${card('Minhas obras', obras.length, 'atribuídas')}
-          ${card('Tarefas hoje', '3', 'pendentes')}
-          ${card('Fotografias', '0', 'carregar hoje')}
-          ${card('Estado', 'Ativo', 'sem acesso financeiro')}
-        </div>
-        <div class="panel warning"><strong>Área Funcionário:</strong> custos, faturação, pagamentos, clientes e administração estão bloqueados.</div>`;
-      return;
-    }
-
-    if (module === 'minhas-obras') {
-      content.innerHTML = table(['Obra', 'Morada', 'Estado', 'Tarefa'], obras.map(o => [o.id, o.morada, o.estado, o.tarefa]));
-      return;
-    }
-
-    if (module === 'checkin') {
-      content.innerHTML = `
-        <div class="panel"><h2>Registo de jornada</h2>
-          <button class="primary" onclick="alert('Check-in registado em modo demonstração')">Iniciar jornada</button>
-          <button onclick="alert('Check-out registado em modo demonstração')">Terminar jornada</button>
-          <p class="muted">Na próxima fase ligamos este registo à tabela de horas no Supabase.</p>
-        </div>`;
-      return;
-    }
-
-    if (module === 'fotografias') {
-      content.innerHTML = `<div class="panel"><h2>Fotografias da obra</h2><input type="file" accept="image/*" multiple><p class="muted">Carregar fotos antes, durante e depois. Ligação ao Storage Supabase na próxima fase.</p></div>`;
-      return;
-    }
-
-    if (module === 'materiais') {
-      content.innerHTML = `<div class="panel"><h2>Pedido de material</h2><textarea placeholder="Escrever material necessário"></textarea><button class="primary">Enviar pedido</button></div>`;
-      return;
-    }
-
-    content.innerHTML = `<div class="panel"><h2>${moduleLabel(module)}</h2><p>Área limitada ao funcionário. Sem dados financeiros ou administrativos.</p></div>`;
-  }
-
-  function renderClienteModule(module, content) {
-    content.innerHTML = `<div class="panel"><h2>${moduleLabel(module)}</h2><p>Portal do cliente: acesso apenas à própria obra, documentos autorizados, fotografias, garantias e faturas.</p></div>`;
-  }
-
-  async function restoreSession() {
-    if (!supabaseClient && !initSupabase()) return renderLogin();
-    const { data } = await supabaseClient.auth.getSession();
-    currentUser = data.session?.user || null;
-    if (currentUser) return loadProfileAndRender();
-    renderLogin();
-  }
-
-  document.addEventListener('DOMContentLoaded', restoreSession);
+  function dashboard(){ setPage('Dashboard','Visão geral da empresa'); view.innerHTML = `
+    <div class="cards"><div class="card"><span>Obras ativas</span><strong>7</strong></div><div class="card"><span>Faturação mês</span><strong>${money(21447.62)}</strong></div><div class="card"><span>Custos registados</span><strong>${money(8920)}</strong></div><div class="card"><span>Lucro estimado</span><strong>${money(12527.62)}</strong></div></div>
+    <div class="grid"><div class="panel"><h2>Obras principais</h2>${obrasTable(true)}</div><div class="panel"><h2>Avisos</h2><p class="notice">Funcionários não têm acesso a custos, pagamentos, lucros ou administração.</p><p class="notice">Fatura M/59 em atraso: 2.560,44 €.</p></div></div>`; }
+  function funcPainel(){ setPage('Painel Funcionário','Área limitada ao funcionário'); view.innerHTML = `<div class="cards"><div class="card"><span>Minhas obras</span><strong>2</strong></div><div class="card"><span>Tarefas hoje</span><strong>4</strong></div><div class="card"><span>Fotos enviadas</span><strong>12</strong></div><div class="card"><span>Estado</span><strong>Ativo</strong></div></div><div class="panel"><h2>Acesso Funcionário</h2><p>Este perfil não tem acesso a faturação, custos, lucros, clientes, pagamentos ou administração.</p><div class="actions"><button class="btn">Iniciar jornada</button><button class="btn secondary">Enviar fotografia</button><button class="btn secondary">Pedir material</button><button class="btn danger">Comunicar incidente</button></div></div>`; }
+  function obrasTable(values){ const rows=window.DISTAK_SAMPLE.obras.map(o=>`<tr><td>${o.id}</td><td>${o.cliente}</td><td>${o.morada}</td><td><span class="tag gold">${o.estado}</span></td>${values?`<td>${money(o.valor)}</td>`:''}</tr>`).join(''); return `<table><tr><th>Nº</th><th>Cliente</th><th>Morada</th><th>Estado</th>${values?'<th>Valor</th>':''}</tr>${rows}</table>`; }
+  function clientes(){ setPage('Clientes','Gestão de clientes'); view.innerHTML=`<div class="panel"><h2>Clientes</h2><div class="form-grid"><input placeholder="Nome"><input placeholder="NIF"><input placeholder="Email"><input placeholder="Telefone"><textarea placeholder="Morada / Observações"></textarea></div><br><button class="btn">Guardar cliente</button><table><tr><th>Cliente</th><th>NIF</th><th>Contacto</th></tr><tr><td>Condomínio Malveira</td><td>—</td><td>Administração</td></tr></table></div>`; }
+  function obras(){ setPage('Obras','Gestão operacional'); view.innerHTML=`<div class="panel"><h2>Obras</h2>${obrasTable(true)}</div>`; }
+  function orcamentos(){ setPage('Orçamentos','Criação e aprovação'); view.innerHTML=`<div class="panel"><h2>Novo orçamento</h2><div class="form-grid"><input placeholder="Cliente"><input placeholder="Morada da obra"><input placeholder="Valor sem IVA"><textarea placeholder="Descrição técnica dos trabalhos"></textarea></div><br><button class="btn">Gerar orçamento</button></div>`; }
+  function custos(){ setPage('Custos','Materiais, subempreiteiros e logística'); view.innerHTML=`<div class="panel"><h2>Registo de custos</h2><div class="form-grid"><input placeholder="Obra"><input placeholder="Categoria"><input placeholder="Valor"><textarea placeholder="Observação"></textarea></div><br><button class="btn">Guardar custo</button></div>`; }
+  function pagamentos(){ setPage('Pagamentos','Controlo financeiro'); view.innerHTML=`<div class="panel"><h2>Pagamentos e faturas</h2><table><tr><th>Fatura</th><th>Cliente</th><th>Total</th><th>Estado</th></tr><tr><td>M/59</td><td>Rua Veiga Beirão</td><td>${money(2560.44)}</td><td><span class="tag red">Em atraso</span></td></tr></table></div>`; }
+  function funcionarios(){ setPage('Funcionários','Equipa e permissões'); view.innerHTML=`<div class="panel"><h2>Funcionários</h2><table><tr><th>Nome</th><th>Email</th><th>Perfil</th><th>Estado</th></tr><tr><td>Funcionário Obras</td><td>obras2015@distak.com</td><td>funcionario</td><td><span class="tag green">Ativo</span></td></tr></table></div>`; }
+  function documentos(){ setPage('Documentos','Contratos, garantias e relatórios'); view.innerHTML=`<div class="panel"><h2>Documentos</h2><p>Área para anexar contratos, garantias, fotos antes/depois e relatórios técnicos.</p><button class="btn secondary">Anexar documento</button></div>`; }
+  function relatorios(){ setPage('Relatórios','Relatórios técnicos e PDF'); view.innerHTML=`<div class="panel"><h2>Relatório técnico</h2><textarea style="width:100%;min-height:150px;border:1px solid #dbe3ef;border-radius:12px;padding:12px" placeholder="Descrição técnica, patologias, trabalhos executados e conclusão..."></textarea><br><br><button class="btn">Gerar PDF</button></div>`; }
+  function agenda(){ setPage('Agenda','Calendário de obras'); view.innerHTML=`<div class="panel"><h2>Agenda</h2><table><tr><th>Dia</th><th>Obra</th><th>Equipa</th></tr><tr><td>Hoje</td><td>Malveira</td><td>Funcionário Obras</td></tr></table></div>`; }
+  function portal(){ setPage('Portal Cliente','Área reservada ao cliente'); view.innerHTML=`<div class="panel"><h2>Portal Cliente</h2><p>Cliente vê apenas a sua obra, fotografias, orçamento, faturas, garantias e relatórios autorizados.</p></div>`; }
+  function administracao(){ setPage('Administração','Utilizadores e configurações'); view.innerHTML=`<div class="panel"><h2>Administração</h2><p>Gestão de perfis, permissões, empresa, backups e configurações do ERP.</p></div>`; }
+  function minhasObras(){ setPage('Minhas Obras','Obras atribuídas ao funcionário'); view.innerHTML=`<div class="panel"><h2>Minhas obras</h2>${obrasTable(false)}</div>`; }
+  function tarefas(){ setPage('Tarefas','Tarefas do dia'); view.innerHTML=`<div class="panel"><h2>Tarefas de hoje</h2><ul>${window.DISTAK_SAMPLE.tarefas.map(t=>`<li>${t}</li>`).join('')}</ul></div>`; }
+  function fotografias(){ setPage('Fotografias','Registo fotográfico da obra'); view.innerHTML=`<div class="panel"><h2>Enviar fotografias</h2><input type="file" multiple accept="image/*"><p>As fotografias serão associadas à obra selecionada.</p></div>`; }
+  function checkin(){ setPage('Check-in / Check-out','Registo de jornada'); view.innerHTML=`<div class="panel"><h2>Registo de presença</h2><div class="actions"><button class="btn">Iniciar jornada</button><button class="btn secondary">Terminar jornada</button></div></div>`; }
+  function materiais(){ setPage('Materiais','Pedidos e materiais atribuídos'); view.innerHTML=`<div class="panel"><h2>Pedir material</h2><div class="form-grid"><input placeholder="Obra"><input placeholder="Material"><input placeholder="Quantidade"><textarea placeholder="Observação"></textarea></div><br><button class="btn">Enviar pedido</button></div>`; }
+  function incidentes(){ setPage('Incidentes','Comunicar avarias ou problemas'); view.innerHTML=`<div class="panel"><h2>Comunicar incidente</h2><div class="form-grid"><input placeholder="Obra"><input placeholder="Tipo de incidente"><textarea placeholder="Descreva o problema"></textarea></div><br><button class="btn danger">Comunicar</button></div>`; }
+  function perfil(){ setPage('Meu Perfil','Dados do utilizador'); view.innerHTML=`<div class="panel"><h2>${currentProfile.nome||'Utilizador'}</h2><p>Email: ${currentProfile.email||currentUser.email}</p><p>Perfil: ${labels[normalizeRole(currentProfile.role || currentProfile.papel)]}</p></div>`; }
+  function renderBlocked(){ setPage('Acesso bloqueado','Permissão insuficiente'); view.innerHTML=`<div class="panel"><h2>Acesso bloqueado</h2><p>O seu perfil não tem autorização para ver esta área.</p></div>`; }
+  boot();
 })();

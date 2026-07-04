@@ -1,6 +1,4 @@
-// CONFIGURAÇÃO SUPABASE
-// Substitua estes valores pelos dados reais do projeto Supabase.
 window.DISTAK_CONFIG = {
-  supabaseUrl: 'COLE_AQUI_O_SUPABASE_URL',
-  supabaseAnonKey: 'COLE_AQUI_O_SUPABASE_ANON_KEY'
+  SUPABASE_URL: "https://usaaiubvynxyfviwgogs.supabase.co",
+  SUPABASE_KEY: "sb_publishable_mPYHA3ZRc91SBf3G4qGtkA_PjW1Hzsz"
 };
