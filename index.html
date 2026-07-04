@@ -1,3 +1,56 @@
-<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>DISTAK ERP | Gestão de Obras</title><link rel="stylesheet" href="assets/css/style.css"></head><body><div id="loginScreen" class="login-screen"><div class="login-card"><div class="brand"><div class="logo-box">D</div><div><h1>DISTAK ERP</h1><p>Gestão profissional de obras</p></div></div><h2>Entrar na aplicação</h2><label>Email</label><input id="email" type="email" placeholder="Digite o seu email" autocomplete="username"><label>Palavra-passe</label><input id="password" type="password" placeholder="Digite a sua senha" autocomplete="current-password"><button onclick="login()">Entrar</button><small>Perfis: Administrador · Escritório · Encarregado · Funcionário · Cliente</small></div></div><div id="app" class="app hidden"><aside class="sidebar"><div class="side-brand"><div class="logo-box small">D</div><strong>DISTAK ERP</strong></div><button onclick="showSection('dashboard')">Dashboard</button><button onclick="showSection('clientes')">Clientes</button><button onclick="showSection('obras')">Obras</button><button onclick="showSection('orcamentos')">Orçamentos</button><button onclick="showSection('custos')">Custos</button><button onclick="showSection('funcionarios')">Funcionários</button><button onclick="showSection('relatorios')">Relatórios</button><button onclick="showSection('portal')">Portal Cliente</button><button onclick="logout()">Sair</button></aside><main class="main"><header class="topbar"><div><h1 id="pageTitle">Dashboard</h1><p>Distak Construção Civil Unipessoal, Lda</p></div><span class="badge">Administrador</span></header><section id="dashboard" class="section active"><div class="cards"><div class="card"><span>Obras ativas</span><strong>7</strong></div><div class="card"><span>Faturação mensal</span><strong>21.447,62 €</strong></div><div class="card"><span>Custos registados</span><strong>8.920,00 €</strong></div><div class="card"><span>Lucro estimado</span><strong>12.527,62 €</strong></div></div><div class="panel"><h2>Alertas importantes</h2><p class="alert red">Fatura M/59 em atraso: 2.560,44 €</p><p class="alert yellow">Telhado Malveira aguarda sinal.</p><p class="alert green">Margem das obras grandes protegida.</p></div></section><section id="clientes" class="section"><h2>Clientes</h2><div class="grid-form"><input placeholder="Nome"><input placeholder="NIF"><input placeholder="Telefone"><input placeholder="Email"><input placeholder="Morada"></div><button>Guardar cliente</button><table><tr><th>Cliente</th><th>NIF</th><th>Contacto</th><th>Obras</th></tr><tr><td>Condomínio Malveira</td><td>—</td><td>Administrador</td><td>Telhado / Beirado</td></tr></table></section><section id="obras" class="section"><h2>Obras</h2><div class="grid-form"><input placeholder="Cliente"><input placeholder="Morada da obra"><input placeholder="N.º orçamento"><input placeholder="Valor contratado"><select><option>Em execução</option><option>Orçamento</option><option>Concluída</option><option>Suspensa</option></select></div><button>Guardar obra</button><table><tr><th>Obra</th><th>Cliente</th><th>Estado</th><th>Valor</th></tr><tr><td>Reconstrução Paço de Arcos</td><td>José Manuel Rosado Gambôa</td><td>Orçamento enviado</td><td>258.500,00 €</td></tr></table></section><section id="orcamentos" class="section"><h2>Orçamentos</h2><div class="grid-form"><input placeholder="N.º orçamento"><input placeholder="Cliente"><input placeholder="Mão de obra"><input placeholder="Materiais"><input placeholder="Logística"><select><option>IVA 6%</option><option>IVA 23%</option></select></div><textarea placeholder="Descrição técnica dos trabalhos"></textarea><button>Gerar orçamento PDF</button></section><section id="custos" class="section"><h2>Custos e margem</h2><div class="grid-form"><input placeholder="Obra"><input placeholder="Despesa"><input placeholder="Valor sem IVA"><input placeholder="IVA"><input placeholder="Fornecedor"></div><button>Registar custo</button><div class="panel"><strong>Margem real:</strong> 35% · <span class="alert green">Lucro seguro</span></div></section><section id="funcionarios" class="section"><h2>Funcionários</h2><div class="grid-form"><input placeholder="Nome"><input placeholder="Contacto"><input placeholder="N.º seguro"><input placeholder="Salário dia"><input placeholder="Dias trabalhados"><input placeholder="Faltas"></div><button>Guardar folha</button></section><section id="relatorios" class="section"><h2>Relatórios técnicos</h2><textarea>Relatório Técnico Final — Obra Concluída e Patologia Resolvida
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DISTAK ERP | Gestão de Obras</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <main id="loginScreen" class="login-screen">
+    <section class="login-card">
+      <div class="brand-row">
+        <div class="brand-icon">D</div>
+        <div>
+          <h1>DISTAK ERP</h1>
+          <p>Gestão profissional de obras</p>
+        </div>
+      </div>
+      <h2>Entrar na aplicação</h2>
+      <form id="loginForm">
+        <label>Email</label>
+        <input id="email" type="email" placeholder="Digite o seu email" autocomplete="username" required />
+        <label>Palavra-passe</label>
+        <input id="password" type="password" placeholder="Digite a sua senha" autocomplete="current-password" required />
+        <button type="submit">Entrar</button>
+      </form>
+      <p id="loginMessage" class="message"></p>
+      <small>Perfis: Administrador · Escritório · Encarregado · Funcionário · Cliente</small>
+    </section>
+  </main>
 
-A DISTAK declara que os trabalhos corretivos foram concluídos e que a patologia identificada foi resolvida após verificação técnica.</textarea><button>Gerar relatório</button></section><section id="portal" class="section"><h2>Portal do cliente</h2><div class="panel"><p>Área para o cliente consultar orçamentos, fotografias, relatórios, garantias e estado da obra.</p><button>Enviar atualização ao cliente</button></div></section></main></div><script src="assets/js/app.js"></script></body></html>
+  <main id="appScreen" class="app hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand"><div class="brand-icon small">D</div><strong>DISTAK ERP</strong></div>
+      <p id="userRole" class="role-badge">perfil</p>
+      <nav id="menu"></nav>
+      <button id="logoutBtn" class="logout">Sair</button>
+    </aside>
+    <section class="content">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageSubtitle">Gestão da DISTAK Construção Civil</p>
+        </div>
+        <div id="userInfo" class="user-info"></div>
+      </header>
+      <section id="view" class="view"></section>
+    </section>
+  </main>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
