@@ -96,13 +96,123 @@
   </main>
 </section>
 
-<dialog id="clienteDialog"><form id="clienteForm" class="modal-form">
+<dialog id="clienteDialog"><form id="clienteForm" class="modal-form crm-client-form">
   <h3>Novo / editar cliente</h3><input type="hidden" id="clienteId">
-  <label>Nome<input id="clienteNome" required></label><label>NIF<input id="clienteNif"></label>
-  <label>Morada<input id="clienteMorada"></label><label>Email<input id="clienteEmail" type="email"></label>
-  <label>Telefone<input id="clienteTelefone"></label><label>Tipo<select id="clienteTipo"><option>Particular</option><option>Empresa</option><option>Condomínio</option></select></label>
+  <label>Nome<input id="clienteNome" required></label>
+  <label>Tipo<select id="clienteTipo"><option>Particular</option><option>Empresa</option><option>Condomínio</option></select></label>
+  <label>NIF<input id="clienteNif"></label>
+  <label>Estado<select id="clienteEstado"><option>Potencial</option><option>Ativo</option><option>Inativo</option></select></label>
+  <label>Email<input id="clienteEmail" type="email"></label>
+  <label>Telefone<input id="clienteTelefone"></label>
+  <label>Telefone alternativo<input id="clienteTelefoneAlternativo"></label>
+  <label>Website<input id="clienteWebsite" type="url"></label>
+  <label>CAE<input id="clienteCae"></label>
+  <label>Morada<input id="clienteMorada"></label>
+  <label>Código postal<input id="clienteCodigoPostal"></label>
+  <label>Localidade<input id="clienteLocalidade"></label>
+  <label>País<input id="clientePais" value="Portugal"></label>
+  <label>Condições de pagamento<input id="clienteCondicoesPagamento"></label>
+  <label>Limite de crédito<input id="clienteLimiteCredito" type="number" step="0.01"></label>
+  <label class="full">Observações<textarea id="clienteObservacoes" rows="4"></textarea></label>
   <div class="actions"><button type="button" class="btn light" data-close="clienteDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
 </form></dialog>
+
+
+<dialog id="clienteCrmDialog" class="crm-dialog">
+  <section class="crm-shell">
+    <header class="crm-head">
+      <div>
+        <span class="crm-kicker">Ficha de cliente</span>
+        <h2 id="crmClienteNome">Cliente</h2>
+        <p id="crmClienteMeta"></p>
+      </div>
+      <button type="button" class="crm-close" data-close="clienteCrmDialog" aria-label="Fechar">×</button>
+    </header>
+
+    <div class="crm-summary">
+      <article><span>Obras</span><strong id="crmTotalObras">0</strong></article>
+      <article><span>Orçamentos</span><strong id="crmTotalOrcamentos">0</strong></article>
+      <article><span>Recebido</span><strong id="crmTotalRecebido">0,00 €</strong></article>
+      <article><span>Contactos</span><strong id="crmTotalContactos">0</strong></article>
+      <article><span>Documentos</span><strong id="crmTotalDocumentos">0</strong></article>
+      <article><span>Último contacto</span><strong id="crmUltimaComunicacao">—</strong></article>
+    </div>
+
+    <nav class="crm-tabs" id="crmTabs">
+      <button class="active" data-crm-tab="dados">Dados gerais</button>
+      <button data-crm-tab="contactos">Contactos</button>
+      <button data-crm-tab="moradas">Moradas</button>
+      <button data-crm-tab="obras">Obras</button>
+      <button data-crm-tab="orcamentos">Orçamentos</button>
+      <button data-crm-tab="pagamentos">Pagamentos</button>
+      <button data-crm-tab="notas">Notas</button>
+      <button data-crm-tab="comunicacoes">Comunicações</button>
+      <button data-crm-tab="documentos">Documentos</button>
+    </nav>
+
+    <div class="crm-body">
+      <div id="crm-tab-dados" class="crm-tab-panel"></div>
+
+      <div id="crm-tab-contactos" class="crm-tab-panel hidden">
+        <form id="crmContactoForm" class="crm-inline-form">
+          <input type="hidden" id="crmContactoId">
+          <input id="crmContactoNome" placeholder="Nome" required>
+          <input id="crmContactoCargo" placeholder="Cargo">
+          <input id="crmContactoTelefone" placeholder="Telefone">
+          <input id="crmContactoEmail" type="email" placeholder="Email">
+          <label class="crm-check"><input id="crmContactoPrincipal" type="checkbox"> Principal</label>
+          <button class="btn primary">Guardar contacto</button>
+        </form>
+        <div id="crmContactosLista"></div>
+      </div>
+
+      <div id="crm-tab-moradas" class="crm-tab-panel hidden">
+        <form id="crmMoradaForm" class="crm-inline-form">
+          <input type="hidden" id="crmMoradaId">
+          <select id="crmMoradaTipo"><option>Faturação</option><option>Sede</option><option>Obra</option><option>Outra</option></select>
+          <input id="crmMoradaTexto" placeholder="Morada" required>
+          <input id="crmMoradaCodigoPostal" placeholder="Código postal">
+          <input id="crmMoradaLocalidade" placeholder="Localidade">
+          <label class="crm-check"><input id="crmMoradaPrincipal" type="checkbox"> Principal</label>
+          <button class="btn primary">Guardar morada</button>
+        </form>
+        <div id="crmMoradasLista"></div>
+      </div>
+
+      <div id="crm-tab-obras" class="crm-tab-panel hidden"><div id="crmObrasLista"></div></div>
+      <div id="crm-tab-orcamentos" class="crm-tab-panel hidden"><div id="crmOrcamentosLista"></div></div>
+      <div id="crm-tab-pagamentos" class="crm-tab-panel hidden"><div id="crmPagamentosLista"></div></div>
+
+      <div id="crm-tab-notas" class="crm-tab-panel hidden">
+        <form id="crmNotaForm" class="crm-note-form">
+          <textarea id="crmNotaTexto" rows="3" placeholder="Nova nota interna..." required></textarea>
+          <label class="crm-check"><input id="crmNotaImportante" type="checkbox"> Importante</label>
+          <button class="btn primary">Adicionar nota</button>
+        </form>
+        <div id="crmNotasLista"></div>
+      </div>
+
+      <div id="crm-tab-comunicacoes" class="crm-tab-panel hidden">
+        <form id="crmComunicacaoForm" class="crm-inline-form">
+          <select id="crmComunicacaoTipo"><option>Nota</option><option>Chamada</option><option>Email</option><option>Reunião</option><option>Visita técnica</option><option>Cobrança</option></select>
+          <input id="crmComunicacaoAssunto" placeholder="Assunto">
+          <input id="crmComunicacaoDescricao" placeholder="Descrição" required>
+          <input id="crmComunicacaoData" type="datetime-local">
+          <button class="btn primary">Registar comunicação</button>
+        </form>
+        <div id="crmComunicacoesLista"></div>
+      </div>
+
+      <div id="crm-tab-documentos" class="crm-tab-panel hidden">
+        <div class="crm-empty-upload">
+          <strong>Documentos do cliente</strong>
+          <p>A listagem está preparada. O carregamento de ficheiros será ligado ao Supabase Storage na próxima etapa.</p>
+        </div>
+        <div id="crmDocumentosLista"></div>
+      </div>
+    </div>
+  </section>
+</dialog>
 
 <dialog id="obraDialog"><form id="obraForm" class="modal-form">
   <h3>Nova / editar obra</h3><input type="hidden" id="obraId">

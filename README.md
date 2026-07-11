@@ -1,21 +1,20 @@
-# DISTAK ERP v2.0 Modular
+# DISTAK ERP v2.1 — CRM visual
 
-Esta versão mantém as funcionalidades comerciais já existentes e separa o código por módulos.
+Substituir:
+- `index.html`
+- `assets/css/style.css`
+- `assets/js/modules/clientes.js`
 
-## Módulos
-- Autenticação
-- Dashboard
-- Clientes
-- Obras
-- Orçamentos
-- Custos
-- Pagamentos
-- Perfil de funcionário
+Commit sugerido: `DISTAK ERP v2.1 - CRM profissional`
 
-## Atualização
-1. Copie todo o conteúdo para o repositório local `distak-erp`.
-2. Commit: `DISTAK ERP v2.0 modular`.
-3. Push origin.
-4. Atualize o site com Ctrl+F5.
-
-O SQL comercial já foi executado, portanto não é necessário voltar ao Supabase.
+Incluído:
+- ficha-resumo do cliente
+- dados avançados
+- contactos
+- moradas
+- obras
+- orçamentos
+- pagamentos
+- notas
+- comunicações
+- documentos (listagem; upload será ligado ao Storage na próxima etapa)
