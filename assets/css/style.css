@@ -40,3 +40,17 @@ textarea{padding:12px;border:1px solid var(--line);border-radius:10px;font:inher
 .crm-empty,.crm-empty-upload{text-align:center;color:var(--muted);padding:28px}.crm-important{background:#fee2e2;color:#991b1b}
 @media(max-width:1000px){.crm-summary{grid-template-columns:repeat(3,1fr)}.crm-data-grid{grid-template-columns:repeat(2,1fr)}.crm-inline-form{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.crm-summary,.crm-data-grid,.crm-inline-form{grid-template-columns:1fr}.crm-note-form{grid-template-columns:1fr}.crm-body{padding:10px}.crm-summary{padding:10px}.crm-head{padding:18px}}
+
+
+/* Perfil institucional DISTAK */
+.company-hero{display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,var(--nav),#263348);color:#fff;border-radius:16px;padding:24px;margin-bottom:18px}
+.company-logo{width:68px;height:68px;border-radius:17px;background:var(--gold);color:#111827;display:grid;place-items:center;font-size:34px;font-weight:900;flex:0 0 auto}
+.company-kicker{text-transform:uppercase;letter-spacing:.13em;font-size:11px;color:var(--gold);font-weight:800}.company-hero h2{margin:4px 0 6px}.company-hero p{margin:0;color:#dbe4f0}
+.company-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.company-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:19px}.company-card-wide{grid-column:1/-1}.company-card h3{margin:0 0 14px}
+.company-card dl{margin:0;display:grid;gap:0}.company-card dl>div{display:grid;grid-template-columns:190px 1fr;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}.company-card dl>div:last-child{border-bottom:0}
+.company-card dt{color:var(--muted);font-size:13px;font-weight:700}.company-card dd{margin:0;font-weight:650;line-height:1.45}
+.company-warning{background:#fff7ed;padding:10px!important;border-radius:9px;border-bottom:0!important}.company-warning dd{color:#9a3412}
+.company-list{margin:0;padding-left:20px;display:grid;gap:9px;line-height:1.5}
+.company-note{margin-top:16px;padding:15px 17px;background:#fffbeb;border:1px solid #fde68a;border-radius:12px;line-height:1.5}
+@media(max-width:850px){.company-grid{grid-template-columns:1fr}.company-card-wide{grid-column:auto}.company-card dl>div{grid-template-columns:1fr;gap:4px}}
