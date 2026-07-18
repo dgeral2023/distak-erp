@@ -1,5 +1,54 @@
 export const db=window.supabase.createClient(window.DISTAK_CONFIG.SUPABASE_URL,window.DISTAK_CONFIG.SUPABASE_KEY);
-export async function getProfile(id){const {data,error}=await db.from("profiles").select("*").eq("id",id).single();if(error)throw error;return data}
-export async function query(table,select="*"){const {data,error}=await db.from(table).select(select).order("id",{ascending:false});if(error)throw error;return data||[]}
-export async function save(table,payload,id){const q=id?db.from(table).update(payload).eq("id",id):db.from(table).insert(payload);const {error}=await q;if(error)throw error}
-export async function remove(table,id){const {error}=await db.from(table).delete().eq("id",id);if(error)throw error}
+
+export async function getProfile(id){
+  const {data,error}=await db.from("profiles").select("*").eq("id",id).single();
+  if(error)throw error;
+  return data;
+}
+
+export async function query(table,select="*"){
+  const {data,error}=await db.from(table).select(select).order("id",{ascending:false});
+  if(error)throw error;
+  return data||[];
+}
+
+export async function save(table,payload,id){
+  const q=id?db.from(table).update(payload).eq("id",id):db.from(table).insert(payload);
+  const {error}=await q;
+  if(error)throw error;
+}
+
+export async function saveReturning(table,payload,id){
+  const q=id
+    ?db.from(table).update(payload).eq("id",id).select().single()
+    :db.from(table).insert(payload).select().single();
+  const {data,error}=await q;
+  if(error)throw error;
+  return data;
+}
+
+export async function remove(table,id){
+  const {error}=await db.from(table).delete().eq("id",id);
+  if(error)throw error;
+}
+
+export async function uploadStorage(bucket,path,file){
+  const {data,error}=await db.storage.from(bucket).upload(path,file,{
+    cacheControl:"3600",
+    upsert:false,
+    contentType:file.type||undefined
+  });
+  if(error)throw error;
+  return data;
+}
+
+export function publicStorageUrl(bucket,path){
+  return db.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+}
+
+export async function removeStorage(bucket,paths){
+  const clean=(Array.isArray(paths)?paths:[paths]).filter(Boolean);
+  if(!clean.length)return;
+  const {error}=await db.storage.from(bucket).remove(clean);
+  if(error)throw error;
+}

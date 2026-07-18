@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
-  <title>DISTAK ERP v2.3</title>
+  <title>DISTAK ERP v2.4</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
   <link rel="stylesheet" href="assets/css/dashboard-executivo.css">
+  <link rel="stylesheet" href="assets/css/fotografias.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
 </head>
@@ -28,7 +29,7 @@
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="brand">DISTAK ERP <small>v2.3</small></div>
+    <div class="brand">DISTAK ERP <small>v2.4</small></div>
     <nav id="mainNav">
       <button class="nav active" data-view="dashboard">Dashboard</button>
       <button class="nav admin-only" data-view="empresa">Empresa</button>
@@ -467,13 +468,112 @@
         <div class="obra-placeholder"><strong>Documentos da obra</strong><p>O módulo de carregamento de contratos, relatórios, garantias e PDFs será ligado ao Supabase Storage na próxima fase.</p></div>
       </div>
       <div id="obra-tab-fotografias" class="obra-tab-panel hidden">
-        <div class="obra-placeholder"><strong>Fotografias da obra</strong><p>A estrutura visual está preparada para as fotografias “Antes”, “Durante”, “Depois” e “Patologias”.</p></div>
+        <section class="photo-manager">
+          <header class="photo-manager-head">
+            <div>
+              <span class="photo-kicker">Registo fotográfico</span>
+              <h3>Fotografias da obra</h3>
+              <p>Carregue e organize fotografias por fase, zona e data.</p>
+            </div>
+            <button id="photoUploadToggle" type="button" class="btn primary admin-only">Adicionar fotografias</button>
+          </header>
+
+          <form id="photoUploadForm" class="photo-upload-form hidden">
+            <div class="photo-form-grid">
+              <label>Categoria
+                <select id="photoCategoria" required>
+                  <option>Antes</option>
+                  <option selected>Durante</option>
+                  <option>Depois</option>
+                  <option>Patologias</option>
+                  <option>Outros</option>
+                </select>
+              </label>
+              <label>Zona da obra
+                <input id="photoZona" placeholder="Ex.: Cobertura, fachada, WC">
+              </label>
+              <label>Data das fotografias
+                <input id="photoData" type="date">
+              </label>
+              <label>Título comum
+                <input id="photoTitulo" placeholder="Ex.: Reparação da cobertura">
+              </label>
+              <label class="full">Descrição
+                <textarea id="photoDescricao" rows="2" placeholder="Observações técnicas ou trabalhos visíveis"></textarea>
+              </label>
+              <label class="full photo-drop-zone" id="photoDropZone">
+                <input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp,image/heic" multiple required>
+                <strong>Arraste fotografias para aqui</strong>
+                <span>ou clique para selecionar vários ficheiros</span>
+                <small>JPEG, PNG, WEBP ou HEIC · máximo 50 MB por ficheiro</small>
+              </label>
+            </div>
+            <div id="photoSelectionSummary" class="photo-selection-summary">Nenhum ficheiro selecionado.</div>
+            <div id="photoUploadProgress" class="photo-upload-progress hidden">
+              <div><span id="photoUploadProgressBar"></span></div>
+              <small id="photoUploadProgressText">A preparar...</small>
+            </div>
+            <div class="actions">
+              <button id="photoUploadCancel" type="button" class="btn light">Cancelar</button>
+              <button id="photoUploadSubmit" type="submit" class="btn primary">Carregar fotografias</button>
+            </div>
+          </form>
+
+          <div class="photo-toolbar">
+            <div class="photo-filters" id="photoFilters">
+              <button type="button" class="active" data-photo-filter="Todas">Todas <span id="photoCountTodas">0</span></button>
+              <button type="button" data-photo-filter="Antes">Antes <span id="photoCountAntes">0</span></button>
+              <button type="button" data-photo-filter="Durante">Durante <span id="photoCountDurante">0</span></button>
+              <button type="button" data-photo-filter="Depois">Depois <span id="photoCountDepois">0</span></button>
+              <button type="button" data-photo-filter="Patologias">Patologias <span id="photoCountPatologias">0</span></button>
+              <button type="button" data-photo-filter="Outros">Outros <span id="photoCountOutros">0</span></button>
+            </div>
+            <input id="photoSearch" class="photo-search" placeholder="Pesquisar título, zona ou descrição">
+          </div>
+
+          <div id="photoGallery" class="photo-gallery"></div>
+        </section>
       </div>
       <div id="obra-tab-diario" class="obra-tab-panel hidden">
         <div class="obra-placeholder"><strong>Diário de obra</strong><p>O diário será desenvolvido com data, autor, descrição, ocorrências, clima, equipa e anexos.</p></div>
       </div>
     </div>
   </section>
+</dialog>
+
+
+<dialog id="photoEditDialog" class="photo-edit-dialog">
+  <form id="photoEditForm" class="modal-form">
+    <h3>Editar fotografia</h3>
+    <input id="photoEditId" type="hidden">
+    <label>Categoria
+      <select id="photoEditCategoria">
+        <option>Antes</option><option>Durante</option><option>Depois</option><option>Patologias</option><option>Outros</option>
+      </select>
+    </label>
+    <label>Zona<input id="photoEditZona"></label>
+    <label>Data<input id="photoEditData" type="date"></label>
+    <label>Título<input id="photoEditTitulo"></label>
+    <label class="full">Descrição<textarea id="photoEditDescricao" rows="4"></textarea></label>
+    <div class="actions">
+      <button type="button" class="btn light" data-close="photoEditDialog">Cancelar</button>
+      <button class="btn primary">Guardar alterações</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="photoLightbox" class="photo-lightbox">
+  <button type="button" class="photo-lightbox-close" data-close="photoLightbox" aria-label="Fechar">×</button>
+  <button id="photoLightboxPrev" type="button" class="photo-lightbox-nav prev" aria-label="Anterior">‹</button>
+  <figure>
+    <img id="photoLightboxImage" alt="">
+    <figcaption>
+      <strong id="photoLightboxTitle"></strong>
+      <span id="photoLightboxMeta"></span>
+      <p id="photoLightboxDescription"></p>
+    </figcaption>
+  </figure>
+  <button id="photoLightboxNext" type="button" class="photo-lightbox-nav next" aria-label="Seguinte">›</button>
 </dialog>
 
 
