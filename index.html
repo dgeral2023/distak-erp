@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
-  <title>DISTAK ERP v2.5</title>
+  <title>DISTAK ERP v2.6</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
   <link rel="stylesheet" href="assets/css/dashboard-executivo.css">
@@ -29,7 +29,7 @@
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="brand">DISTAK ERP <small>v2.5</small></div>
+    <div class="brand">DISTAK ERP <small>v2.6</small></div>
     <nav id="mainNav">
       <button class="nav active" data-view="dashboard">Dashboard</button>
       <button class="nav admin-only" data-view="empresa">Empresa</button>
@@ -473,10 +473,28 @@
             <div>
               <span class="photo-kicker">Registo fotográfico</span>
               <h3>Fotografias da obra</h3>
-              <p>Carregue e organize fotografias por fase, zona e data.</p>
+              <p>Registo rápido, organizado e preparado para utilização em obra.</p>
             </div>
-            <button id="photoUploadToggle" type="button" class="btn primary">Adicionar fotografias</button>
+            <button id="photoUploadToggle" type="button" class="btn primary desktop-photo-add">Adicionar fotografias</button>
           </header>
+
+          <section class="photo-mobile-dashboard" aria-label="Ações rápidas de fotografias">
+            <button id="photoQuickCamera" type="button" class="photo-mobile-action primary">
+              <span class="photo-mobile-icon">📷</span>
+              <strong>Tirar fotografia</strong>
+              <small>Abrir a câmara traseira</small>
+            </button>
+            <button id="photoQuickGallery" type="button" class="photo-mobile-action">
+              <span class="photo-mobile-icon">🖼️</span>
+              <strong>Galeria</strong>
+              <small>Ver fotografias da obra</small>
+            </button>
+            <button id="photoQuickReport" type="button" class="photo-mobile-action">
+              <span class="photo-mobile-icon">📄</span>
+              <strong>Relatório</strong>
+              <small>Preparar relatório fotográfico</small>
+            </button>
+          </section>
 
           <form id="photoUploadForm" class="photo-upload-form hidden">
             <div class="photo-form-grid">
@@ -543,6 +561,12 @@
           </div>
 
           <div id="photoGallery" class="photo-gallery"></div>
+
+          <nav class="photo-mobile-bottom-bar" aria-label="Navegação rápida">
+            <button id="photoBottomCamera" type="button"><span>📷</span>Tirar foto</button>
+            <button id="photoBottomGallery" type="button"><span>🖼️</span>Galeria</button>
+            <button id="photoBottomAdd" type="button"><span>＋</span>Dados</button>
+          </nav>
         </section>
       </div>
       <div id="obra-tab-diario" class="obra-tab-panel hidden">

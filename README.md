@@ -1,18 +1,30 @@
-# DISTAK ERP v2.5 — Câmara móvel e localização
+# DISTAK ERP v2.6 — Fotografias mobile-first
 
-## Novidades
-- Câmara traseira do telemóvel.
-- GPS opcional.
-- Data e hora automáticas.
-- Compressão automática de imagens grandes.
-- Botão de descarregar.
-- Funcionário e administrador podem carregar e editar.
-- Apenas o administrador elimina.
+## Principais melhorias no telemóvel
 
-## Substituir
+- Ecrã inicial com três ações grandes:
+  - Tirar fotografia
+  - Galeria
+  - Relatório
+- Botão Tirar fotografia abre diretamente a câmara traseira.
+- Barra inferior fixa para utilização rápida em obra.
+- Formulário adaptado a toque com campos e botões maiores.
+- Galeria em grelha compacta de 3 fotografias por linha.
+- Filtros com deslocação horizontal.
+- Visualizador de fotografia em ecrã inteiro.
+- Botão Dados abre o formulário sem abrir a câmara.
+
+## Permissões
+
+- Funcionário e administrador: tirar, carregar e editar fotografias.
+- Apenas administrador: eliminar fotografias.
+
+## Substituição rápida
+
 - index.html
 - assets/js/modules/fotografias.js
 - assets/css/fotografias.css
 
-## Commit
-DISTAK ERP v2.5 - Câmara móvel, GPS e compressão de fotografias
+## Commit sugerido
+
+DISTAK ERP v2.6 - Interface fotografias mobile-first

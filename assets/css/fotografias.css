@@ -20,3 +20,266 @@
   .mobile-photo-actions .photo-gps-status{grid-column:1/-1;text-align:center}
   .camera-button,.mobile-photo-actions .btn{width:100%;min-height:44px}
 }
+
+
+/* DISTAK ERP v2.6 — interface mobile-first */
+.photo-mobile-dashboard,.photo-mobile-bottom-bar{display:none}
+
+@media(max-width:700px){
+  .photo-manager{
+    gap:14px;
+    padding-bottom:82px;
+  }
+
+  .photo-manager-head{
+    display:block;
+    padding:2px 2px 0;
+  }
+
+  .photo-manager-head h3{
+    font-size:21px;
+    margin-top:5px;
+  }
+
+  .photo-manager-head p{
+    font-size:13px;
+    line-height:1.45;
+  }
+
+  .desktop-photo-add{display:none!important}
+
+  .photo-mobile-dashboard{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .photo-mobile-action{
+    min-height:112px;
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:#fff;
+    padding:15px 12px;
+    text-align:left;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    box-shadow:0 8px 24px rgba(15,23,42,.06);
+    cursor:pointer;
+  }
+
+  .photo-mobile-action:first-child{
+    grid-column:1/-1;
+    min-height:132px;
+  }
+
+  .photo-mobile-action.primary{
+    background:linear-gradient(135deg,var(--nav),#1e293b);
+    color:#fff;
+    border-color:transparent;
+  }
+
+  .photo-mobile-action strong{
+    font-size:15px;
+    margin-top:5px;
+  }
+
+  .photo-mobile-action small{
+    margin-top:4px;
+    color:var(--muted);
+    font-size:11px;
+  }
+
+  .photo-mobile-action.primary small{color:#cbd5e1}
+  .photo-mobile-icon{font-size:29px;line-height:1}
+
+  .photo-upload-form{
+    padding:14px;
+    border-radius:16px;
+  }
+
+  .photo-form-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .photo-form-grid label{
+    font-size:12px;
+  }
+
+  .photo-form-grid input,
+  .photo-form-grid select,
+  .photo-form-grid textarea{
+    min-height:46px;
+    font-size:16px;
+  }
+
+  .mobile-photo-actions{
+    grid-template-columns:1fr;
+  }
+
+  .camera-button,
+  .mobile-photo-actions .btn{
+    min-height:50px;
+    border-radius:12px;
+    font-size:14px;
+  }
+
+  .photo-drop-zone{
+    padding:20px 12px!important;
+  }
+
+  .photo-upload-form .actions{
+    position:sticky;
+    bottom:68px;
+    z-index:4;
+    display:grid;
+    grid-template-columns:1fr 1.4fr;
+    padding:10px;
+    margin:12px -6px -6px;
+    background:rgba(248,250,252,.96);
+    backdrop-filter:blur(10px);
+    border-radius:13px;
+    box-shadow:0 -6px 20px rgba(15,23,42,.08);
+  }
+
+  .photo-upload-form .actions .btn{
+    min-height:48px;
+  }
+
+  .photo-toolbar{
+    gap:9px;
+  }
+
+  .photo-filters{
+    display:flex;
+    flex-wrap:nowrap;
+    width:100%;
+    overflow-x:auto;
+    padding-bottom:4px;
+    scrollbar-width:none;
+  }
+
+  .photo-filters::-webkit-scrollbar{display:none}
+
+  .photo-filters button{
+    flex:0 0 auto;
+    min-height:39px;
+    padding:8px 12px;
+  }
+
+  .photo-search{
+    min-height:46px;
+    font-size:16px;
+  }
+
+  .photo-gallery{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+  }
+
+  .photo-card{
+    border:0;
+    border-radius:9px;
+    box-shadow:none;
+    overflow:hidden;
+    position:relative;
+  }
+
+  .photo-preview{
+    height:auto;
+    aspect-ratio:1/1;
+  }
+
+  .photo-category{
+    left:5px;
+    top:5px;
+    max-width:calc(100% - 10px);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:8px;
+    padding:4px 6px;
+  }
+
+  .photo-card-body{
+    display:none;
+  }
+
+  .photo-empty{
+    grid-column:1/-1;
+    padding:35px 18px;
+  }
+
+  .photo-lightbox{
+    width:100vw;
+    height:100dvh;
+    max-height:none;
+    border-radius:0;
+  }
+
+  .photo-lightbox-close{
+    width:44px;
+    height:44px;
+  }
+
+  .photo-lightbox-nav{
+    width:42px;
+    height:54px;
+  }
+
+  .photo-mobile-bottom-bar{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    position:fixed;
+    z-index:40;
+    left:0;
+    right:0;
+    bottom:0;
+    min-height:64px;
+    padding:6px max(8px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));
+    background:rgba(255,255,255,.97);
+    border-top:1px solid var(--line);
+    box-shadow:0 -8px 25px rgba(15,23,42,.12);
+    backdrop-filter:blur(14px);
+  }
+
+  .photo-mobile-bottom-bar button{
+    border:0;
+    background:transparent;
+    color:#334155;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    font:inherit;
+    font-size:10px;
+    font-weight:750;
+    cursor:pointer;
+  }
+
+  .photo-mobile-bottom-bar button span{
+    font-size:22px;
+    line-height:1;
+  }
+
+  .photo-mobile-bottom-bar button:first-child{
+    color:var(--nav);
+  }
+}
+
+@media(max-width:390px){
+  .photo-mobile-dashboard{
+    grid-template-columns:1fr;
+  }
+
+  .photo-mobile-action:first-child{
+    grid-column:auto;
+  }
+
+  .photo-gallery{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}

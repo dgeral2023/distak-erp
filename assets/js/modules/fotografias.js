@@ -280,8 +280,28 @@ function moveLightbox(step){
   renderLightbox();
 }
 
+function openMobileCamera(){
+  toggleUpload(true);
+  setTimeout(()=>$("photoCamera")?.click(),80);
+}
+
+function scrollToGallery(){
+  $("photoGallery")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function openPhotoData(){
+  toggleUpload(true);
+  setTimeout(()=>$("photoCategoria")?.focus(),120);
+}
+
 export function initFotografias(){
   $("photoUploadToggle")?.addEventListener("click",()=>toggleUpload($("photoUploadForm").classList.contains("hidden")));
+  $("photoQuickCamera")?.addEventListener("click",openMobileCamera);
+  $("photoBottomCamera")?.addEventListener("click",openMobileCamera);
+  $("photoQuickGallery")?.addEventListener("click",scrollToGallery);
+  $("photoBottomGallery")?.addEventListener("click",scrollToGallery);
+  $("photoBottomAdd")?.addEventListener("click",openPhotoData);
+  $("photoQuickReport")?.addEventListener("click",()=>toast("O gerador automático de relatório fotográfico será ligado na próxima fase."));
   $("photoUploadCancel")?.addEventListener("click",()=>{resetUploadForm();toggleUpload(false)});
   $("photoUploadForm")?.addEventListener("submit",uploadPhotos);
   $("photoEditForm")?.addEventListener("submit",saveEdit);
