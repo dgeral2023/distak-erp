@@ -1,30 +1,25 @@
-# DISTAK ERP v2.6 — Fotografias mobile-first
+# DISTAK ERP v2.7 — Painel Mobile de Obra
 
-## Principais melhorias no telemóvel
+Atualização mobile-first baseada na v2.6.
 
-- Ecrã inicial com três ações grandes:
-  - Tirar fotografia
-  - Galeria
-  - Relatório
-- Botão Tirar fotografia abre diretamente a câmara traseira.
-- Barra inferior fixa para utilização rápida em obra.
-- Formulário adaptado a toque com campos e botões maiores.
-- Galeria em grelha compacta de 3 fotografias por linha.
-- Filtros com deslocação horizontal.
-- Visualizador de fotografia em ecrã inteiro.
-- Botão Dados abre o formulário sem abrir a câmara.
+## Novidades
+- Painel móvel dentro da ficha de cada obra.
+- Acesso rápido à câmara e galeria.
+- Checklist diária funcional.
+- Registos rápidos de equipa, materiais, horas e ocorrências.
+- Atalhos para relatórios e documentos.
+- Dados operacionais provisórios guardados localmente no dispositivo.
+- Interface pensada para utilização com uma mão no telemóvel.
 
-## Permissões
+## Ficheiros a substituir
+- `index.html`
+- `assets/js/modules/obras.js`
+- `assets/css/fotografias.css`
 
-- Funcionário e administrador: tirar, carregar e editar fotografias.
-- Apenas administrador: eliminar fotografias.
+Os restantes ficheiros incluídos mantêm a integração da v2.6.
 
-## Substituição rápida
-
-- index.html
-- assets/js/modules/fotografias.js
-- assets/css/fotografias.css
+## Nota técnica
+Checklist e registos operacionais usam `localStorage` nesta versão. A sincronização com Supabase deve ser feita numa etapa posterior, após criação das tabelas e políticas RLS.
 
 ## Commit sugerido
-
-DISTAK ERP v2.6 - Interface fotografias mobile-first
+`DISTAK ERP v2.7 - Painel mobile de obra`

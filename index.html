@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
-  <title>DISTAK ERP v2.6</title>
+  <title>DISTAK ERP v2.7</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
   <link rel="stylesheet" href="assets/css/dashboard-executivo.css">
@@ -29,7 +29,7 @@
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="brand">DISTAK ERP <small>v2.6</small></div>
+    <div class="brand">DISTAK ERP <small>v2.7</small></div>
     <nav id="mainNav">
       <button class="nav active" data-view="dashboard">Dashboard</button>
       <button class="nav admin-only" data-view="empresa">Empresa</button>
@@ -438,6 +438,28 @@
       </div>
     </header>
 
+    <section class="mobile-work-panel" aria-label="Painel móvel da obra">
+      <div class="mobile-work-status">
+        <div>
+          <span class="mobile-work-kicker">Painel de obra</span>
+          <strong id="mobileWorkTitle">Ações rápidas</strong>
+          <small id="mobileWorkSync">Pronto para trabalhar</small>
+        </div>
+        <span id="mobileWorkState" class="mobile-work-state">Em execução</span>
+      </div>
+      <div class="mobile-work-grid">
+        <button type="button" class="mobile-work-action primary" data-work-action="camera"><span>📷</span><strong>Tirar foto</strong><small>Câmara traseira</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="gallery"><span>🖼️</span><strong>Galeria</strong><small>Fotos da obra</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="checklist"><span>✅</span><strong>Checklist</strong><small>Verificação diária</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="team"><span>👷</span><strong>Equipa</strong><small>Pessoal em obra</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="materials"><span>🧱</span><strong>Materiais</strong><small>Consumos e faltas</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="hours"><span>⏱️</span><strong>Horas</strong><small>Entrada e saída</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="reports"><span>📄</span><strong>Relatórios</strong><small>Resumo da obra</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="documents"><span>📁</span><strong>Documentos</strong><small>Contratos e PDFs</small></button>
+        <button type="button" class="mobile-work-action warning" data-work-action="occurrences"><span>⚠️</span><strong>Ocorrências</strong><small>Registar problema</small></button>
+      </div>
+    </section>
+
     <div class="obra-finance-summary">
       <article><span>Valor contratado</span><strong id="obraFichaContratado">0,00 €</strong></article>
       <article><span>Orçamento total</span><strong id="obraFichaOrcamento">0,00 €</strong></article>
@@ -457,6 +479,7 @@
       <button data-obra-tab="documentos">Documentos</button>
       <button data-obra-tab="fotografias">Fotografias</button>
       <button data-obra-tab="diario">Diário de obra</button>
+      <button data-obra-tab="operacional" class="mobile-operational-tab">Painel de obra</button>
     </nav>
 
     <div class="obra-ficha-body">
@@ -568,6 +591,9 @@
             <button id="photoBottomAdd" type="button"><span>＋</span>Dados</button>
           </nav>
         </section>
+      </div>
+      <div id="obra-tab-operacional" class="obra-tab-panel hidden">
+        <div id="mobileWorkModule" class="mobile-work-module"></div>
       </div>
       <div id="obra-tab-diario" class="obra-tab-panel hidden">
         <div class="obra-placeholder"><strong>Diário de obra</strong><p>O diário será desenvolvido com data, autor, descrição, ocorrências, clima, equipa e anexos.</p></div>

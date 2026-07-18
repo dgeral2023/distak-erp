@@ -102,6 +102,12 @@ function renderObraFicha(obra){
   obraFichaLucro.textContent=money(lucro);
   obraFichaMargem.textContent=`${margem.toFixed(1)}%`;
   obraFichaProgresso.textContent=`${obra.progresso||0}%`;
+  const mobileTitle=$("mobileWorkTitle");
+  const mobileState=$("mobileWorkState");
+  const mobileSync=$("mobileWorkSync");
+  if(mobileTitle)mobileTitle.textContent=obra.nome||"Ações rápidas";
+  if(mobileState)mobileState.textContent=obra.estado||"Em execução";
+  if(mobileSync)mobileSync.textContent=`Atualizado ${new Date().toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"})}`;
 
   $("obra-tab-resumo").innerHTML=`<div class="obra-resumo-grid">
     ${field("Cliente",cliente.nome)}
@@ -135,16 +141,69 @@ const orcamentoTotal=o=>{
   return base*(1+Number(o.iva||0)/100);
 };
 
+
+
+function activateObraTab(tab){
+  document.querySelectorAll("[data-obra-tab]").forEach(b=>b.classList.toggle("active",b.dataset.obraTab===tab));
+  document.querySelectorAll(".obra-tab-panel").forEach(p=>p.classList.add("hidden"));
+  const panel=$(`obra-tab-${tab}`);
+  if(panel)panel.classList.remove("hidden");
+}
+
+function workStorageKey(module){return `distak:v27:${module}:${obraFichaAtual?.id||"obra"}`}
+function readLocal(module,fallback){try{return JSON.parse(localStorage.getItem(workStorageKey(module)))??fallback}catch{return fallback}}
+function writeLocal(module,value){localStorage.setItem(workStorageKey(module),JSON.stringify(value))}
+
+function renderWorkModule(action){
+  if(!obraFichaAtual)return;
+  activateObraTab("operacional");
+  const host=$("mobileWorkModule");
+  const labels={checklist:["✅","Checklist diário","Verificações essenciais antes e no final do trabalho."],team:["👷","Equipa em obra","Registo rápido da equipa presente."],materials:["🧱","Materiais","Registe material utilizado ou em falta."],hours:["⏱️","Horas de trabalho","Guarde entrada, saída e observações."],reports:["📄","Relatórios","Acesso ao resumo e preparação do relatório da obra."],occurrences:["⚠️","Ocorrências","Registe problemas, atrasos ou situações de segurança."]};
+  const [icon,title,desc]=labels[action]||["📌","Painel de obra","Registo operacional da obra."];
+  const head=`<div class="work-module-head"><div><h3>${title}</h3><p>${desc}</p></div><span class="work-module-icon">${icon}</span></div>`;
+  if(action==="checklist"){
+    const items=["EPI verificado","Acesso seguro","Água disponível","Eletricidade disponível","Zona protegida","Cliente informado","Ferramentas verificadas","Limpeza final"];
+    const saved=readLocal("checklist",{});
+    host.innerHTML=`<section class="work-module-card">${head}<div class="daily-checklist">${items.map((x,i)=>`<label class="daily-check"><input type="checkbox" data-check-index="${i}" ${saved[i]?"checked":""}><span>${x}</span></label>`).join("")}</div><p class="work-local-note">Guardado neste dispositivo. A sincronização Supabase será ligada na próxima fase.</p></section>`;
+    host.querySelectorAll("[data-check-index]").forEach(el=>el.addEventListener("change",()=>{saved[el.dataset.checkIndex]=el.checked;writeLocal("checklist",saved);toast("Checklist guardada.")}));
+    return;
+  }
+  const fields={
+    team:`<label>Nome do funcionário<input name="nome" required placeholder="Nome"></label><label>Função<input name="detalhe" placeholder="Ex.: Pintor, pedreiro"></label>`,
+    materials:`<label>Material<input name="nome" required placeholder="Ex.: Primário"></label><label>Quantidade<input name="detalhe" placeholder="Ex.: 2 latas"></label>`,
+    hours:`<label>Funcionário<input name="nome" required placeholder="Nome"></label><label>Horário<input name="detalhe" placeholder="Ex.: 08:30–17:30"></label>`,
+    occurrences:`<label>Tipo<select name="nome"><option>Cliente</option><option>Material</option><option>Segurança</option><option>Tempo</option><option>Outro</option></select></label><label>Descrição<textarea name="detalhe" rows="4" required placeholder="Descreva a ocorrência"></textarea></label>`
+  };
+  if(action==="reports"){
+    host.innerHTML=`<section class="work-module-card">${head}<div class="work-entry-list"><div class="work-entry"><strong>${esc(obraFichaAtual.nome)}</strong><small>Estado: ${esc(obraFichaAtual.estado||"—")} · Progresso: ${obraFichaAtual.progresso||0}%</small></div><div class="work-entry"><strong>Relatório fotográfico</strong><small>Abra Fotografias para consultar e organizar os registos.</small></div></div><div class="work-form-actions"><button class="btn primary" type="button" data-work-report-photos>Ver fotografias</button></div></section>`;
+    host.querySelector("[data-work-report-photos]")?.addEventListener("click",()=>activateObraTab("fotografias"));return;
+  }
+  const entries=readLocal(action,[]);
+  host.innerHTML=`<section class="work-module-card">${head}<form class="work-form" data-work-form="${action}">${fields[action]||""}<label>Observação opcional<textarea name="obs" rows="2"></textarea></label><div class="work-form-actions"><button class="btn primary" type="submit">Guardar</button></div></form><p class="work-local-note">Registo provisório guardado neste dispositivo.</p><div class="work-entry-list">${entries.slice().reverse().map(e=>`<div class="work-entry"><strong>${esc(e.nome)}</strong><span>${esc(e.detalhe||"")}</span><small>${esc(e.data)}</small></div>`).join("")}</div></section>`;
+  host.querySelector("form")?.addEventListener("submit",e=>{e.preventDefault();const fd=new FormData(e.currentTarget);entries.push({nome:fd.get("nome")||title,detalhe:[fd.get("detalhe"),fd.get("obs")].filter(Boolean).join(" · "),data:new Date().toLocaleString("pt-PT")});writeLocal(action,entries);toast("Registo guardado.");renderWorkModule(action)});
+}
+
+function handleWorkAction(action){
+  if(action==="camera"||action==="gallery"){
+    activateObraTab("fotografias");
+    setTimeout(()=>{
+      if(action==="camera")$("photoQuickCamera")?.click();
+      else $("photoGallery")?.scrollIntoView({behavior:"smooth",block:"start"});
+    },80);return;
+  }
+  if(action==="documents"){activateObraTab("documentos");return}
+  renderWorkModule(action);
+}
+
 document.addEventListener("click",e=>{
   const id=e.target.closest("[data-view-obra]")?.dataset.viewObra;
   if(id){openObraFicha(id);return}
 
+  const action=e.target.closest("[data-work-action]")?.dataset.workAction;
+  if(action){handleWorkAction(action);return}
+
   const tab=e.target.closest("[data-obra-tab]")?.dataset.obraTab;
-  if(tab){
-    document.querySelectorAll("[data-obra-tab]").forEach(b=>b.classList.toggle("active",b.dataset.obraTab===tab));
-    document.querySelectorAll(".obra-tab-panel").forEach(p=>p.classList.add("hidden"));
-    $(`obra-tab-${tab}`).classList.remove("hidden");
-  }
+  if(tab)activateObraTab(tab);
 });
 
 document.addEventListener("DOMContentLoaded",()=>{
