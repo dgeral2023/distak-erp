@@ -15,6 +15,26 @@ const slug=value=>cleanName(value||"outros").replace(/\.[^.]+$/,"");
 const formatDate=value=>value?new Date(`${value}T00:00:00`).toLocaleDateString("pt-PT"):"Sem data";
 const isAdmin=()=>store.profile?.role==="admin";
 const canUpload=()=>["admin","funcionario"].includes(store.profile?.role);
+const canDelete=()=>store.profile?.role==="admin";
+
+async function compressImage(file){
+  if(!file.type.startsWith("image/") || /heic|heif/i.test(file.type)) return file;
+  if(file.size < 2.5 * 1024 * 1024) return file;
+  const bitmap = await createImageBitmap(file);
+  const maxDimension = 2200;
+  const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.82));
+  bitmap.close?.();
+  if(!blob || blob.size >= file.size) return file;
+  return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", {
+    type:"image/jpeg",
+    lastModified:Date.now()
+  });
+}
 
 function photoRows(){
   return store.fotografias
@@ -71,10 +91,11 @@ function renderGallery(){
         <p>${esc(photo.descricao||"Sem descrição.")}</p>
         <div class="photo-card-meta">
           <span>${esc(photo.zona||"Zona não indicada")}</span>
-          ${isAdmin()?`<div>
-            <button type="button" class="photo-action" data-photo-edit="${photo.id}">Editar</button>
-            <button type="button" class="photo-action danger" data-photo-delete="${photo.id}">Eliminar</button>
-          </div>`:""}
+          <div>
+            <a class="photo-action" href="${esc(photo.url)}" download target="_blank" rel="noopener">Descarregar</a>
+            ${canUpload()?`<button type="button" class="photo-action" data-photo-edit="${photo.id}">Editar</button>`:""}
+            ${canDelete()?`<button type="button" class="photo-action danger" data-photo-delete="${photo.id}">Eliminar</button>`:""}
+          </div>
         </div>
       </div>
     </article>`).join(""):`<div class="photo-empty">
@@ -97,6 +118,11 @@ function resetUploadForm(){
   $("photoUploadProgress").classList.add("hidden");
   $("photoUploadProgressBar").style.width="0%";
   $("photoUploadProgressText").textContent="A preparar...";
+  $("photoLatitude").value="";
+  $("photoLongitude").value="";
+  $("photoCapturedAt").value=new Date().toISOString();
+  $("photoGpsStatus").textContent="Localização não registada";
+  $("photoGpsStatus").classList.remove("active");
 }
 
 function selectedSummary(){
@@ -131,20 +157,29 @@ async function uploadPhotos(event){
     $("photoUploadProgress").classList.remove("hidden");
 
     let completed=0;
-    for(const file of files){
+    for(const originalFile of files){
+      const file=await compressImage(originalFile);
       const unique=`${Date.now()}-${crypto.randomUUID?.()||Math.random().toString(36).slice(2)}`;
       const path=`obras/${obraAtual.id}/${slug($("photoCategoria").value)}/${unique}-${cleanName(file.name)}`;
 
-      $("photoUploadProgressText").textContent=`A carregar ${completed+1} de ${files.length}: ${file.name}`;
+      $("photoUploadProgressText").textContent=`A carregar ${completed+1} de ${files.length}: ${originalFile.name}`;
       await uploadStorage(BUCKET,path,file);
       const url=publicStorageUrl(BUCKET,path);
+
+      const lat=$("photoLatitude").value;
+      const lng=$("photoLongitude").value;
+      const capturedAt=$("photoCapturedAt").value;
+      const gpsText=lat&&lng?`Localização: ${lat}, ${lng}`:"";
+      const captureText=capturedAt?`Registada em: ${new Date(capturedAt).toLocaleString("pt-PT")}`:"";
+      const baseDescription=$("photoDescricao").value.trim();
+      const fullDescription=[baseDescription,gpsText,captureText].filter(Boolean).join(" | ");
 
       try{
         await saveReturning("obra_fotografias",{
           obra_id:obraAtual.id,
           categoria:$("photoCategoria").value,
-          titulo:$("photoTitulo").value.trim()||file.name.replace(/\.[^.]+$/,""),
-          descricao:$("photoDescricao").value.trim()||null,
+          titulo:$("photoTitulo").value.trim()||originalFile.name.replace(/\.[^.]+$/,""),
+          descricao:fullDescription||null,
           zona:$("photoZona").value.trim()||null,
           ficheiro:path,
           url,
@@ -251,6 +286,41 @@ export function initFotografias(){
   $("photoUploadForm")?.addEventListener("submit",uploadPhotos);
   $("photoEditForm")?.addEventListener("submit",saveEdit);
   $("photoFiles")?.addEventListener("change",selectedSummary);
+
+  $("photoCamera")?.addEventListener("change",event=>{
+    const cameraFile=event.target.files?.[0];
+    if(!cameraFile)return;
+    const dt=new DataTransfer();
+    dt.items.add(cameraFile);
+    $("photoFiles").files=dt.files;
+    $("photoCapturedAt").value=new Date().toISOString();
+    if(!$("photoData").value)$("photoData").value=new Date().toISOString().slice(0,10);
+    selectedSummary();
+    toggleUpload(true);
+  });
+
+  $("photoGpsBtn")?.addEventListener("click",()=>{
+    if(!navigator.geolocation){
+      toast("Este dispositivo não permite obter a localização.","error");
+      return;
+    }
+    $("photoGpsStatus").textContent="A obter localização...";
+    navigator.geolocation.getCurrentPosition(
+      position=>{
+        $("photoLatitude").value=position.coords.latitude.toFixed(6);
+        $("photoLongitude").value=position.coords.longitude.toFixed(6);
+        $("photoGpsStatus").textContent=`Localização registada (${position.coords.accuracy.toFixed(0)} m)`;
+        $("photoGpsStatus").classList.add("active");
+        toast("Localização adicionada.");
+      },
+      error=>{
+        $("photoGpsStatus").textContent="Não foi possível obter a localização";
+        toast(error.message||"Localização não autorizada.","error");
+      },
+      {enableHighAccuracy:true,timeout:12000,maximumAge:60000}
+    );
+  });
+
   $("photoSearch")?.addEventListener("input",renderGallery);
   $("photoLightboxPrev")?.addEventListener("click",()=>moveLightbox(-1));
   $("photoLightboxNext")?.addEventListener("click",()=>moveLightbox(1));

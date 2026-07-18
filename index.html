@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
-  <title>DISTAK ERP v2.4.2</title>
+  <title>DISTAK ERP v2.5</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
   <link rel="stylesheet" href="assets/css/dashboard-executivo.css">
@@ -29,7 +29,7 @@
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="brand">DISTAK ERP <small>v2.4.2</small></div>
+    <div class="brand">DISTAK ERP <small>v2.5</small></div>
     <nav id="mainNav">
       <button class="nav active" data-view="dashboard">Dashboard</button>
       <button class="nav admin-only" data-view="empresa">Empresa</button>
@@ -501,8 +501,19 @@
               <label class="full">Descrição
                 <textarea id="photoDescricao" rows="2" placeholder="Observações técnicas ou trabalhos visíveis"></textarea>
               </label>
+              <div class="full mobile-photo-actions">
+                <label class="camera-button">
+                  <input id="photoCamera" type="file" accept="image/*" capture="environment">
+                  <span>📷 Tirar fotografia</span>
+                </label>
+                <button id="photoGpsBtn" type="button" class="btn light">📍 Guardar localização</button>
+                <span id="photoGpsStatus" class="photo-gps-status">Localização não registada</span>
+              </div>
+              <input id="photoLatitude" type="hidden">
+              <input id="photoLongitude" type="hidden">
+              <input id="photoCapturedAt" type="hidden">
               <label class="full photo-drop-zone" id="photoDropZone">
-                <input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp,image/heic" multiple required>
+                <input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple required>
                 <strong>Arraste fotografias para aqui</strong>
                 <span>ou clique para selecionar vários ficheiros</span>
                 <small>JPEG, PNG, WEBP ou HEIC · máximo 50 MB por ficheiro</small>
