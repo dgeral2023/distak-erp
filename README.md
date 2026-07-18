@@ -1,13 +1,24 @@
-# DISTAK ERP v2.4 — Gestão de Fotografias
+# DISTAK ERP v2.4.1 — Gestão de Fotografias (correção)
 
-## Antes de publicar
-Execute no Supabase SQL Editor:
+## Correção principal
 
-`supabase/01_politicas_obra_fotografias.sql`
+A consulta da tabela `orcamentos` foi corrigida.
 
-Este ficheiro garante os índices, ativa o RLS e cria as quatro políticas da tabela `obra_fotografias`.
+A estrutura real do Supabase possui:
+
+- `orcamentos.obra_id -> obras.id`
+- não possui ligação direta `orcamentos -> clientes`
+
+Por isso, a consulta correta é:
+
+```javascript
+store.orcamentos = await query("orcamentos", "*,obras(nome)");
+```
+
+A consulta anterior tentava usar `clientes(nome)` diretamente e provocava um erro 400, interrompendo o carregamento dos dados do ERP.
 
 ## Substituir
+
 - `index.html`
 - `assets/js/app.js`
 - `assets/js/core/store.js`
@@ -15,29 +26,32 @@ Este ficheiro garante os índices, ativa o RLS e cria as quatro políticas da ta
 - `assets/js/modules/data.js`
 - `assets/js/modules/obras.js`
 
-## Adicionar
+## Adicionar ou substituir
+
 - `assets/js/modules/fotografias.js`
 - `assets/css/fotografias.css`
 
-## Funcionalidades
-- Upload múltiplo para o bucket `distak-obras`
-- Drag & drop
-- Categorias Antes, Durante, Depois, Patologias e Outros
-- Zona, título, descrição e data
-- Galeria por obra
-- Pesquisa e filtros
-- Ampliação em lightbox
-- Edição de metadados
-- Eliminação do ficheiro no Storage e do registo na base de dados
-- Compatível com a ficha profissional da obra
+## Supabase
+
+Não é necessário voltar a criar a tabela, o bucket ou as políticas. A infraestrutura já foi confirmada:
+
+- tabela `obra_fotografias`
+- chaves estrangeiras
+- índices
+- RLS
+- quatro políticas da tabela
+- bucket `distak-obras`
+- quatro políticas do Storage
 
 ## Teste
-1. Publicar os ficheiros.
-2. Fazer Ctrl+F5.
-3. Abrir Obras.
-4. Abrir a Ficha de uma obra.
-5. Selecionar Fotografias.
-6. Carregar duas imagens de teste.
+
+1. Publicar todos os ficheiros deste pacote.
+2. Fazer `Ctrl + F5`.
+3. Confirmar que Clientes, Obras, Custos e Pagamentos voltaram a aparecer.
+4. Abrir uma obra.
+5. Abrir o separador Fotografias.
+6. Carregar uma fotografia pequena de teste.
 
 Commit sugerido:
-`DISTAK ERP v2.4 - Gestão profissional de fotografias`
+
+`DISTAK ERP v2.4.1 - Corrige carregamento de dados e fotografias`
