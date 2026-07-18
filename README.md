@@ -1,21 +1,26 @@
-# DISTAK ERP v2.2 — Ficha profissional da obra
+# DISTAK ERP v2.3 — Dashboard Executivo
 
-Substituir:
+## Substituir
 - `index.html`
-- `assets/js/app.js`
-- `assets/js/modules/data.js`
-- `assets/js/modules/obras.js`
+- `assets/js/modules/dashboard.js`
 
-Adicionar:
-- `assets/css/obra-ficha.css`
+## Adicionar
+- `assets/css/dashboard-executivo.css`
+
+## O dashboard calcula automaticamente
+- valor contratado
+- custos
+- recebimentos
+- saldo por receber
+- lucro estimado
+- margem
+- obras ativas, em orçamento, concluídas e em alerta
+- gráficos dos últimos 6 meses
+- custos por categoria
+- alertas de gestão
+- últimos movimentos
+
+Os valores apresentados são calculados apenas com os dados existentes no Supabase.
 
 Commit sugerido:
-`DISTAK ERP v2.2 - Ficha profissional das obras`
-
-Esta versão usa a estrutura real do Supabase:
-- obras: valor, valor_contratado, prazo, notas, progresso, responsável
-- orçamentos: obra_id, número, mão de obra, materiais, logística, IVA
-- custos: obra_id, descrição, tipo, valor, data
-- pagamentos: obra_id, valor, data, método, observações
-
-Nenhum valor é inventado. Só aparecem dados efetivamente associados a cada obra.
+`DISTAK ERP v2.3 - Dashboard executivo`

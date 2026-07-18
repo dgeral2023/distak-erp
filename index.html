@@ -4,9 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
-  <title>DISTAK ERP v2.0</title>
+  <title>DISTAK ERP v2.3</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
+  <link rel="stylesheet" href="assets/css/dashboard-executivo.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
 </head>
@@ -27,7 +28,7 @@
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="brand">DISTAK ERP <small>v2.0</small></div>
+    <div class="brand">DISTAK ERP <small>v2.3</small></div>
     <nav id="mainNav">
       <button class="nav active" data-view="dashboard">Dashboard</button>
       <button class="nav admin-only" data-view="empresa">Empresa</button>
@@ -53,17 +54,107 @@
     </header>
 
     <section id="view-dashboard" class="view">
-      <div class="stats">
-        <article><span>Clientes</span><strong id="statClientes">0</strong></article>
-        <article><span>Obras</span><strong id="statObras">0</strong></article>
-        <article><span>Orçamentos</span><strong id="statOrcamentos">0</strong></article>
-        <article><span>Custos</span><strong id="statCustos">0,00 €</strong></article>
-        <article><span>Recebido</span><strong id="statPagamentos">0,00 €</strong></article>
-        <article><span>Saldo</span><strong id="statSaldo">0,00 €</strong></article>
+      <div class="executive-head">
+        <div>
+          <span class="executive-kicker">Centro de controlo</span>
+          <h2>Dashboard Executivo</h2>
+          <p>Situação comercial, operacional e financeira da DISTAK em tempo real.</p>
+        </div>
+        <div class="executive-period">
+          <span>Atualizado</span>
+          <strong id="dashboardUpdatedAt">—</strong>
+        </div>
       </div>
-      <div class="grid2">
-        <div class="panel"><h3>Obras recentes</h3><div id="dashboardObras"></div></div>
-        <div class="panel"><h3>Orçamentos recentes</h3><div id="dashboardOrcamentos"></div></div>
+
+      <div class="executive-stats">
+        <article class="exec-stat">
+          <span>Valor contratado</span>
+          <strong id="statValorContratado">0,00 €</strong>
+          <small id="statTotalObras">0 obras registadas</small>
+        </article>
+        <article class="exec-stat">
+          <span>Recebido</span>
+          <strong id="statPagamentos">0,00 €</strong>
+          <small id="statTaxaRecebida">0% do contratado</small>
+        </article>
+        <article class="exec-stat">
+          <span>Por receber</span>
+          <strong id="statPorReceber">0,00 €</strong>
+          <small>Saldo pendente das obras</small>
+        </article>
+        <article class="exec-stat">
+          <span>Custos totais</span>
+          <strong id="statCustos">0,00 €</strong>
+          <small id="statTaxaCustos">0% do contratado</small>
+        </article>
+        <article class="exec-stat">
+          <span>Lucro estimado</span>
+          <strong id="statLucro">0,00 €</strong>
+          <small id="statMargem">Margem de 0%</small>
+        </article>
+        <article class="exec-stat">
+          <span>Clientes</span>
+          <strong id="statClientes">0</strong>
+          <small id="statClientesAtivos">0 clientes ativos</small>
+        </article>
+      </div>
+
+      <div class="executive-status-grid">
+        <article><span>Obras ativas</span><strong id="statObrasAtivas">0</strong></article>
+        <article><span>Em orçamento</span><strong id="statObrasOrcamento">0</strong></article>
+        <article><span>Concluídas</span><strong id="statObrasConcluidas">0</strong></article>
+        <article><span>Suspensas / atraso</span><strong id="statObrasAlerta">0</strong></article>
+        <article><span>Orçamentos</span><strong id="statOrcamentos">0</strong></article>
+        <article><span>Margem média</span><strong id="statMargemMedia">0%</strong></article>
+      </div>
+
+      <div class="executive-main-grid">
+        <section class="panel executive-chart-panel">
+          <div class="panel-title">
+            <div><h3>Fluxo financeiro mensal</h3><p>Custos e recebimentos dos últimos 6 meses</p></div>
+          </div>
+          <div id="dashboardFinanceChart" class="finance-chart"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <div><h3>Estado das obras</h3><p>Distribuição operacional atual</p></div>
+          </div>
+          <div id="dashboardStatusChart" class="status-chart"></div>
+        </section>
+      </div>
+
+      <div class="executive-main-grid">
+        <section class="panel">
+          <div class="panel-title">
+            <div><h3>Obras com maior valor</h3><p>Visão rápida das principais obras</p></div>
+            <button class="btn small light" data-dashboard-view="obras">Ver todas</button>
+          </div>
+          <div id="dashboardObras"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <div><h3>Alertas de gestão</h3><p>Pontos que precisam de atenção</p></div>
+          </div>
+          <div id="dashboardAlerts" class="dashboard-alerts"></div>
+        </section>
+      </div>
+
+      <div class="executive-main-grid">
+        <section class="panel">
+          <div class="panel-title">
+            <div><h3>Custos por categoria</h3><p>Distribuição dos custos registados</p></div>
+          </div>
+          <div id="dashboardCostCategories" class="cost-categories"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <div><h3>Últimos movimentos</h3><p>Pagamentos e custos mais recentes</p></div>
+          </div>
+          <div id="dashboardMovements"></div>
+        </section>
       </div>
     </section>
 
