@@ -14,6 +14,7 @@ const cleanName=name=>name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").repla
 const slug=value=>cleanName(value||"outros").replace(/\.[^.]+$/,"");
 const formatDate=value=>value?new Date(`${value}T00:00:00`).toLocaleDateString("pt-PT"):"Sem data";
 const isAdmin=()=>store.profile?.role==="admin";
+const canUpload=()=>["admin","funcionario"].includes(store.profile?.role);
 
 function photoRows(){
   return store.fotografias
@@ -28,6 +29,8 @@ export function renderObraFotografias(obra){
   renderCounts();
   renderGallery();
   resetUploadForm();
+  const uploadButton=$("photoUploadToggle");
+  if(uploadButton)uploadButton.classList.toggle("hidden",!canUpload());
 }
 
 function renderCounts(){
@@ -76,7 +79,7 @@ function renderGallery(){
       </div>
     </article>`).join(""):`<div class="photo-empty">
       <strong>${photoRows().length?"Nenhuma fotografia corresponde ao filtro.":"Ainda não existem fotografias nesta obra."}</strong>
-      <p>${isAdmin()?"Clique em “Adicionar fotografias” para começar o registo fotográfico.":"As fotografias carregadas pela equipa aparecerão aqui."}</p>
+      <p>${canUpload()?"Clique em “Adicionar fotografias” para começar o registo fotográfico.":"As fotografias carregadas pela equipa aparecerão aqui."}</p>
     </div>`;
 }
 

@@ -1,57 +1,37 @@
-# DISTAK ERP v2.4.1 — Gestão de Fotografias (correção)
+# DISTAK ERP v2.4.2 — Fotografias para funcionários e administradores
 
-## Correção principal
+## Correção
 
-A consulta da tabela `orcamentos` foi corrigida.
+O botão **Adicionar fotografias** estava marcado com a classe `admin-only`.
+Por isso desaparecia quando a conta tinha o perfil `funcionario`.
 
-A estrutura real do Supabase possui:
+Agora:
 
-- `orcamentos.obra_id -> obras.id`
-- não possui ligação direta `orcamentos -> clientes`
+- Administrador pode adicionar fotografias.
+- Funcionário pode adicionar fotografias.
+- Administrador continua a poder editar e eliminar fotografias.
+- Funcionário pode visualizar e carregar fotografias, mas não eliminar registos.
 
-Por isso, a consulta correta é:
-
-```javascript
-store.orcamentos = await query("orcamentos", "*,obras(nome)");
-```
-
-A consulta anterior tentava usar `clientes(nome)` diretamente e provocava um erro 400, interrompendo o carregamento dos dados do ERP.
+As políticas já configuradas no Supabase permitem INSERT para qualquer utilizador autenticado, portanto não é necessária nova alteração no Supabase.
 
 ## Substituir
 
+Para uma atualização mínima:
+
 - `index.html`
-- `assets/js/app.js`
-- `assets/js/core/store.js`
-- `assets/js/core/supabase.js`
-- `assets/js/modules/data.js`
-- `assets/js/modules/obras.js`
-
-## Adicionar ou substituir
-
 - `assets/js/modules/fotografias.js`
-- `assets/css/fotografias.css`
 
-## Supabase
-
-Não é necessário voltar a criar a tabela, o bucket ou as políticas. A infraestrutura já foi confirmada:
-
-- tabela `obra_fotografias`
-- chaves estrangeiras
-- índices
-- RLS
-- quatro políticas da tabela
-- bucket `distak-obras`
-- quatro políticas do Storage
+Também pode substituir todos os ficheiros do pacote para garantir que fica na versão completa v2.4.2.
 
 ## Teste
 
-1. Publicar todos os ficheiros deste pacote.
+1. Publicar os ficheiros.
 2. Fazer `Ctrl + F5`.
-3. Confirmar que Clientes, Obras, Custos e Pagamentos voltaram a aparecer.
-4. Abrir uma obra.
-5. Abrir o separador Fotografias.
+3. Entrar com a conta do funcionário.
+4. Abrir Obras → Ficha → Fotografias.
+5. Confirmar o botão **Adicionar fotografias**.
 6. Carregar uma fotografia pequena de teste.
 
 Commit sugerido:
 
-`DISTAK ERP v2.4.1 - Corrige carregamento de dados e fotografias`
+`DISTAK ERP v2.4.2 - Funcionários podem adicionar fotografias`
