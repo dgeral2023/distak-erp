@@ -1,9 +1,0 @@
-DISTAK ERP v2.7 Stable — restauração completa
-
-Esta versão inclui todos os ficheiros CSS originais anteriores ao Design System monocromático.
-Para restaurar corretamente:
-1. Apague o conteúdo atual do repositório, exceto .git.
-2. Copie TODO o conteúdo desta pasta para a raiz do repositório.
-3. Faça commit e push.
-4. No Render, faça Manual Deploy > Clear build cache & deploy.
-5. No navegador, use Ctrl+F5 para limpar a cache local.
