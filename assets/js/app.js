@@ -7,6 +7,27 @@ $("logoutBtn").onclick=async()=>{await logout();location.reload()};$("mainNav").
 $("novoClienteBtn").onclick=()=>openCliente();$("novaObraBtn").onclick=()=>openObra();$("novoOrcamentoBtn").onclick=()=>openOrcamento();$("novoCustoBtn").onclick=()=>openCusto();$("novoPagamentoBtn").onclick=()=>openPagamento()
 $("clienteForm").onsubmit=e=>submitCliente(e,refresh);$("obraForm").onsubmit=e=>submitObra(e,refresh);$("orcamentoForm").onsubmit=e=>submitOrcamento(e,refresh);$("custoForm").onsubmit=e=>submitCusto(e,refresh);$("pagamentoForm").onsubmit=e=>submitPagamento(e,refresh)
 document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>$(b.dataset.close).close())
-document.body.onclick=e=>{if(e.target.dataset.editCliente)openCliente(store.clientes.find(x=>String(x.id)===e.target.dataset.editCliente));if(e.target.dataset.delCliente)deleteCliente(e.target.dataset.delCliente,refresh);if(e.target.dataset.editObra)openObra(store.obras.find(x=>String(x.id)===e.target.dataset.editObra));if(e.target.dataset.delObra)deleteObra(e.target.dataset.delObra,refresh);if(e.target.dataset.editOrcamento)openOrcamento(store.orcamentos.find(x=>String(x.id)===e.target.dataset.editOrcamento));if(e.target.dataset.delOrcamento)deleteOrcamento(e.target.dataset.delOrcamento,refresh);if(e.target.dataset.editCusto)openCusto(store.custos.find(x=>String(x.id)===e.target.dataset.editCusto));if(e.target.dataset.delCusto)deleteCusto(e.target.dataset.delCusto,refresh);if(e.target.dataset.editPagamento)openPagamento(store.pagamentos.find(x=>String(x.id)===e.target.dataset.editPagamento));if(e.target.dataset.delPagamento)deletePagamento(e.target.dataset.delPagamento,refresh)}
+document.body.onclick=e=>{
+  const editCliente=e.target.closest("[data-edit-cliente]")?.dataset.editCliente;
+  const delCliente=e.target.closest("[data-del-cliente]")?.dataset.delCliente;
+  const editObra=e.target.closest("[data-edit-obra]")?.dataset.editObra;
+  const delObra=e.target.closest("[data-del-obra]")?.dataset.delObra;
+  const editOrc=e.target.closest("[data-edit-orcamento]")?.dataset.editOrcamento;
+  const delOrc=e.target.closest("[data-del-orcamento]")?.dataset.delOrcamento;
+  const editCusto=e.target.closest("[data-edit-custo]")?.dataset.editCusto;
+  const delCusto=e.target.closest("[data-del-custo]")?.dataset.delCusto;
+  const editPag=e.target.closest("[data-edit-pagamento]")?.dataset.editPagamento;
+  const delPag=e.target.closest("[data-del-pagamento]")?.dataset.delPagamento;
+  if(editCliente)openCliente(store.clientes.find(x=>String(x.id)===editCliente));
+  if(delCliente)deleteCliente(delCliente,refresh);
+  if(editObra)openObra(store.obras.find(x=>String(x.id)===editObra));
+  if(delObra)deleteObra(delObra,refresh);
+  if(editOrc)openOrcamento(store.orcamentos.find(x=>String(x.id)===editOrc));
+  if(delOrc)deleteOrcamento(delOrc,refresh);
+  if(editCusto)openCusto(store.custos.find(x=>String(x.id)===editCusto));
+  if(delCusto)deleteCusto(delCusto,refresh);
+  if(editPag)openPagamento(store.pagamentos.find(x=>String(x.id)===editPag));
+  if(delPag)deletePagamento(delPag,refresh);
+}
 $("clienteSearch").oninput=e=>renderClientes(store.clientes.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())));$("obraSearch").oninput=e=>renderObras(store.obras.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())));$("orcamentoSearch").oninput=e=>renderOrcamentos(store.orcamentos.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())));$("custoSearch").oninput=e=>renderCustos(store.custos.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())));$("pagamentoSearch").oninput=e=>renderPagamentos(store.pagamentos.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())))
 session().then(s=>s&&enter(s))

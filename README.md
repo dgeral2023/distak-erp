@@ -1,20 +1,21 @@
-# DISTAK ERP v2.1 — CRM visual
+# DISTAK ERP v2.2 — Ficha profissional da obra
 
 Substituir:
 - `index.html`
-- `assets/css/style.css`
-- `assets/js/modules/clientes.js`
+- `assets/js/app.js`
+- `assets/js/modules/data.js`
+- `assets/js/modules/obras.js`
 
-Commit sugerido: `DISTAK ERP v2.1 - CRM profissional`
+Adicionar:
+- `assets/css/obra-ficha.css`
 
-Incluído:
-- ficha-resumo do cliente
-- dados avançados
-- contactos
-- moradas
-- obras
-- orçamentos
-- pagamentos
-- notas
-- comunicações
-- documentos (listagem; upload será ligado ao Storage na próxima etapa)
+Commit sugerido:
+`DISTAK ERP v2.2 - Ficha profissional das obras`
+
+Esta versão usa a estrutura real do Supabase:
+- obras: valor, valor_contratado, prazo, notas, progresso, responsável
+- orçamentos: obra_id, número, mão de obra, materiais, logística, IVA
+- custos: obra_id, descrição, tipo, valor, data
+- pagamentos: obra_id, valor, data, método, observações
+
+Nenhum valor é inventado. Só aparecem dados efetivamente associados a cada obra.

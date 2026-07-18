@@ -1,0 +1,21 @@
+
+/* DISTAK ERP v2.2 — Ficha profissional da obra */
+.obra-link{border:0;background:transparent;color:var(--nav);font:inherit;font-weight:800;cursor:pointer;padding:0;text-align:left}
+.progress-line{width:110px;height:7px;background:#e5e7eb;border-radius:999px;overflow:hidden;display:inline-block;margin-right:6px;vertical-align:middle}
+.progress-line span{display:block;height:100%;background:var(--gold);border-radius:999px}
+.obra-edit-form{max-height:82vh;overflow:auto}.obra-ficha-dialog{width:min(1240px,calc(100% - 24px));max-width:none}
+.obra-ficha-shell{background:var(--bg);min-height:76vh}
+.obra-ficha-head{background:linear-gradient(135deg,var(--nav),#263348);color:#fff;padding:22px 24px;display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.obra-ficha-head h2{margin:4px 0 7px}.obra-ficha-head p{margin:0;color:#dbe4f0}.obra-kicker{text-transform:uppercase;letter-spacing:.13em;font-size:11px;color:var(--gold);font-weight:800}
+.obra-head-actions{display:flex;align-items:center;gap:10px}.obra-ficha-close{border:0;background:transparent;color:#fff;font-size:30px;cursor:pointer}
+.obra-finance-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;padding:16px 20px}
+.obra-finance-summary article{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.obra-finance-summary span{display:block;color:var(--muted);font-size:12px}.obra-finance-summary strong{display:block;margin-top:6px;font-size:19px}
+.obra-tabs{display:flex;gap:5px;overflow:auto;padding:0 20px;background:#fff;border-bottom:1px solid var(--line)}
+.obra-tabs button{white-space:nowrap;border:0;background:transparent;padding:13px 12px;font-weight:750;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}
+.obra-tabs button.active{color:var(--nav);border-bottom-color:var(--gold)}
+.obra-ficha-body{padding:20px}.obra-tab-panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;overflow:auto}
+.obra-resumo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.obra-field{border:1px solid var(--line);border-radius:10px;padding:12px}
+.obra-field span{display:block;color:var(--muted);font-size:12px}.obra-field strong{display:block;margin-top:5px;line-height:1.45}.obra-placeholder{text-align:center;color:var(--muted);padding:34px}
+@media(max-width:1000px){.obra-finance-summary{grid-template-columns:repeat(2,1fr)}.obra-resumo-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.obra-finance-summary,.obra-resumo-grid{grid-template-columns:1fr}.obra-ficha-body{padding:10px}.obra-finance-summary{padding:10px}.obra-ficha-head{padding:18px;flex-direction:column}.obra-head-actions{width:100%;justify-content:space-between}}
