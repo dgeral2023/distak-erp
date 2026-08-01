@@ -111,6 +111,13 @@
         <article><span>Margem média</span><strong id="statMargemMedia">0%</strong></article>
       </div>
 
+      <div class="dashboard-operation-strip">
+        <article><span>Equipa ativa</span><strong id="statEquipaAtiva">0</strong><small>funcionários disponíveis</small></article>
+        <article><span>Horas da equipa</span><strong id="statHorasMes">0 h</strong><small>no mês atual</small></article>
+        <article><span>Custo de mão de obra</span><strong id="statCustoEquipaMes">0,00 €</strong><small>estimado no mês</small></article>
+        <article><span>Custos vencidos</span><strong id="statCustosVencidos">0,00 €</strong><small id="statCustosVencidosQtd">0 documentos</small></article>
+      </div>
+
       <div class="executive-main-grid">
         <section class="panel executive-chart-panel">
           <div class="panel-title">
@@ -158,6 +165,11 @@
           </div>
           <div id="dashboardMovements"></div>
         </section>
+      </div>
+
+      <div class="executive-main-grid">
+        <section class="panel"><div class="panel-title"><div><h3>Pipeline de orçamentos</h3><p>Valor e quantidade por estado comercial</p></div><button class="btn small light" data-dashboard-view="orcamentos">Ver orçamentos</button></div><div id="dashboardBudgetPipeline" class="dashboard-pipeline"></div></section>
+        <section class="panel"><div class="panel-title"><div><h3>Equipa neste mês</h3><p>Horas e custo estimado por funcionário</p></div><button class="btn small light" data-dashboard-view="funcionarios">Ver equipa</button></div><div id="dashboardTeam" class="dashboard-team"></div></section>
       </div>
     </section>
 
