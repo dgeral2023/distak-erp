@@ -391,4 +391,3 @@ export function initFotografias(){
     if(e.key==="ArrowRight")moveLightbox(1);
   });
 }
-
