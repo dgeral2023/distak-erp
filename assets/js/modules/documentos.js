@@ -9,5 +9,30 @@ export async function renderObraDocumentos(obra){obraAtual=obra;const h=$("workD
 async function openDoc(id){const d=documentos.find(x=>String(x.id)===String(id));if(!d)return;const {data,error}=await db.storage.from(BUCKET).createSignedUrl(d.storage_path,60);if(error)return toast(error.message,"error");const a=document.createElement("a");a.href=data.signedUrl;a.target="_blank";a.rel="noopener";a.click()}
 async function deleteDoc(id){const d=documentos.find(x=>String(x.id)===String(id));if(!d||!confirm(`Eliminar "${d.nome}"?`))return;try{const {error:s}=await db.storage.from(BUCKET).remove([d.storage_path]);if(s)throw s;const {error}=await db.from("obra_documentos").delete().eq("id",d.id);if(error)throw error;toast("Documento eliminado.");await renderObraDocumentos(obraAtual)}catch(e){toast(e.message,"error")}}
 export function initDocumentos(){
-$("workDocumentForm")?.addEventListener("submit",async e=>{e.preventDefault();if(!obraAtual)return;const file=$("workDocumentFile").files?.[0];if(!file)return;if(file.size>25*1048576)return toast("O ficheiro excede 25 MB.","error");const b=$("workDocumentSubmit");b.disabled=true;const path=`${obraAtual.id}/${crypto.randomUUID()}-${safe(file.name)}`;try{const {error:u}=await db.storage.from(BUCKET).upload(path,file,{contentType:file.type||undefined});if(u)throw u;const {error}=await db.from("obra_documentos").insert({obra_id:obraAtual.id,nome:$("workDocumentName").value.trim(),categoria:$("workDocumentCategory").value,storage_path:path,mime_type:file.type||null,tamanho_bytes:file.size});if(error){await db.storage.from(BUCKET).remove([path]);throw error}e.currentTarget.reset();toast("Documento carregado.");await renderObraDocumentos(obraAtual)}catch(err){toast(err.message,"error")}finally{b.disabled=false}});
+$("workDocumentForm")?.addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!obraAtual)return;
+  const form=e.currentTarget;
+  const file=$("workDocumentFile").files?.[0];
+  if(!file)return;
+  if(file.size>25*1048576)return toast("O ficheiro excede 25 MB.","error");
+  const b=$("workDocumentSubmit");
+  const nome=$("workDocumentName").value.trim();
+  const categoria=$("workDocumentCategory").value;
+  b.disabled=true;
+  const path=`${obraAtual.id}/${crypto.randomUUID()}-${safe(file.name)}`;
+  try{
+    const {error:u}=await db.storage.from(BUCKET).upload(path,file,{contentType:file.type||undefined});
+    if(u)throw u;
+    const {error}=await db.from("obra_documentos").insert({obra_id:obraAtual.id,nome,categoria,storage_path:path,mime_type:file.type||null,tamanho_bytes:file.size});
+    if(error){await db.storage.from(BUCKET).remove([path]);throw error}
+    form.reset();
+    await renderObraDocumentos(obraAtual);
+    toast("Documento carregado.");
+  }catch(err){
+    toast(err.message,"error");
+  }finally{
+    if(b.isConnected)b.disabled=false;
+  }
+});
 document.addEventListener("click",e=>{const o=e.target.closest("[data-doc-open]")?.dataset.docOpen,d=e.target.closest("[data-doc-delete]")?.dataset.docDelete;if(o)openDoc(o);if(d)deleteDoc(d)})}

@@ -143,39 +143,54 @@ const simpleTable=(headers,rows)=>`<table><thead><tr>${headers.map(h=>`<th>${h}<
 
 async function addContact(e){
   e.preventDefault();
+  const form=e.currentTarget;
+  const button=form.querySelector("button[type=submit]");
+  if(button)button.disabled=true;
   try{
     await save("cliente_contactos",{
       cliente_id:crmClienteId,nome:crmContactoNome.value.trim(),
       cargo:crmContactoCargo.value||null,telefone:crmContactoTelefone.value||null,
       email:crmContactoEmail.value||null,principal:crmContactoPrincipal.checked
     },crmContactoId.value||null);
-    e.target.reset();crmContactoId.value="";toast("Contacto guardado.");await loadCrm(crmClienteId);
+    form.reset();crmContactoId.value="";toast("Contacto guardado.");await loadCrm(crmClienteId);
   }catch(err){toast(err.message,"error")}
+  finally{if(button?.isConnected)button.disabled=false}
 }
 
 async function addMorada(e){
   e.preventDefault();
+  const form=e.currentTarget;
+  const button=form.querySelector("button[type=submit]");
+  if(button)button.disabled=true;
   try{
     await save("cliente_moradas",{
       cliente_id:crmClienteId,tipo:crmMoradaTipo.value,morada:crmMoradaTexto.value.trim(),
       codigo_postal:crmMoradaCodigoPostal.value||null,localidade:crmMoradaLocalidade.value||null,
       pais:"Portugal",principal:crmMoradaPrincipal.checked
     },crmMoradaId.value||null);
-    e.target.reset();crmMoradaId.value="";toast("Morada guardada.");await loadCrm(crmClienteId);
+    form.reset();crmMoradaId.value="";toast("Morada guardada.");await loadCrm(crmClienteId);
   }catch(err){toast(err.message,"error")}
+  finally{if(button?.isConnected)button.disabled=false}
 }
 
 async function addNota(e){
   e.preventDefault();
+  const form=e.currentTarget;
+  const button=form.querySelector("button[type=submit]");
+  if(button)button.disabled=true;
   try{
     const {data:{user}}=await db.auth.getUser();
     await save("cliente_notas",{cliente_id:crmClienteId,autor_id:user?.id||null,nota:crmNotaTexto.value.trim(),importante:crmNotaImportante.checked});
-    e.target.reset();toast("Nota adicionada.");await loadCrm(crmClienteId);
+    form.reset();toast("Nota adicionada.");await loadCrm(crmClienteId);
   }catch(err){toast(err.message,"error")}
+  finally{if(button?.isConnected)button.disabled=false}
 }
 
 async function addComunicacao(e){
   e.preventDefault();
+  const form=e.currentTarget;
+  const button=form.querySelector("button[type=submit]");
+  if(button)button.disabled=true;
   try{
     const {data:{user}}=await db.auth.getUser();
     await save("cliente_comunicacoes",{
@@ -183,8 +198,9 @@ async function addComunicacao(e){
       assunto:crmComunicacaoAssunto.value||null,descricao:crmComunicacaoDescricao.value.trim(),
       data_comunicacao:crmComunicacaoData.value?new Date(crmComunicacaoData.value).toISOString():new Date().toISOString()
     });
-    e.target.reset();toast("Comunicação registada.");await loadCrm(crmClienteId);
+    form.reset();toast("Comunicação registada.");await loadCrm(crmClienteId);
   }catch(err){toast(err.message,"error")}
+  finally{if(button?.isConnected)button.disabled=false}
 }
 
 async function deleteCrmRecord(value){
