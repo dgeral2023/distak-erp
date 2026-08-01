@@ -278,7 +278,15 @@
     </section>
 
     <section id="view-custos" class="view hidden">
-      <div class="toolbar"><input id="custoSearch" placeholder="Pesquisar custo"><button id="novoCustoBtn" class="btn primary">Novo custo</button></div>
+      <div class="toolbar custo-toolbar">
+        <input id="custoSearch" placeholder="Pesquisar empresa, fatura ou descrição">
+        <select id="custoObraFiltro" aria-label="Filtrar por obra"><option value="">Todas as obras</option></select>
+        <select id="custoEstadoFiltro" aria-label="Filtrar por estado"><option value="">Todos os estados</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
+        <input id="custoDataInicioFiltro" type="date" aria-label="Data inicial">
+        <input id="custoDataFimFiltro" type="date" aria-label="Data final">
+        <button id="custoLimparFiltros" class="btn light" type="button">Limpar</button>
+        <button id="novoCustoBtn" class="btn primary">Novo custo</button>
+      </div>
       <div class="panel"><div id="custosTable"></div></div>
     </section>
 
@@ -681,6 +689,10 @@
   <label>Nome da empresa / fornecedor<input id="custoNomeEmpresa" placeholder="Ex.: Fornecedor, Lda."></label><label>Nº da fatura<input id="custoNumeroFatura" placeholder="Ex.: FT 2026/123"></label>
   <label>Descrição<input id="custoDescricao" required></label><label>Valor sem IVA<input id="custoValor" type="number" step="0.01" required></label>
   <label>IVA %<select id="custoIva"><option value="0">0%</option><option value="6">6%</option><option value="23">23%</option></select></label><label>Data<input id="custoData" type="date"></label>
+  <label>Estado do pagamento<select id="custoEstadoPagamento"><option value="pendente">Pendente</option><option value="pago">Pago</option></select></label><label>Data de vencimento<input id="custoDataVencimento" type="date"></label>
+  <label class="full">Fatura (PDF ou imagem, máximo 25 MB)<input id="custoAnexo" type="file" accept="application/pdf,image/jpeg,image/png,image/webp,image/heic"></label>
+  <div id="custoAnexoAtual" class="full custo-anexo-atual hidden"></div>
+  <div class="full custo-total-preview"><span>Total com IVA</span><strong id="custoTotalPreview">0,00 €</strong></div>
   <div class="actions"><button type="button" class="btn light" data-close="custoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
 </form></dialog>
 
