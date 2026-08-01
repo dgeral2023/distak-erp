@@ -487,7 +487,16 @@
       <div id="obra-tab-custos" class="obra-tab-panel hidden"></div>
       <div id="obra-tab-pagamentos" class="obra-tab-panel hidden"></div>
       <div id="obra-tab-documentos" class="obra-tab-panel hidden">
-        <div class="obra-placeholder"><strong>Documentos da obra</strong><p>O módulo de carregamento de contratos, relatórios, garantias e PDFs será ligado ao Supabase Storage na próxima fase.</p></div>
+        <section class="work-documents">
+          <header class="work-module-head"><div><h3>Documentos da obra</h3><p>Ficheiros privados associados a esta obra.</p></div><span class="work-module-icon">📁</span></header>
+          <form id="workDocumentForm" class="work-document-form">
+            <label>Nome<input id="workDocumentName" required placeholder="Ex.: Contrato assinado"></label>
+            <label>Categoria<select id="workDocumentCategory"><option>Contrato</option><option>Relatório</option><option>Garantia</option><option>Fatura</option><option>Planta</option><option>Outro</option></select></label>
+            <label class="full">Ficheiro<input id="workDocumentFile" type="file" required accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx"><small>PDF, imagem, Word ou Excel · máximo 25 MB</small></label>
+            <div class="full work-form-actions"><button id="workDocumentSubmit" class="btn primary" type="submit">Carregar documento</button></div>
+          </form>
+          <div id="workDocumentList" class="work-document-list"></div>
+        </section>
       </div>
       <div id="obra-tab-fotografias" class="obra-tab-panel hidden">
         <section class="photo-manager">
