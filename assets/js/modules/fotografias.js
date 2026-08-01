@@ -294,6 +294,19 @@ function openPhotoData(){
   setTimeout(()=>$("photoCategoria")?.focus(),120);
 }
 
+function createPhotoReport(){
+  const rows=filteredRows();
+  if(!rows.length)return toast("Não existem fotografias no filtro atual.","error");
+  const reportWindow=window.open("","_blank");
+  if(!reportWindow)return toast("O navegador bloqueou o relatório. Autorize janelas pop-up e tente novamente.","error");
+  reportWindow.opener=null;
+  const obraName=obraAtual?.nome||obraAtual?.descricao||"Obra";
+  const generatedAt=new Date().toLocaleString("pt-PT");
+  const cards=rows.map((photo,index)=>`<article><img src="${esc(photo.url)}" alt="${esc(photo.titulo||"Fotografia da obra")}"><div class="body"><span class="number">${index+1}</span><h2>${esc(photo.titulo||photo.zona||"Fotografia da obra")}</h2><p class="meta">${[photo.categoria,photo.zona,formatDate(photo.data_foto)].filter(Boolean).map(esc).join(" · ")}</p>${photo.descricao?`<p>${esc(photo.descricao)}</p>`:""}</div></article>`).join("");
+  reportWindow.document.write(`<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>Relatório fotográfico - ${esc(obraName)}</title><style>@page{size:A4;margin:14mm}*{box-sizing:border-box}body{margin:0;color:#172033;font:12px Arial,sans-serif}.cover{border-bottom:3px solid #c69a2b;padding:8px 0 16px;margin-bottom:18px}.cover small{color:#64748b;text-transform:uppercase;letter-spacing:.12em}.cover h1{font-size:25px;margin:5px 0}.cover p{color:#64748b;margin:4px 0}.actions{position:fixed;right:12px;top:12px}.actions button{border:0;border-radius:8px;background:#172033;color:white;padding:10px 15px;font-weight:bold;cursor:pointer}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}article{border:1px solid #dbe2ea;border-radius:8px;overflow:hidden;break-inside:avoid;page-break-inside:avoid}article img{display:block;width:100%;height:230px;object-fit:contain;background:#f1f5f9}.body{position:relative;padding:10px 12px}.number{position:absolute;right:10px;top:10px;border-radius:999px;background:#172033;color:#fff;width:23px;height:23px;display:grid;place-items:center}.body h2{font-size:14px;margin:0 30px 5px 0}.body p{line-height:1.45;margin:6px 0}.meta{color:#64748b}.footer{margin-top:18px;padding-top:8px;border-top:1px solid #dbe2ea;color:#64748b}@media print{.actions{display:none}}@media(max-width:700px){.grid{grid-template-columns:1fr}}</style></head><body><div class="actions"><button onclick="window.print()">Imprimir / Guardar PDF</button></div><header class="cover"><small>DISTAK ERP · Relatório fotográfico</small><h1>${esc(obraName)}</h1><p>${rows.length} fotografia(s) · Filtro: ${esc(filtroAtual)}</p><p>Gerado em ${esc(generatedAt)}</p></header><main class="grid">${cards}</main><footer class="footer">Relatório gerado pelo DISTAK ERP.</footer></body></html>`);
+  reportWindow.document.close();
+}
+
 export function initFotografias(){
   $("photoUploadToggle")?.addEventListener("click",()=>toggleUpload($("photoUploadForm").classList.contains("hidden")));
   $("photoQuickCamera")?.addEventListener("click",openMobileCamera);
@@ -301,7 +314,8 @@ export function initFotografias(){
   $("photoQuickGallery")?.addEventListener("click",scrollToGallery);
   $("photoBottomGallery")?.addEventListener("click",scrollToGallery);
   $("photoBottomAdd")?.addEventListener("click",openPhotoData);
-  $("photoQuickReport")?.addEventListener("click",()=>toast("O gerador automático de relatório fotográfico será ligado na próxima fase."));
+  $("photoQuickReport")?.addEventListener("click",createPhotoReport);
+  $("photoReportBtn")?.addEventListener("click",createPhotoReport);
   $("photoUploadCancel")?.addEventListener("click",()=>{resetUploadForm();toggleUpload(false)});
   $("photoUploadForm")?.addEventListener("submit",uploadPhotos);
   $("photoEditForm")?.addEventListener("submit",saveEdit);
