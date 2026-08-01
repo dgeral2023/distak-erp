@@ -7,8 +7,10 @@ const fmtDate=v=>v?new Date(v).toLocaleDateString("pt-PT"):"—";
 
 function obraValor(o){return num(o.valor_contratado||o.valor)}
 function orcamentoTotal(o){
-  const base=num(o.mao_obra)+num(o.materiais)+num(o.logistica);
-  return base*(1+num(o.iva)/100);
+  const componentes=num(o.mao_obra)+num(o.materiais)+num(o.logistica);
+  if(componentes)return componentes*(1+num(o.iva)/100);
+  if(num(o.valor_sem_iva))return num(o.valor_sem_iva)*(1+num(o.iva)/100);
+  return num(o.total);
 }
 function isActive(o){
   const s=norm(o.estado);

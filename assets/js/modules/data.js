@@ -5,9 +5,7 @@ export async function refreshData(){
   store.clientes = await query("clientes");
   store.obras = await query("obras", "*,clientes(nome)");
 
-  // A tabela orcamentos está ligada diretamente apenas a obras.
-  // Não existe uma chave estrangeira direta orcamentos -> clientes.
-  store.orcamentos = await query("orcamentos", "*,obras(nome)");
+  store.orcamentos = await query("orcamentos", "*,obras(nome),clientes(nome)");
 
   store.custos = await query("custos", "*,obras(nome)");
   store.pagamentos = await query("pagamentos", "*,obras(nome)");
