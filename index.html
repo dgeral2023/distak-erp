@@ -273,195 +273,37 @@
     </section>
 
     <section id="view-orcamentos" class="view hidden">
-      <div class="toolbar"><input id="orcamentoSearch" placeholder="Pesquisar or√ßamento"><button id="novoOrcamentoBtn" class="btn primary">Novo or√ßamento</button></div>
+      <div class="toolbar orcamento-toolbar">
+        <input id="orcamentoSearch" placeholder="Pesquisar n√∫mero, cliente ou descri√ß√£o">
+        <select id="orcamentoEstadoFiltro" aria-label="Filtrar or√ßamentos por estado"><option value="">Todos os estados</option><option>Rascunho</option><option>Enviado</option><option>Aprovado</option><option>Recusado</option></select>
+        <select id="orcamentoClienteFiltro" aria-label="Filtrar or√ßamentos por cliente"><option value="">Todos os clientes</option></select>
+        <button id="novoOrcamentoBtn" class="btn primary">Novo or√ßamento</button>
+      </div>
       <div class="panel"><div id="orcamentosTable"></div></div>
     </section>
 
-    <section id="view-cus‚Ä¶6367 tokens truncated‚Ä¶abel>
-              <label>Zona da obra
-                <input id="photoZona" placeholder="Ex.: Cobertura, fachada, WC">
-              </label>
-              <label>Data das fotografias
-                <input id="photoData" type="date">
-              </label>
-              <label>T√≠tulo comum
-                <input id="photoTitulo" placeholder="Ex.: Repara√ß√£o da cobertura">
-              </label>
-              <label class="full">Descri√ß√£o
-                <textarea id="photoDescricao" rows="2" placeholder="Observa√ß√µes t√©cnicas ou trabalhos vis√≠veis"></textarea>
-              </label>
-              <div class="full mobile-photo-actions">
-                <label class="camera-button">
-                  <input id="photoCamera" type="file" accept="image/*" capture="environment">
-                  <span>üì∑ Tirar fotografia</span>
-                </label>
-                <button id="photoGpsBtn" type="button" class="btn light">üìç Guardar localiza√ß√£o</button>
-                <span id="photoGpsStatus" class="photo-gps-status">Localiza√ß√£o n√£o registada</span>
-              </div>
-              <input id="photoLatitude" type="hidden">
-              <input id="photoLongitude" type="hidden">
-              <input id="photoCapturedAt" type="hidden">
-              <label class="full photo-drop-zone" id="photoDropZone">
-                <input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple required>
-                <strong>Arraste fotografias para aqui</strong>
-                <span>ou clique para selecionar v√°rios ficheiros</span>
-                <small>JPEG, PNG, WEBP ou HEIC ¬∑ m√°ximo 50 MB por ficheiro</small>
-              </label>
-            </div>
-            <div id="photoSelectionSummary" class="photo-selection-summary">Nenhum ficheiro selecionado.</div>
-            <div id="photoUploadProgress" class="photo-upload-progress hidden">
-              <div><span id="photoUploadProgressBar"></span></div>
-              <small id="photoUploadProgressText">A preparar...</small>
-            </div>
-            <div class="actions">
-              <button id="photoUploadCancel" type="button" class="btn light">Cancelar</button>
-              <button id="photoUploadSubmit" type="submit" class="btn primary">Carregar fotografias</button>
-            </div>
-          </form>
-
-          <div class="photo-toolbar">
-            <div class="photo-filters" id="photoFilters">
-              <button type="button" class="active" data-photo-filter="Todas">Todas <span id="photoCountTodas">0</span></button>
-              <button type="button" data-photo-filter="Antes">Antes <span id="photoCountAntes">0</span></button>
-              <button type="button" data-photo-filter="Durante">Durante <span id="photoCountDurante">0</span></button>
-              <button type="button" data-photo-filter="Depois">Depois <span id="photoCountDepois">0</span></button>
-              <button type="button" data-photo-filter="Patologias">Patologias <span id="photoCountPatologias">0</span></button>
-              <button type="button" data-photo-filter="Outros">Outros <span id="photoCountOutros">0</span></button>
-            </div>
-            <input id="photoSearch" class="photo-search" placeholder="Pesquisar t√≠tulo, zona ou descri√ß√£o">
-          </div>
-
-          <div id="photoGallery" class="photo-gallery"></div>
-
-          <nav class="photo-mobile-bottom-bar" aria-label="Navega√ß√£o r√°pida">
-            <button id="photoBottomCamera" type="button"><span>üì∑</span>Tirar foto</button>
-            <button id="photoBottomGallery" type="button"><span>üñºÔ∏è</span>Galeria</button>
-            <button id="photoBottomAdd" type="button"><span>Ôºã</span>Dados</button>
-          </nav>
-        </section>
+    <section id="view-custos" class="view hidden">
+      <div class="toolbar custo-toolbar">
+        <input id="custoSearch" placeholder="Pesquisar empresa, fatura ou descri√ß√£o">
+        <select id="custoObraFiltro" aria-label="Filtrar por obra"><option value="">Todas as obras</option></select>
+        <select id="custoEstadoFiltro" aria-label="Filtrar por estado"><option value="">Todos os estados</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
+        <input id="custoDataInicioFiltro" type="date" aria-label="Data inicial">
+        <input id="custoDataFimFiltro" type="date" aria-label="Data final">
+        <button id="custoLimparFiltros" class="btn light" type="button">Limpar</button>
+        <button id="novoCustoBtn" class="btn primary">Novo custo</button>
       </div>
-      <div id="obra-tab-diario" class="obra-tab-panel hidden">
-        <section class="diario-v28">
-          <header class="diario-header">
-            <div><span class="diario-kicker">DISTAK ERP v2.8</span><h3>Di√°rio de obra</h3><p>Registe o trabalho di√°rio e mantenha o hist√≥rico completo da obra.</p></div>
-            <button id="diarioNovo" class="btn primary" type="button">Novo registo</button>
-          </header>
-          <form id="diarioForm" class="diario-form">
-            <input id="diarioId" type="hidden">
-            <div class="diario-form-head"><strong id="diarioFormTitle">Novo registo di√°rio</strong><button id="diarioCancelar" class="btn light small hidden" type="button">Cancelar edi√ß√£o</button></div>
-            <label>Data<input id="diarioData" type="date" required></label>
-            <label class="wide">T√≠tulo<input id="diarioTitulo" required maxlength="120" placeholder="Ex.: Aplica√ß√£o de prim√°rio no piso 1"></label>
-            <label>Clima<select id="diarioClima"><option value="">N√£o indicado</option><option>Ensolarado</option><option>Nublado</option><option>Chuva</option><option>Vento</option><option>Frio</option><option>Calor</option></select></label>
-            <label>Horas trabalhadas<input id="diarioHoras" type="number" min="0" step="0.5" placeholder="Ex.: 16"></label>
-            <label class="full">Trabalhos realizados<textarea id="diarioDescricao" rows="4" required placeholder="Descreva o trabalho executado, zonas intervencionadas e progresso."></textarea></label>
-            <label class="full">Equipa presente<textarea id="diarioEquipa" rows="2" placeholder="Nomes e fun√ß√µes da equipa."></textarea></label>
-            <label class="full">Materiais utilizados<textarea id="diarioMateriais" rows="2" placeholder="Materiais, quantidades e eventuais faltas."></textarea></label>
-            <label class="full">Ocorr√™ncias e observa√ß√µes<textarea id="diarioOcorrencias" rows="3" placeholder="Atrasos, seguran√ßa, visitas, decis√µes do cliente ou outras ocorr√™ncias."></textarea></label>
-            <label>Fotografias relacionadas<select id="diarioFotografias" multiple size="4"></select><small>Use Ctrl/Cmd para selecionar v√°rias.</small></label>
-            <label>Documentos relacionados<select id="diarioDocumentos" multiple size="4"></select><small>Use Ctrl/Cmd para selecionar v√°rios.</small></label>
-            <div class="diario-actions full"><button id="diarioSubmit" class="btn primary" type="submit">Guardar registo</button></div>
-          </form>
-          <div class="diario-toolbar"><strong>Hist√≥rico</strong><input id="diarioPesquisa" type="search" placeholder="Pesquisar no di√°rio"></div>
-          <div id="diarioLista" class="diario-list"><p>A carregar di√°rio‚Ä¶</p></div>
-        </section>
-      </div>
-    </div>
-  </section>
-</dialog>
+      <div class="panel"><div id="custosTable"></div></div>
+      <div class="panel custo-supplier-panel"><h3>Resumo por fornecedor</h3><div id="custoSupplierReport"></div></div>
+    </section>
 
-<dialog id="workDocumentEditDialog">
-  <form id="workDocumentEditForm" class="modal-form">
-    <h3>Editar documento</h3>
-    <input id="workDocumentEditId" type="hidden">
-    <label>Nome<input id="workDocumentEditName" required></label>
-    <label>Categoria<select id="workDocumentEditCategory"><option>Contrato</option><option>Relat√≥rio</option><option>Garantia</option><option>Fatura</option><option>Planta</option><option>Outro</option></select></label>
-    <div class="actions">
-      <button type="button" class="btn light" data-close="workDocumentEditDialog">Cancelar</button>
-      <button class="btn primary">Guardar altera√ß√µes</button>
-    </div>
-  </form>
-</dialog>
-
-
-<dialog id="photoEditDialog" class="photo-edit-dialog">
-  <form id="photoEditForm" class="modal-form">
-    <h3>Editar fotografia</h3>
-    <input id="photoEditId" type="hidden">
-    <label>Categoria
-      <select id="photoEditCategoria">
-        <option>Antes</option><option>Durante</option><option>Depois</option><option>Patologias</option><option>Outros</option>
-      </select>
-    </label>
-    <label>Zona<input id="photoEditZona"></label>
-    <label>Data<input id="photoEditData" type="date"></label>
-    <label>T√≠tulo<input id="photoEditTitulo"></label>
-    <label class="full">Descri√ß√£o<textarea id="photoEditDescricao" rows="4"></textarea></label>
-    <div class="actions">
-      <button type="button" class="btn light" data-close="photoEditDialog">Cancelar</button>
-      <button class="btn primary">Guardar altera√ß√µes</button>
-    </div>
-  </form>
-</dialog>
-
-<dialog id="photoLightbox" class="photo-lightbox">
-  <button type="button" class="photo-lightbox-close" data-close="photoLightbox" aria-label="Fechar">√ó</button>
-  <button id="photoLightboxPrev" type="button" class="photo-lightbox-nav prev" aria-label="Anterior">‚Äπ</button>
-  <figure>
-    <img id="photoLightboxImage" alt="">
-    <figcaption>
-      <strong id="photoLightboxTitle"></strong>
-      <span id="photoLightboxMeta"></span>
-      <p id="photoLightboxDescription"></p>
-    </figcaption>
-  </figure>
-  <button id="photoLightboxNext" type="button" class="photo-lightbox-nav next" aria-label="Seguinte">‚Ä∫</button>
-</dialog>
-
-
-<dialog id="orcamentoDialog"><form id="orcamentoForm" class="modal-form">
-  <h3>Novo / editar or√ßamento</h3><input type="hidden" id="orcamentoId">
-  <label>Cliente<select id="orcamentoClienteId" required></select></label><label>Obra<select id="orcamentoObraId"></select></label>
-  <label>N√∫mero<input id="orcamentoNumero" required></label><label>Descri√ß√£o<input id="orcamentoDescricao" required></label>
-  <label>Valor sem IVA<input id="orcamentoValor" type="number" step="0.01" required></label><label>IVA %<select id="orcamentoIva"><option value="6">6%</option><option value="23">23%</option></select></label>
-  <label>Estado<select id="orcamentoEstado"><option>Rascunho</option><option>Enviado</option><option>Aprovado</option><option>Recusado</option></select></label>
-  <div class="actions"><button type="button" class="btn light" data-close="orcamentoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
-</form></dialog>
-
-<dialog id="custoDialog"><form id="custoForm" class="modal-form">
-  <h3>Novo / editar custo</h3><input type="hidden" id="custoId">
-  <label>Obra<select id="custoObraId" required></select></label><label>Categoria<select id="custoCategoria"><option>Materiais</option><option>M√£o de obra</option><option>Subempreiteiros</option><option>M√°quinas</option><option>Andaimes</option><option>Entulho</option><option>Combust√≠vel</option><option>Portagens</option><option>Ferramentas</option><option>Seguros</option><option>Outros</option></select></label>
-  <label>Nome da empresa / fornecedor<input id="custoNomeEmpresa" placeholder="Ex.: Fornecedor, Lda."></label><label>N¬∫ da fatura<input id="custoNumeroFatura" placeholder="Ex.: FT 2026/123"></label>
-  <label>Descri√ß√£o<input id="custoDescricao" required></label><label>Valor sem IVA<input id="custoValor" type="number" step="0.01" required></label>
-  <label>IVA %<select id="custoIva"><option value="0">0%</option><option value="6">6%</option><option value="23">23%</option></select></label><label>Data<input id="custoData" type="date"></label>
-  <label>Estado do pagamento<select id="custoEstadoPagamento"><option value="pendente">Pendente</option><option value="pago">Pago</option></select></label><label>Data de vencimento<input id="custoDataVencimento" type="date"></label>
-  <label class="full">Fatura (PDF ou imagem, m√°ximo 25 MB)<input id="custoAnexo" type="file" accept="application/pdf,image/jpeg,image/png,image/webp,image/heic"></label>
-  <div id="custoAnexoAtual" class="full custo-anexo-atual hidden"></div>
-  <div class="full custo-total-preview"><span>Total com IVA</span><strong id="custoTotalPreview">0,00 ‚Ç¨</strong></div>
-  <div class="actions"><button type="button" class="btn light" data-close="custoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
-</form></dialog>
-
-<dialog id="custoPagamentoDialog"><form id="custoPagamentoForm" class="modal-form">
-  <h3>Pagamentos ao fornecedor</h3><input type="hidden" id="custoPagamentoCustoId">
-  <div id="custoPagamentoResumo" class="full custo-total-preview"></div>
-  <label>Valor pago<input id="custoPagamentoValor" type="number" min="0.01" step="0.01" required></label>
-  <label>Data<input id="custoPagamentoData" type="date" required></label>
-  <label>M√©todo<select id="custoPagamentoMetodo"><option>Transfer√™ncia</option><option>Cart√£o</option><option>Numer√°rio</option><option>Cheque</option><option>D√©bito direto</option><option>Outro</option></select></label>
-  <label>Refer√™ncia<input id="custoPagamentoReferencia" placeholder="Ex.: comprovativo ou opera√ß√£o"></label>
-  <label class="full">Observa√ß√µes<textarea id="custoPagamentoObservacoes" rows="2"></textarea></label>
-  <div id="custoPagamentoLista" class="full"></div>
-  <div class="actions"><button type="button" class="btn light" data-close="custoPagamentoDialog">Fechar</button><button class="btn primary">Registar pagamento</button></div>
-</form></dialog>
-
-<dialog id="pagamentoDialog"><form id="pagamentoForm" class="modal-form">
-  <h3>Novo / editar pagamento</h3><input type="hidden" id="pagamentoId">
-  <label>Obra<select id="pagamentoObraId" required></select></label><label>Descri√ß√£o<input id="pagamentoDescricao" required></label>
-  <label>Valor<input id="pagamentoValor" type="number" step="0.01" required></label><label>Data<input id="pagamentoData" type="date"></label>
-  <label>Estado<select id="pagamentoEstado"><option>Recebido</option><option>Pendente</option><option>Em atraso</option></select></label>
-  <div class="actions"><button type="button" class="btn light" data-close="pagamentoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
-</form></dialog>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js"></script>
-</body>
-</html>
+    <section id="view-pagamentos" class="view hidden">
+      <div class="toolbar"><input id="pagamentoSearch" placeholder="Pesquisar pagamento"><button id="novoPagamentoBtn" class="btn primary">Novo pagamento</button></div>
+      <div class="panel"><div id="pagÁ≠=∂âûÀk∫wµÁ@ÄÄÄÄÄÄÄÄÄÄÄÄΩ±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅç±ÖÕÃÙâô’±∞ÅµΩâ•±îµ¡°Ω—ºµÖç—•ΩπÃà¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞Åç±ÖÕÃÙâçÖµï…Ñµâ’——Ω∏à¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒ•π¡’–Å•êÙâ¡°Ω—ΩÖµï…ÑàÅ—Â¡îÙâô•±îàÅÖççï¡–Ùâ•µÖùîº®àÅçÖ¡—’…îÙâïπŸ•…Ωπµïπ–à¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒÕ¡Ö∏˚¬~N‹ÅQ•…Ö»ÅôΩ—Ωù…Öô•ÑΩÕ¡Ö∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄΩ±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å•êÙâ¡°Ω—Ω¡Õ	—∏àÅ—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙââ—∏Å±•ù°–à˚¬~N4Å’Ö…ëÖ»Å±ΩçÖ±•ÈáüçºΩâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒÕ¡Ö∏Å•êÙâ¡°Ω—Ω¡ÕM—Ö—’ÃàÅç±ÖÕÃÙâ¡°Ω—ºµù¡ÃµÕ—Ö—’Ãà˘1ΩçÖ±•ÈáüçºÅªçºÅ…ïù•Õ—ÖëÑΩÕ¡Ö∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄΩë•ÿ¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒ•π¡’–Å•êÙâ¡°Ω—Ω1Ö—•—’ëîàÅ—Â¡îÙâ°•ëëï∏à¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒ•π¡’–Å•êÙâ¡°Ω—Ω1Ωπù•—’ëîàÅ—Â¡îÙâ°•ëëï∏à¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒ•π¡’–Å•êÙâ¡°Ω—ΩÖ¡—’…ïë–àÅ—Â¡îÙâ°•ëëï∏à¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞Åç±ÖÕÃÙâô’±∞Å¡°Ω—ºµë…Ω¿µÈΩπîàÅ•êÙâ¡°Ω—Ω…Ω¡iΩπîà¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒ•π¡’–Å•êÙâ¡°Ω—Ω•±ïÃàÅ—Â¡îÙâô•±îàÅÖççï¡–Ùâ•µÖùîΩ©¡ïú±•µÖùîΩ¡πú±•µÖùîΩ›ïâ¿±•µÖùîΩ°ï•å±•µÖùîΩ°ï•òàÅµ’±—•¡±îÅ…ï≈’•…ïê¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒÕ—…Ωπú˘……ÖÕ—îÅôΩ—Ωù…Öô•ÖÃÅ¡Ö…ÑÅÖ≈’§ΩÕ—…Ωπú¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒÕ¡Ö∏˘Ω‘Åç±•≈’îÅ¡Ö…ÑÅÕï±ïç•ΩπÖ»Å€Ö…•ΩÃÅô•ç°ï•…ΩÃΩÕ¡Ö∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒÕµÖ±∞˘)A∞ÅA9∞Å]	@ÅΩ‘Å!%É
+‹Å∑Ö·•µºÄ‘¿Å5Å¡Ω»Åô•ç°ï•…ºΩÕµÖ±∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄΩ±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄΩë•ÿ¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅ•êÙâ¡°Ω—ΩMï±ïç—•ΩπM’µµÖ…‰àÅç±ÖÕÃÙâ¡°Ω—ºµÕï±ïç—•Ω∏µÕ’µµÖ…‰à˘9ïπ°’¥Åô•ç°ï•…ºÅÕï±ïç•ΩπÖëº∏Ωë•ÿ¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅ•êÙâ¡°Ω—ΩU¡±ΩÖëA…Ωù…ïÕÃàÅç±ÖÕÃÙâ¡°Ω—ºµ’¡±ΩÖêµ¡…Ωù…ïÕÃÅ°•ëëï∏à¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿ¯ÒÕ¡Ö∏Å•êÙâ¡°Ω—ΩU¡±ΩÖëA…Ωù…ïÕÕ	Ö»à¯ΩÕ¡Ö∏¯Ωë•ÿ¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒÕµÖ±∞Å•êÙâ¡°Ω—ΩU¡±ΩÖëA…Ωù…ïÕÕQï·–à˘Å¡…ï¡Ö…Ö»∏∏∏ΩÕµÖ±∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄΩë•ÿ¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅç±ÖÕÃÙâÖç—•ΩπÃà¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å•êÙâ¡°Ω—ΩU¡±ΩÖëÖπçï∞àÅ—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙââ—∏Å±•ù°–à˘Öπçï±Ö»Ωâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å•êÙâ¡°Ω—ΩU¡±ΩÖëM’âµ•–àÅ—Â¡îÙâÕ’âµ•–àÅç±ÖÕÃÙââ—∏Å¡…•µÖ…‰à˘Ö……ïùÖ»ÅôΩ—Ωù…Öô•ÖÃΩâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄΩë•ÿ¯(ÄÄÄÄÄÄÄÄÄÄΩôΩ…¥¯((ÄÄÄÄÄÄÄÄÄÄÒë•ÿÅç±ÖÕÃÙâ¡°Ω—ºµ—ΩΩ±âÖ»à¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅç±ÖÕÃÙâ¡°Ω—ºµô•±—ï…ÃàÅ•êÙâ¡°Ω—Ω•±—ï…Ãà¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙâÖç—•ŸîàÅëÖ—Ñµ¡°Ω—ºµô•±—ï»ÙâQΩëÖÃà˘QΩëÖÃÄÒÕ¡Ö∏Å•êÙâ¡°Ω—ΩΩ’π—QΩëÖÃà¯¿ΩÕ¡Ö∏¯Ωâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅëÖ—Ñµ¡°Ω—ºµô•±—ï»Ùâπ—ïÃà˘π—ïÃÄÒÕ¡Ö∏Å•êÙâ¡°Ω—ΩΩ’π—π—ïÃà¯¿ΩÕ¡Ö∏¯Ωâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅëÖ—Ñµ¡°Ω—ºµô•±—ï»Ùâ’…Öπ—îà˘’…Öπ—îÄÒÕ¡Ö∏Å•êÙâ¡°Ω—ΩΩ’π—’…Öπ—îà¯¿ΩÕ¡Ö∏¯Ωâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅëÖ—Ñµ¡°Ω—ºµô•±—ï»Ùâï¡Ω•Ãà˘ï¡Ω•ÃÄÒÕ¡Ö∏Å•êÙâ¡°Ω—ΩΩ’π—ï¡Ω•Ãà¯¿ΩÕ¡Ö∏¯Ωâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅëÖ—Ñµ¡°Ω—ºµô•±—ï»ÙâAÖ—Ω±Ωù•ÖÃà˘AÖ—Ω±Ωù•ÖÃÄÒÕ¡Ö∏Å•êÙâ¡°Ω—ΩΩ’π—AÖ—Ω±Ωù•ÖÃà¯¿ΩÕ¡Ö∏¯Ωâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅëÖ—Ñµ¡°Ω—ºµô•±—ï»Ùâ=’—…ΩÃà˘=’—…ΩÃÄÒÕ¡Ö∏Å•êÙâ¡°Ω—ΩΩ’π—=’—…ΩÃà¯¿ΩÕ¡Ö∏¯Ωâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄΩë•ÿ¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ•π¡’–Å•êÙâ¡°Ω—ΩMïÖ…ç†àÅç±ÖÕÃÙâ¡°Ω—ºµÕïÖ…ç†àÅ¡±Öçï°Ω±ëï»ÙâAïÕ≈’•ÕÖ»Å”µ—’±º∞ÅÈΩπÑÅΩ‘ÅëïÕç…ßüçºà¯(ÄÄÄÄÄÄÄÄÄÄΩë•ÿ¯((ÄÄÄÄÄÄÄÄÄÄÒë•ÿÅ•êÙâ¡°Ω—ΩÖ±±ï…‰àÅç±ÖÕÃÙâ¡°Ω—ºµùÖ±±ï…‰à¯Ωë•ÿ¯((ÄÄÄÄÄÄÄÄÄÄÒπÖÿÅç±ÖÕÃÙâ¡°Ω—ºµµΩâ•±îµâΩ——Ω¥µâÖ»àÅÖ…•Ñµ±Öâï∞Ùâ9ÖŸïùáüçºÅÀÖ¡•ëÑà¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å•êÙâ¡°Ω—Ω	Ω——ΩµÖµï…ÑàÅ—Â¡îÙââ’——Ω∏à¯ÒÕ¡Ö∏˚¬~N‹ΩÕ¡Ö∏˘Q•…Ö»ÅôΩ—ºΩâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å•êÙâ¡°Ω—Ω	Ω——ΩµÖ±±ï…‰àÅ—Â¡îÙââ’——Ω∏à¯ÒÕ¡Ö∏˚¬~ZÛæ‚<ΩÕ¡Ö∏˘Ö±ï…•ÑΩâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å•êÙâ¡°Ω—Ω	Ω——ΩµëêàÅ—Â¡îÙââ’——Ω∏à¯ÒÕ¡Ö∏˚æÚ,ΩÕ¡Ö∏˘ÖëΩÃΩâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄΩπÖÿ¯(ÄÄÄÄÄÄÄÄΩÕïç—•Ω∏¯(ÄÄÄÄÄÄΩë•ÿ¯(ÄÄÄÄÄÄÒë•ÿÅ•êÙâΩâ…Ñµ—Öàµë•Ö…•ºàÅç±ÖÕÃÙâΩâ…Ñµ—Öàµ¡Öπï∞Å°•ëëï∏à¯(ÄÄÄÄÄÄÄÄÒÕïç—•Ω∏Åç±ÖÕÃÙâë•Ö…•ºµÿ»‡à¯(ÄÄÄÄÄÄÄÄÄÄÒ°ïÖëï»Åç±ÖÕÃÙâë•Ö…•ºµ°ïÖëï»à¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿ¯ÒÕ¡Ö∏Åç±ÖÕÃÙâë•Ö…•ºµ≠•ç≠ï»à˘%MQ,ÅI@Åÿ»∏‡ΩÕ¡Ö∏¯Ò†Ã˘ßÖ…•ºÅëîÅΩâ…ÑΩ†Ã¯Ò¿˘Iïù•Õ—îÅºÅ—…ÖâÖ±°ºÅëßÖ…•ºÅîÅµÖπ—ïπ°ÑÅºÅ°•Õ”Õ…•çºÅçΩµ¡±ï—ºÅëÑÅΩâ…Ñ∏Ω¿¯Ωë•ÿ¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å•êÙâë•Ö…•Ω9ΩŸºàÅç±ÖÕÃÙââ—∏Å¡…•µÖ…‰àÅ—Â¡îÙââ’——Ω∏à˘9ΩŸºÅ…ïù•Õ—ºΩâ’——Ω∏¯(ÄÄÄÄÄÄÄÄÄÄΩ°ïÖëï»¯(ÄÄÄÄÄÄÄÄÄÄÒôΩ…¥Å•êÙâë•Ö…•ΩΩ…¥àÅç±ÖÕÃÙâë•Ö…•ºµôΩ…¥à¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ•π¡’–Å•êÙâë•Ö…•Ω%êàÅ—Â¡îÙâ°•ëëï∏à¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅç±ÖÕÃÙâë•Ö…•ºµôΩ…¥µ°ïÖêà¯ÒÕ—…ΩπúÅ•êÙâë•Ö…•ΩΩ…µQ•—±îà˘9ΩŸºÅ…ïù•Õ—ºÅëßÖ…•ºΩÕ—…Ωπú¯Òâ’——Ω∏Å•êÙâë•Ö…•ΩÖπçï±Ö»àÅç±ÖÕÃÙââ—∏Å±•ù°–ÅÕµÖ±∞Å°•ëëï∏àÅ—Â¡îÙââ’——Ω∏à˘Öπçï±Ö»ÅïëßüçºΩâ’——Ω∏¯Ωë•ÿ¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞˘Ö—ÑÒ•π¡’–Å•êÙâë•Ö…•ΩÖ—ÑàÅ—Â¡îÙâëÖ—îàÅ…ï≈’•…ïê¯Ω±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞Åç±ÖÕÃÙâ›•ëîà˘Sµ—’±ºÒ•π¡’–Å•êÙâë•Ö…•ΩQ•—’±ºàÅ…ï≈’•…ïêÅµÖ·±ïπù—†Ùàƒ»¿àÅ¡±Öçï°Ω±ëï»Ùâ‡∏ËÅ¡±•çáüçºÅëîÅ¡…•∑Ö…•ºÅπºÅ¡•ÕºÄƒà¯Ω±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞˘±•µÑÒÕï±ïç–Å•êÙâë•Ö…•Ω±•µÑà¯ÒΩ¡—•Ω∏ÅŸÖ±’îÙàà˘;çºÅ•πë•çÖëºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘πÕΩ±Ö…ÖëºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘9’â±ÖëºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘°’ŸÑΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘Yïπ—ºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘…•ºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘Ö±Ω»ΩΩ¡—•Ω∏¯ΩÕï±ïç–¯Ω±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞˘!Ω…ÖÃÅ—…ÖâÖ±°ÖëÖÃÒ•π¡’–Å•êÙâë•Ö…•Ω!Ω…ÖÃàÅ—Â¡îÙâπ’µâï»àÅµ•∏Ùà¿àÅÕ—ï¿Ùà¿∏‘àÅ¡±Öçï°Ω±ëï»Ùâ‡∏ËÄƒÿà¯Ω±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞Åç±ÖÕÃÙâô’±∞à˘Q…ÖâÖ±°ΩÃÅ…ïÖ±•ÈÖëΩÃÒ—ï·—Ö…ïÑÅ•êÙâë•Ö…•ΩïÕç…•çÖºàÅ…Ω›ÃÙà–àÅ…ï≈’•…ïêÅ¡±Öçï°Ω±ëï»ÙâïÕç…ïŸÑÅºÅ—…ÖâÖ±°ºÅï·ïç’—Öëº∞ÅÈΩπÖÃÅ•π—ï…Ÿïπç•ΩπÖëÖÃÅîÅ¡…Ωù…ïÕÕº∏à¯Ω—ï·—Ö…ïÑ¯Ω±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞Åç±ÖÕÃÙâô’±∞à˘≈’•¡ÑÅ¡…ïÕïπ—îÒ—ï·—Ö…ïÑÅ•êÙâë•Ö…•Ω≈’•¡ÑàÅ…Ω›ÃÙà»àÅ¡±Öçï°Ω±ëï»Ùâ9ΩµïÃÅîÅô’ªü’ïÃÅëÑÅï≈’•¡Ñ∏à¯Ω—ï·—Ö…ïÑ¯Ω±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞Åç±ÖÕÃÙâô’±∞à˘5Ö—ï…•Ö•ÃÅ’—•±•ÈÖëΩÃÒ—ï·—Ö…ïÑÅ•êÙâë•Ö…•Ω5Ö—ï…•Ö•ÃàÅ…Ω›ÃÙà»àÅ¡±Öçï°Ω±ëï»Ùâ5Ö—ï…•Ö•Ã∞Å≈’Öπ—•ëÖëïÃÅîÅïŸïπ—’Ö•ÃÅôÖ±—ÖÃ∏à¯Ω—ï·—Ö…ïÑ¯Ω±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞Åç±ÖÕÃÙâô’±∞à˘=çΩ…À©πç•ÖÃÅîÅΩâÕï…Ÿáü’ïÃÒ—ï·—Ö…ïÑÅ•êÙâë•Ö…•Ω=çΩ……ïπç•ÖÃàÅ…Ω›ÃÙàÃàÅ¡±Öçï°Ω±ëï»Ùâ—…ÖÕΩÃ∞ÅÕïù’…ÖªùÑ∞ÅŸ•Õ•—ÖÃ∞Åëïç•œ’ïÃÅëºÅç±•ïπ—îÅΩ‘ÅΩ’—…ÖÃÅΩçΩ…À©πç•ÖÃ∏à¯Ω—ï·—Ö…ïÑ¯Ω±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞˘Ω—Ωù…Öô•ÖÃÅ…ï±Öç•ΩπÖëÖÃÒÕï±ïç–Å•êÙâë•Ö…•ΩΩ—Ωù…Öô•ÖÃàÅµ’±—•¡±îÅÕ•ÈîÙà–à¯ΩÕï±ïç–¯ÒÕµÖ±∞˘UÕîÅ—…∞ΩµêÅ¡Ö…ÑÅÕï±ïç•ΩπÖ»Å€Ö…•ÖÃ∏ΩÕµÖ±∞¯Ω±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞˘Ωç’µïπ—ΩÃÅ…ï±Öç•ΩπÖëΩÃÒÕï±ïç–Å•êÙâë•Ö…•ΩΩç’µïπ—ΩÃàÅµ’±—•¡±îÅÕ•ÈîÙà–à¯ΩÕï±ïç–¯ÒÕµÖ±∞˘UÕîÅ—…∞ΩµêÅ¡Ö…ÑÅÕï±ïç•ΩπÖ»Å€Ö…•ΩÃ∏ΩÕµÖ±∞¯Ω±Öâï∞¯(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅç±ÖÕÃÙâë•Ö…•ºµÖç—•ΩπÃÅô’±∞à¯Òâ’——Ω∏Å•êÙâë•Ö…•ΩM’âµ•–àÅç±ÖÕÃÙââ—∏Å¡…•µÖ…‰àÅ—Â¡îÙâÕ’âµ•–à˘’Ö…ëÖ»Å…ïù•Õ—ºΩâ’——Ω∏¯Ωë•ÿ¯(ÄÄÄÄÄÄÄÄÄÄΩôΩ…¥¯(ÄÄÄÄÄÄÄÄÄÄÒë•ÿÅç±ÖÕÃÙâë•Ö…•ºµ—ΩΩ±âÖ»à¯ÒÕ—…Ωπú˘!•Õ”Õ…•çºΩÕ—…Ωπú¯Ò•π¡’–Å•êÙâë•Ö…•ΩAïÕ≈’•ÕÑàÅ—Â¡îÙâÕïÖ…ç†àÅ¡±Öçï°Ω±ëï»ÙâAïÕ≈’•ÕÖ»ÅπºÅëßÖ…•ºà¯Ωë•ÿ¯(ÄÄÄÄÄÄÄÄÄÄÒë•ÿÅ•êÙâë•Ö…•Ω1•Õ—ÑàÅç±ÖÕÃÙâë•Ö…•ºµ±•Õ–à¯Ò¿˘ÅçÖ……ïùÖ»ÅëßÖ…•øäòΩ¿¯Ωë•ÿ¯(ÄÄÄÄÄÄÄÄΩÕïç—•Ω∏¯(ÄÄÄÄÄÄΩë•ÿ¯(ÄÄÄÄΩë•ÿ¯(ÄÄΩÕïç—•Ω∏¯(Ωë•Ö±Ωú¯((Òë•Ö±ΩúÅ•êÙâ›Ω…≠Ωç’µïπ—ë•—•Ö±Ωúà¯(ÄÄÒôΩ…¥Å•êÙâ›Ω…≠Ωç’µïπ—ë•—Ω…¥àÅç±ÖÕÃÙâµΩëÖ∞µôΩ…¥à¯(ÄÄÄÄÒ†Ã˘ë•—Ö»ÅëΩç’µïπ—ºΩ†Ã¯(ÄÄÄÄÒ•π¡’–Å•êÙâ›Ω…≠Ωç’µïπ—ë•—%êàÅ—Â¡îÙâ°•ëëï∏à¯(ÄÄÄÄÒ±Öâï∞˘9ΩµîÒ•π¡’–Å•êÙâ›Ω…≠Ωç’µïπ—ë•—9ÖµîàÅ…ï≈’•…ïê¯Ω±Öâï∞¯(ÄÄÄÄÒ±Öâï∞˘Ö—ïùΩ…•ÑÒÕï±ïç–Å•êÙâ›Ω…≠Ωç’µïπ—ë•—Ö—ïùΩ…‰à¯ÒΩ¡—•Ω∏˘Ωπ—…Ö—ºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘Iï±Ö”Õ…•ºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘Ö…Öπ—•ÑΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘Ö—’…ÑΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘A±Öπ—ÑΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘=’—…ºΩΩ¡—•Ω∏¯ΩÕï±ïç–¯Ω±Öâï∞¯(ÄÄÄÄÒë•ÿÅç±ÖÕÃÙâÖç—•ΩπÃà¯(ÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙââ—∏Å±•ù°–àÅëÖ—Ñµç±ΩÕîÙâ›Ω…≠Ωç’µïπ—ë•—•Ö±Ωúà˘Öπçï±Ö»Ωâ’——Ω∏¯(ÄÄÄÄÄÄÒâ’——Ω∏Åç±ÖÕÃÙââ—∏Å¡…•µÖ…‰à˘’Ö…ëÖ»ÅÖ±—ï…áü’ïÃΩâ’——Ω∏¯(ÄÄÄÄΩë•ÿ¯(ÄÄΩôΩ…¥¯(Ωë•Ö±Ωú¯(((Òë•Ö±ΩúÅ•êÙâ¡°Ω—Ωë•—•Ö±ΩúàÅç±ÖÕÃÙâ¡°Ω—ºµïë•–µë•Ö±Ωúà¯(ÄÄÒôΩ…¥Å•êÙâ¡°Ω—Ωë•—Ω…¥àÅç±ÖÕÃÙâµΩëÖ∞µôΩ…¥à¯(ÄÄÄÄÒ†Ã˘ë•—Ö»ÅôΩ—Ωù…Öô•ÑΩ†Ã¯(ÄÄÄÄÒ•π¡’–Å•êÙâ¡°Ω—Ωë•—%êàÅ—Â¡îÙâ°•ëëï∏à¯(ÄÄÄÄÒ±Öâï∞˘Ö—ïùΩ…•Ñ(ÄÄÄÄÄÄÒÕï±ïç–Å•êÙâ¡°Ω—Ωë•—Ö—ïùΩ…•Ñà¯(ÄÄÄÄÄÄÄÄÒΩ¡—•Ω∏˘π—ïÃΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘’…Öπ—îΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘ï¡Ω•ÃΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘AÖ—Ω±Ωù•ÖÃΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘=’—…ΩÃΩΩ¡—•Ω∏¯(ÄÄÄÄÄÄΩÕï±ïç–¯(ÄÄÄÄΩ±Öâï∞¯(ÄÄÄÄÒ±Öâï∞˘iΩπÑÒ•π¡’–Å•êÙâ¡°Ω—Ωë•—iΩπÑà¯Ω±Öâï∞¯(ÄÄÄÄÒ±Öâï∞˘Ö—ÑÒ•π¡’–Å•êÙâ¡°Ω—Ωë•—Ö—ÑàÅ—Â¡îÙâëÖ—îà¯Ω±Öâï∞¯(ÄÄÄÄÒ±Öâï∞˘Sµ—’±ºÒ•π¡’–Å•êÙâ¡°Ω—Ωë•—Q•—’±ºà¯Ω±Öâï∞¯(ÄÄÄÄÒ±Öâï∞Åç±ÖÕÃÙâô’±∞à˘ïÕç…ßüçºÒ—ï·—Ö…ïÑÅ•êÙâ¡°Ω—Ωë•—ïÕç…•çÖºàÅ…Ω›ÃÙà–à¯Ω—ï·—Ö…ïÑ¯Ω±Öâï∞¯(ÄÄÄÄÒë•ÿÅç±ÖÕÃÙâÖç—•ΩπÃà¯(ÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙââ—∏Å±•ù°–àÅëÖ—Ñµç±ΩÕîÙâ¡°Ω—Ωë•—•Ö±Ωúà˘Öπçï±Ö»Ωâ’——Ω∏¯(ÄÄÄÄÄÄÒâ’——Ω∏Åç±ÖÕÃÙââ—∏Å¡…•µÖ…‰à˘’Ö…ëÖ»ÅÖ±—ï…áü’ïÃΩâ’——Ω∏¯(ÄÄÄÄΩë•ÿ¯(ÄÄΩôΩ…¥¯(Ωë•Ö±Ωú¯((Òë•Ö±ΩúÅ•êÙâ¡°Ω—Ω1•ù°—âΩ‡àÅç±ÖÕÃÙâ¡°Ω—ºµ±•ù°—âΩ‡à¯(ÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙâ¡°Ω—ºµ±•ù°—âΩ‡µç±ΩÕîàÅëÖ—Ñµç±ΩÕîÙâ¡°Ω—Ω1•ù°—âΩ‡àÅÖ…•Ñµ±Öâï∞Ùâïç°Ö»à˚\Ωâ’——Ω∏¯(ÄÄÒâ’——Ω∏Å•êÙâ¡°Ω—Ω1•ù°—âΩ·A…ïÿàÅ—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙâ¡°Ω—ºµ±•ù°—âΩ‡µπÖÿÅ¡…ïÿàÅÖ…•Ñµ±Öâï∞Ùâπ—ï…•Ω»à˚ä‰Ωâ’——Ω∏¯(ÄÄÒô•ù’…î¯(ÄÄÄÄÒ•µúÅ•êÙâ¡°Ω—Ω1•ù°—âΩ·%µÖùîàÅÖ±–Ùàà¯(ÄÄÄÄÒô•ùçÖ¡—•Ω∏¯(ÄÄÄÄÄÄÒÕ—…ΩπúÅ•êÙâ¡°Ω—Ω1•ù°—âΩ·Q•—±îà¯ΩÕ—…Ωπú¯(ÄÄÄÄÄÄÒÕ¡Ö∏Å•êÙâ¡°Ω—Ω1•ù°—âΩ·5ï—Ñà¯ΩÕ¡Ö∏¯(ÄÄÄÄÄÄÒ¿Å•êÙâ¡°Ω—Ω1•ù°—âΩ·ïÕç…•¡—•Ω∏à¯Ω¿¯(ÄÄÄÄΩô•ùçÖ¡—•Ω∏¯(ÄÄΩô•ù’…î¯(ÄÄÒâ’——Ω∏Å•êÙâ¡°Ω—Ω1•ù°—âΩ·9ï·–àÅ—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙâ¡°Ω—ºµ±•ù°—âΩ‡µπÖÿÅπï·–àÅÖ…•Ñµ±Öâï∞ÙâMïù’•π—îà˚äËΩâ’——Ω∏¯(Ωë•Ö±Ωú¯(((Òë•Ö±ΩúÅ•êÙâΩ…çÖµïπ—Ω•Ö±ΩúàÅç±ÖÕÃÙâΩ…çÖµïπ—ºµë•Ö±Ωúà¯ÒôΩ…¥Å•êÙâΩ…çÖµïπ—ΩΩ…¥àÅç±ÖÕÃÙâµΩëÖ∞µôΩ…¥ÅΩ…çÖµïπ—ºµôΩ…¥à¯(ÄÄÒ°ïÖëï»Åç±ÖÕÃÙâΩ…çÖµïπ—ºµôΩ…¥µ°ïÖêà¯Òë•ÿ¯ÒÕ¡Ö∏˘A…Ω¡ΩÕ—ÑÅçΩµï…ç•Ö∞ΩÕ¡Ö∏¯Ò†Ã˘9ΩŸºÄºÅïë•—Ö»ÅΩÀùÖµïπ—ºΩ†Ã¯Ωë•ÿ¯Òâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙâç…¥µç±ΩÕîÅëÖ…¨àÅëÖ—Ñµç±ΩÕîÙâΩ…çÖµïπ—Ω•Ö±ΩúàÅÖ…•Ñµ±Öâï∞Ùâïç°Ö»à˚\Ωâ’——Ω∏¯Ω°ïÖëï»¯(ÄÄÒ•π¡’–Å—Â¡îÙâ°•ëëï∏àÅ•êÙâΩ…çÖµïπ—Ω%êà¯(ÄÄÒ±Öâï∞˘±•ïπ—îÒÕï±ïç–Å•êÙâΩ…çÖµïπ—Ω±•ïπ—ï%êàÅ…ï≈’•…ïê¯ΩÕï±ïç–¯Ω±Öâï∞¯Ò±Öâï∞˘=â…ÑÒÕï±ïç–Å•êÙâΩ…çÖµïπ—Ω=â…Ö%êà¯ΩÕï±ïç–¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘;Èµï…ºÒ•π¡’–Å•êÙâΩ…çÖµïπ—Ω9’µï…ºàÅ…ï≈’•…ïê¯Ω±Öâï∞¯Ò±Öâï∞˘IïôïÀ©πç•ÑÒ•π¡’–Å•êÙâΩ…çÖµïπ—ΩIïôï…ïπç•ÑàÅ¡±Öçï°Ω±ëï»Ùâ‡∏ËÅAïë•ëºÅ¡Ω»ÅïµÖ•∞ÅëîÄ¿ƒº¿‡à¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘Ö—ÑÅëîÅïµ•ÕœçºÒ•π¡’–Å•êÙâΩ…çÖµïπ—ΩÖ—Öµ•ÕÕÖºàÅ—Â¡îÙâëÖ—îàÅ…ï≈’•…ïê¯Ω±Öâï∞¯Ò±Öâï∞˘YÖ±•ëÖëîÅï¥Åë•ÖÃÒ•π¡’–Å•êÙâΩ…çÖµïπ—ΩYÖ±•ëÖëï•ÖÃàÅ—Â¡îÙâπ’µâï»àÅµ•∏ÙàƒàÅµÖ‡ÙàÃÿ‘àÅŸÖ±’îÙàƒ‘àÅ…ï≈’•…ïê¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞Åç±ÖÕÃÙâô’±∞à˘ïÕç…ßüçºÄºÅΩâ©ï—ºÅëºÅΩÀùÖµïπ—ºÒ—ï·—Ö…ïÑÅ•êÙâΩ…çÖµïπ—ΩïÕç…•çÖºàÅ…Ω›ÃÙà»àÅ…ï≈’•…ïê¯Ω—ï·—Ö…ïÑ¯Ω±Öâï∞¯(ÄÄÒÕïç—•Ω∏Åç±ÖÕÃÙâô’±∞ÅΩ…çÖµïπ—ºµ•—ïπÃµÕïç—•Ω∏à¯(ÄÄÄÄÒ°ïÖëï»¯Òë•ÿ¯ÒÕ—…Ωπú˘Q…ÖâÖ±°ΩÃÅîÅµÖ—ï…•Ö•ÃΩÕ—…Ωπú¯ÒÕµÖ±∞˘ë•ç•ΩπîÅ—ΩëÖÃÅÖÃÅ±•π°ÖÃÅ≈’îÅÕïÀçºÅÖ¡…ïÕïπ—ÖëÖÃÅÖºÅç±•ïπ—î∏ΩÕµÖ±∞¯Ωë•ÿ¯Òâ’——Ω∏Å•êÙâΩ…çÖµïπ—Ωëë%—ï¥àÅç±ÖÕÃÙââ—∏Å±•ù°–ÅÕµÖ±∞àÅ—Â¡îÙââ’——Ω∏à¯¨Åë•ç•ΩπÖ»Å±•π°ÑΩâ’——Ω∏¯Ω°ïÖëï»¯(ÄÄÄÄÒë•ÿÅç±ÖÕÃÙâΩ…çÖµïπ—ºµ•—ï¥µ°ïÖêà¯ÒÕ¡Ö∏˘ïÕç…ßüçºΩÕ¡Ö∏¯ÒÕ¡Ö∏˘Uπ•ëÖëîΩÕ¡Ö∏¯ÒÕ¡Ö∏˘E’Öπ—•ëÖëîΩÕ¡Ö∏¯ÒÕ¡Ö∏˘A…óùºÅ’π•”Ö…•ºΩÕ¡Ö∏¯ÒÕ¡Ö∏˘QΩ—Ö∞ΩÕ¡Ö∏¯ÒÕ¡Ö∏¯ΩÕ¡Ö∏¯Ωë•ÿ¯(ÄÄÄÄÒë•ÿÅ•êÙâΩ…çÖµïπ—Ω%—ïπÃà¯Ωë•ÿ¯(ÄÄΩÕïç—•Ω∏¯(ÄÄÒ±Öâï∞˘ïÕçΩπ—ºÄ£ä
+∞§Ò•π¡’–Å•êÙâΩ…çÖµïπ—ΩïÕçΩπ—ºàÅ—Â¡îÙâπ’µâï»àÅµ•∏Ùà¿àÅÕ—ï¿Ùà¿∏¿ƒàÅŸÖ±’îÙà¿à¯Ω±Öâï∞¯Ò±Öâï∞˘%YÄîÒÕï±ïç–Å•êÙâΩ…çÖµïπ—Ω%ŸÑà¯ÒΩ¡—•Ω∏ÅŸÖ±’îÙà¿à¯¿îΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏ÅŸÖ±’îÙàÿà¯ÿîΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏ÅŸÖ±’îÙà»Ãà¯»ÃîΩΩ¡—•Ω∏¯ΩÕï±ïç–¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘Õ—ÖëºÒÕï±ïç–Å•êÙâΩ…çÖµïπ—ΩÕ—Öëºà¯ÒΩ¡—•Ω∏˘IÖÕç’π°ºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘πŸ•ÖëºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘¡…ΩŸÖëºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘Iïç’ÕÖëºΩΩ¡—•Ω∏¯ΩÕï±ïç–¯Ω±Öâï∞¯Ò±Öâï∞Åç±ÖÕÃÙâô’±∞à˘Ωπëßü’ïÃÅçΩµï…ç•Ö•ÃÒ—ï·—Ö…ïÑÅ•êÙâΩ…çÖµïπ—ΩΩπë•çΩïÃàÅ…Ω›ÃÙàÃàÅ¡±Öçï°Ω±ëï»ÙâA…ÖÈº∞ÅôΩ…µÑÅëîÅ¡ÖùÖµïπ—º∞Åï·ç±’œ’ïÃÅîÅΩâÕï…Ÿáü’ïÃ∏à¯Ω—ï·—Ö…ïÑ¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞Åç±ÖÕÃÙâô’±∞à˘9Ω—ÖÃÅ•π—ï…πÖÃÒ—ï·—Ö…ïÑÅ•êÙâΩ…çÖµïπ—Ω9Ω—ÖÃàÅ…Ω›ÃÙà»àÅ¡±Öçï°Ω±ëï»ÙâÕ—ÖÃÅπΩ—ÖÃÅªçºÅÖ¡Ö…ïçï¥ÅπºÅ…ï±Ö”Õ…•ºÅïπ—…ïù’îÅÖºÅç±•ïπ—î∏à¯Ω—ï·—Ö…ïÑ¯Ω±Öâï∞¯(ÄÄÒë•ÿÅç±ÖÕÃÙâô’±∞ÅΩ…çÖµïπ—ºµ—Ω—Ö∞µâΩ‡à¯ÒÕ¡Ö∏˘M’â—Ω—Ö∞ÄÒÕ—…ΩπúÅ•êÙâΩ…çÖµïπ—ΩM’â—Ω—Ö±A…ïŸ•ï‹à¯¿∞¿¿Éä
+∞ΩÕ—…Ωπú¯ΩÕ¡Ö∏¯ÒÕ¡Ö∏˘ïÕçΩπ—ºÄÒÕ—…ΩπúÅ•êÙâΩ…çÖµïπ—ΩïÕçΩπ—ΩA…ïŸ•ï‹à¯¿∞¿¿Éä
+∞ΩÕ—…Ωπú¯ΩÕ¡Ö∏¯ÒÕ¡Ö∏˘%YÄÒÕ—…ΩπúÅ•êÙâΩ…çÖµïπ—Ω%ŸÖA…ïŸ•ï‹à¯¿∞¿¿Éä
+∞ΩÕ—…Ωπú¯ΩÕ¡Ö∏¯ÒÕ¡Ö∏Åç±ÖÕÃÙâù…Öπêà˘QΩ—Ö∞ÄÒÕ—…ΩπúÅ•êÙâΩ…çÖµïπ—ΩQΩ—Ö±A…ïŸ•ï‹à¯¿∞¿¿Éä
+∞ΩÕ—…Ωπú¯ΩÕ¡Ö∏¯Ωë•ÿ¯(ÄÄÒë•ÿÅç±ÖÕÃÙâÖç—•ΩπÃÅô’±∞à¯Òâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙââ—∏Å±•ù°–àÅëÖ—Ñµç±ΩÕîÙâΩ…çÖµïπ—Ω•Ö±Ωúà˘Öπçï±Ö»Ωâ’——Ω∏¯Òâ’——Ω∏Å•êÙâΩ…çÖµïπ—ΩM’âµ•–àÅç±ÖÕÃÙââ—∏Å¡…•µÖ…‰à˘’Ö…ëÖ»ÅΩÀùÖµïπ—ºΩâ’——Ω∏¯Ωë•ÿ¯(ΩôΩ…¥¯Ωë•Ö±Ωú¯((Òë•Ö±ΩúÅ•êÙâç’Õ—Ω•Ö±Ωúà¯ÒôΩ…¥Å•êÙâç’Õ—ΩΩ…¥àÅç±ÖÕÃÙâµΩëÖ∞µôΩ…¥à¯(ÄÄÒ†Ã˘9ΩŸºÄºÅïë•—Ö»Åç’Õ—ºΩ†Ã¯Ò•π¡’–Å—Â¡îÙâ°•ëëï∏àÅ•êÙâç’Õ—Ω%êà¯(ÄÄÒ±Öâï∞˘=â…ÑÒÕï±ïç–Å•êÙâç’Õ—Ω=â…Ö%êàÅ…ï≈’•…ïê¯ΩÕï±ïç–¯Ω±Öâï∞¯Ò±Öâï∞˘Ö—ïùΩ…•ÑÒÕï±ïç–Å•êÙâç’Õ—ΩÖ—ïùΩ…•Ñà¯ÒΩ¡—•Ω∏˘5Ö—ï…•Ö•ÃΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘7çºÅëîÅΩâ…ÑΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘M’âïµ¡…ï•—ï•…ΩÃΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘7Ö≈’•πÖÃΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘πëÖ•µïÃΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘π—’±°ºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘Ωµâ’Õ”µŸï∞ΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘AΩ…—ÖùïπÃΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘ï……Öµïπ—ÖÃΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘Mïù’…ΩÃΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘=’—…ΩÃΩΩ¡—•Ω∏¯ΩÕï±ïç–¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘9ΩµîÅëÑÅïµ¡…ïÕÑÄºÅôΩ…πïçïëΩ»Ò•π¡’–Å•êÙâç’Õ—Ω9Ωµïµ¡…ïÕÑàÅ¡±Öçï°Ω±ëï»Ùâ‡∏ËÅΩ…πïçïëΩ»∞Å1ëÑ∏à¯Ω±Öâï∞¯Ò±Öâï∞˘;
+ËÅëÑÅôÖ—’…ÑÒ•π¡’–Å•êÙâç’Õ—Ω9’µï…ΩÖ—’…ÑàÅ¡±Öçï°Ω±ëï»Ùâ‡∏ËÅPÄ»¿»ÿºƒ»Ãà¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘ïÕç…ßüçºÒ•π¡’–Å•êÙâç’Õ—ΩïÕç…•çÖºàÅ…ï≈’•…ïê¯Ω±Öâï∞¯Ò±Öâï∞˘YÖ±Ω»ÅÕï¥Å%YÒ•π¡’–Å•êÙâç’Õ—ΩYÖ±Ω»àÅ—Â¡îÙâπ’µâï»àÅÕ—ï¿Ùà¿∏¿ƒàÅ…ï≈’•…ïê¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘%YÄîÒÕï±ïç–Å•êÙâç’Õ—Ω%ŸÑà¯ÒΩ¡—•Ω∏ÅŸÖ±’îÙà¿à¯¿îΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏ÅŸÖ±’îÙàÿà¯ÿîΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏ÅŸÖ±’îÙà»Ãà¯»ÃîΩΩ¡—•Ω∏¯ΩÕï±ïç–¯Ω±Öâï∞¯Ò±Öâï∞˘Ö—ÑÒ•π¡’–Å•êÙâç’Õ—ΩÖ—ÑàÅ—Â¡îÙâëÖ—îà¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘Õ—ÖëºÅëºÅ¡ÖùÖµïπ—ºÒÕï±ïç–Å•êÙâç’Õ—ΩÕ—ÖëΩAÖùÖµïπ—ºà¯ÒΩ¡—•Ω∏ÅŸÖ±’îÙâ¡ïπëïπ—îà˘Aïπëïπ—îΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏ÅŸÖ±’îÙâ¡Öùºà˘AÖùºΩΩ¡—•Ω∏¯ΩÕï±ïç–¯Ω±Öâï∞¯Ò±Öâï∞˘Ö—ÑÅëîÅŸïπç•µïπ—ºÒ•π¡’–Å•êÙâç’Õ—ΩÖ—ÖYïπç•µïπ—ºàÅ—Â¡îÙâëÖ—îà¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞Åç±ÖÕÃÙâô’±∞à˘Ö—’…ÑÄ°AÅΩ‘Å•µÖùï¥∞Å∑Ö·•µºÄ»‘Å5§Ò•π¡’–Å•êÙâç’Õ—Ωπï·ºàÅ—Â¡îÙâô•±îàÅÖççï¡–ÙâÖ¡¡±•çÖ—•Ω∏Ω¡ëò±•µÖùîΩ©¡ïú±•µÖùîΩ¡πú±•µÖùîΩ›ïâ¿±•µÖùîΩ°ï•åà¯Ω±Öâï∞¯(ÄÄÒë•ÿÅ•êÙâç’Õ—Ωπï·Ω—’Ö∞àÅç±ÖÕÃÙâô’±∞Åç’Õ—ºµÖπï·ºµÖ—’Ö∞Å°•ëëï∏à¯Ωë•ÿ¯(ÄÄÒë•ÿÅç±ÖÕÃÙâô’±∞Åç’Õ—ºµ—Ω—Ö∞µ¡…ïŸ•ï‹à¯ÒÕ¡Ö∏˘QΩ—Ö∞ÅçΩ¥Å%YΩÕ¡Ö∏¯ÒÕ—…ΩπúÅ•êÙâç’Õ—ΩQΩ—Ö±A…ïŸ•ï‹à¯¿∞¿¿Éä
+∞ΩÕ—…Ωπú¯Ωë•ÿ¯(ÄÄÒë•ÿÅç±ÖÕÃÙâÖç—•ΩπÃà¯Òâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙââ—∏Å±•ù°–àÅëÖ—Ñµç±ΩÕîÙâç’Õ—Ω•Ö±Ωúà˘Öπçï±Ö»Ωâ’——Ω∏¯Òâ’——Ω∏Åç±ÖÕÃÙââ—∏Å¡…•µÖ…‰à˘’Ö…ëÖ»Ωâ’——Ω∏¯Ωë•ÿ¯(ΩôΩ…¥¯Ωë•Ö±Ωú¯((Òë•Ö±ΩúÅ•êÙâç’Õ—ΩAÖùÖµïπ—Ω•Ö±Ωúà¯ÒôΩ…¥Å•êÙâç’Õ—ΩAÖùÖµïπ—ΩΩ…¥àÅç±ÖÕÃÙâµΩëÖ∞µôΩ…¥à¯(ÄÄÒ†Ã˘AÖùÖµïπ—ΩÃÅÖºÅôΩ…πïçïëΩ»Ω†Ã¯Ò•π¡’–Å—Â¡îÙâ°•ëëï∏àÅ•êÙâç’Õ—ΩAÖùÖµïπ—Ω’Õ—Ω%êà¯(ÄÄÒë•ÿÅ•êÙâç’Õ—ΩAÖùÖµïπ—ΩIïÕ’µºàÅç±ÖÕÃÙâô’±∞Åç’Õ—ºµ—Ω—Ö∞µ¡…ïŸ•ï‹à¯Ωë•ÿ¯(ÄÄÒ±Öâï∞˘YÖ±Ω»Å¡ÖùºÒ•π¡’–Å•êÙâç’Õ—ΩAÖùÖµïπ—ΩYÖ±Ω»àÅ—Â¡îÙâπ’µâï»àÅµ•∏Ùà¿∏¿ƒàÅÕ—ï¿Ùà¿∏¿ƒàÅ…ï≈’•…ïê¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘Ö—ÑÒ•π¡’–Å•êÙâç’Õ—ΩAÖùÖµïπ—ΩÖ—ÑàÅ—Â¡îÙâëÖ—îàÅ…ï≈’•…ïê¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘7•—ΩëºÒÕï±ïç–Å•êÙâç’Õ—ΩAÖùÖµïπ—Ω5ï—Ωëºà¯ÒΩ¡—•Ω∏˘Q…ÖπÕôïÀ©πç•ÑΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘Ö…”çºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘9’µïÀÖ…•ºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘°ï≈’îΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘•â•—ºÅë•…ï—ºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘=’—…ºΩΩ¡—•Ω∏¯ΩÕï±ïç–¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘IïôïÀ©πç•ÑÒ•π¡’–Å•êÙâç’Õ—ΩAÖùÖµïπ—ΩIïôï…ïπç•ÑàÅ¡±Öçï°Ω±ëï»Ùâ‡∏ËÅçΩµ¡…ΩŸÖ—•ŸºÅΩ‘ÅΩ¡ï…áüçºà¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞Åç±ÖÕÃÙâô’±∞à˘=âÕï…Ÿáü’ïÃÒ—ï·—Ö…ïÑÅ•êÙâç’Õ—ΩAÖùÖµïπ—Ω=âÕï…ŸÖçΩïÃàÅ…Ω›ÃÙà»à¯Ω—ï·—Ö…ïÑ¯Ω±Öâï∞¯(ÄÄÒë•ÿÅ•êÙâç’Õ—ΩAÖùÖµïπ—Ω1•Õ—ÑàÅç±ÖÕÃÙâô’±∞à¯Ωë•ÿ¯(ÄÄÒë•ÿÅç±ÖÕÃÙâÖç—•ΩπÃà¯Òâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙââ—∏Å±•ù°–àÅëÖ—Ñµç±ΩÕîÙâç’Õ—ΩAÖùÖµïπ—Ω•Ö±Ωúà˘ïç°Ö»Ωâ’——Ω∏¯Òâ’——Ω∏Åç±ÖÕÃÙââ—∏Å¡…•µÖ…‰à˘Iïù•Õ—Ö»Å¡ÖùÖµïπ—ºΩâ’——Ω∏¯Ωë•ÿ¯(ΩôΩ…¥¯Ωë•Ö±Ωú¯((Òë•Ö±ΩúÅ•êÙâ¡ÖùÖµïπ—Ω•Ö±Ωúà¯ÒôΩ…¥Å•êÙâ¡ÖùÖµïπ—ΩΩ…¥àÅç±ÖÕÃÙâµΩëÖ∞µôΩ…¥à¯(ÄÄÒ†Ã˘9ΩŸºÄºÅïë•—Ö»Å¡ÖùÖµïπ—ºΩ†Ã¯Ò•π¡’–Å—Â¡îÙâ°•ëëï∏àÅ•êÙâ¡ÖùÖµïπ—Ω%êà¯(ÄÄÒ±Öâï∞˘=â…ÑÒÕï±ïç–Å•êÙâ¡ÖùÖµïπ—Ω=â…Ö%êàÅ…ï≈’•…ïê¯ΩÕï±ïç–¯Ω±Öâï∞¯Ò±Öâï∞˘ïÕç…ßüçºÒ•π¡’–Å•êÙâ¡ÖùÖµïπ—ΩïÕç…•çÖºàÅ…ï≈’•…ïê¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘YÖ±Ω»Ò•π¡’–Å•êÙâ¡ÖùÖµïπ—ΩYÖ±Ω»àÅ—Â¡îÙâπ’µâï»àÅÕ—ï¿Ùà¿∏¿ƒàÅ…ï≈’•…ïê¯Ω±Öâï∞¯Ò±Öâï∞˘Ö—ÑÒ•π¡’–Å•êÙâ¡ÖùÖµïπ—ΩÖ—ÑàÅ—Â¡îÙâëÖ—îà¯Ω±Öâï∞¯(ÄÄÒ±Öâï∞˘Õ—ÖëºÒÕï±ïç–Å•êÙâ¡ÖùÖµïπ—ΩÕ—Öëºà¯ÒΩ¡—•Ω∏˘Iïçïâ•ëºΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘Aïπëïπ—îΩΩ¡—•Ω∏¯ÒΩ¡—•Ω∏˘¥ÅÖ—…ÖÕºΩΩ¡—•Ω∏¯ΩÕï±ïç–¯Ω±Öâï∞¯(ÄÄÒë•ÿÅç±ÖÕÃÙâÖç—•ΩπÃà¯Òâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅç±ÖÕÃÙââ—∏Å±•ù°–àÅëÖ—Ñµç±ΩÕîÙâ¡ÖùÖµïπ—Ω•Ö±Ωúà˘Öπçï±Ö»Ωâ’——Ω∏¯Òâ’——Ω∏Åç±ÖÕÃÙââ—∏Å¡…•µÖ…‰à˘’Ö…ëÖ»Ωâ’——Ω∏¯Ωë•ÿ¯(ΩôΩ…¥¯Ωë•Ö±Ωú¯((ÒÕç…•¡–ÅÕ…åÙâ°——¡ÃËºΩçë∏π©Õëï±•Ÿ»ππï–Ωπ¡¥ΩÕ’¡ÖâÖÕîΩÕ’¡ÖâÖÕîµ©Õ »à¯ΩÕç…•¡–¯(ÒÕç…•¡–ÅÕ…åÙâÖÕÕï—ÃΩ©ÃΩçΩπô•úπ©Ãà¯ΩÕç…•¡–¯(ÒÕç…•¡–Å—Â¡îÙâµΩë’±îàÅÕ…åÙâÖÕÕï—ÃΩ©ÃΩÖ¡¿π©Ãà¯ΩÕç…•¡–¯(ΩâΩë‰¯(Ω°—µ∞¯(
