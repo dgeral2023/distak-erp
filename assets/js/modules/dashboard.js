@@ -49,6 +49,8 @@ export function renderDashboard(){
   const orcamentos=store.orcamentos||[];
   const custos=store.custos||[];
   const pagamentos=store.pagamentos||[];
+  const funcionarios=store.funcionarios||[];
+  const funcionarioHoras=store.funcionarioHoras||[];
 
   const contratado=obras.reduce((s,o)=>s+obraValor(o),0);
   const totalCustos=custos.reduce((s,c)=>s+num(c.valor||c.valor_sem_iva),0);
@@ -57,6 +59,11 @@ export function renderDashboard(){
   const lucro=contratado-totalCustos;
   const margem=contratado>0?lucro/contratado*100:0;
   const clientesAtivos=clientes.filter(c=>norm(c.estado)==="ativo").length;
+  const thisMonth=new Date().toISOString().slice(0,7);
+  const monthHours=funcionarioHoras.filter(row=>String(row.data||"").startsWith(thisMonth));
+  const totalTeamHours=monthHours.reduce((sum,row)=>sum+num(row.horas),0);
+  const teamCost=monthHours.reduce((sum,row)=>sum+num(row.horas)*num(row.funcionarios?.custo_hora),0);
+  const overdueCosts=custos.filter(c=>c.estado_pagamento!=="pago"&&c.data_vencimento&&new Date(`${c.data_vencimento}T23:59:59`)<new Date());
 
   $("statValorContratado").textContent=money(contratado);
   $("statPagamentos").textContent=money(recebido);
@@ -76,13 +83,20 @@ export function renderDashboard(){
   $("statOrcamentos").textContent=orcamentos.length;
   $("statMargemMedia").textContent=`${margem.toFixed(1)}%`;
   $("dashboardUpdatedAt").textContent=new Date().toLocaleString("pt-PT",{dateStyle:"short",timeStyle:"short"});
+  $("statEquipaAtiva").textContent=funcionarios.filter(f=>norm(f.estado)==="ativo").length;
+  $("statHorasMes").textContent=`${totalTeamHours.toFixed(1)} h`;
+  $("statCustoEquipaMes").textContent=money(teamCost);
+  $("statCustosVencidos").textContent=money(overdueCosts.reduce((sum,c)=>sum+num(c.valor||c.valor_sem_iva),0));
+  $("statCustosVencidosQtd").textContent=`${overdueCosts.length} documento(s)`;
 
   renderFinanceChart(custos,pagamentos);
   renderStatusChart(obras);
   renderTopWorks(obras,custos,pagamentos);
-  renderAlerts(obras,orcamentos,pagamentos);
+  renderAlerts(obras,orcamentos,pagamentos,overdueCosts);
   renderCategories(custos);
   renderMovements(custos,pagamentos);
+  renderPipeline(orcamentos);
+  renderTeam(funcionarios,monthHours);
 }
 
 function renderFinanceChart(custos,pagamentos){
@@ -134,15 +148,28 @@ function renderTopWorks(obras,custos,pagamentos){
   }).join("")}</tbody></table>`:'<div class="dashboard-empty">Ainda não existem obras registadas.</div>';
 }
 
-function renderAlerts(obras,orcamentos,pagamentos){
+function renderAlerts(obras,orcamentos,pagamentos,overdueCosts=[]){
   const alerts=[];
   obras.filter(isAlert).forEach(o=>alerts.push({level:"danger",title:o.nome,text:`Estado: ${o.estado}`}));
   obras.filter(o=>obraValor(o)>0&&!pagamentos.some(p=>String(p.obra_id)===String(o.id))).forEach(o=>alerts.push({level:"warning",title:o.nome,text:"Obra com valor contratado e sem pagamentos registados."}));
   obras.filter(o=>num(o.progresso)>=100&&!isCompleted(o)).forEach(o=>alerts.push({level:"warning",title:o.nome,text:"Progresso a 100%, mas o estado ainda não está concluído."}));
+  overdueCosts.forEach(c=>alerts.push({level:"danger",title:c.nome_empresa||c.descricao||"Custo vencido",text:`Pagamento vencido em ${fmtDate(c.data_vencimento)} · ${money(c.valor||c.valor_sem_iva)}`}));
   if(!orcamentos.length) alerts.push({level:"info",title:"Orçamentos",text:"Ainda não existem orçamentos registados."});
   $("dashboardAlerts").innerHTML=alerts.length?alerts.slice(0,8).map(a=>`<article class="dashboard-alert ${a.level}">
     <span class="alert-dot"></span><div><strong>${esc(a.title)}</strong><p>${esc(a.text)}</p></div>
   </article>`).join(""):'<div class="dashboard-success">Sem alertas críticos neste momento.</div>';
+}
+
+function renderPipeline(orcamentos){
+  const states=["Rascunho","Enviado","Aprovado","Recusado"];
+  const rows=states.map(state=>{const items=orcamentos.filter(o=>norm(o.estado)===norm(state));return {state,count:items.length,value:items.reduce((sum,o)=>sum+orcamentoTotal(o),0)}});
+  const max=Math.max(1,...rows.map(row=>row.value));
+  $("dashboardBudgetPipeline").innerHTML=rows.map(row=>`<article><div><span>${esc(row.state)}</span><strong>${money(row.value)}</strong><small>${row.count} orçamento(s)</small></div><div class="pipeline-track"><span class="pipeline-${norm(row.state)}" style="width:${row.value/max*100}%"></span></div></article>`).join("");
+}
+
+function renderTeam(funcionarios,hours){
+  const rows=funcionarios.filter(f=>norm(f.estado)!=="inativo").map(f=>{const employeeHours=hours.filter(row=>String(row.funcionario_id)===String(f.id)).reduce((sum,row)=>sum+num(row.horas),0);return {...f,employeeHours,cost:employeeHours*num(f.custo_hora)}}).sort((a,b)=>b.employeeHours-a.employeeHours).slice(0,7);
+  $("dashboardTeam").innerHTML=rows.length?rows.map(row=>`<article><div class="team-avatar">${esc(row.nome?.[0]||"F")}</div><div><strong>${esc(row.nome)}</strong><small>${esc(row.funcao||"Sem função")}</small></div><div class="team-hours"><strong>${row.employeeHours.toFixed(1)} h</strong><small>${money(row.cost)}</small></div></article>`).join(""):'<div class="dashboard-empty">Adicione funcionários para acompanhar a equipa.</div>';
 }
 
 function renderCategories(custos){
