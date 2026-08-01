@@ -1,6 +1,6 @@
 import {store} from "../core/store.js";
 import {$,esc,money,toast} from "../core/ui.js";
-import {save,remove} from "../core/supabase.js";
+import {db,save,remove} from "../core/supabase.js";
 import {renderObraFotografias} from "./fotografias.js";
 
 let obraFichaAtual=null;
@@ -150,37 +150,103 @@ function activateObraTab(tab){
   if(panel)panel.classList.remove("hidden");
 }
 
-function workStorageKey(module){return `distak:v27:${module}:${obraFichaAtual?.id||"obra"}`}
-function readLocal(module,fallback){try{return JSON.parse(localStorage.getItem(workStorageKey(module)))??fallback}catch{return fallback}}
-function writeLocal(module,value){localStorage.setItem(workStorageKey(module),JSON.stringify(value))}
+const operationalTables={
+  team:{table:"obra_equipa_registos",name:"nome",detail:"funcao"},
+  materials:{table:"obra_materiais",name:"material",detail:"quantidade"},
+  hours:{table:"obra_horas",name:"funcionario_nome",detail:"horario"},
+  occurrences:{table:"obra_ocorrencias",name:"tipo",detail:"descricao"}
+};
+const today=()=>new Date().toISOString().slice(0,10);
+const formatWorkDate=value=>value?new Date(value).toLocaleString("pt-PT"):"—";
 
-function renderWorkModule(action){
+async function fetchWorkEntries(action){
+  const config=operationalTables[action];
+  if(!config)return [];
+  const {data,error}=await db.from(config.table)
+    .select("*")
+    .eq("obra_id",obraFichaAtual.id)
+    .order("criado_em",{ascending:false})
+    .limit(50);
+  if(error)throw error;
+  return data||[];
+}
+
+async function renderWorkModule(action){
   if(!obraFichaAtual)return;
   activateObraTab("operacional");
   const host=$("mobileWorkModule");
   const labels={checklist:["✅","Checklist diário","Verificações essenciais antes e no final do trabalho."],team:["👷","Equipa em obra","Registo rápido da equipa presente."],materials:["🧱","Materiais","Registe material utilizado ou em falta."],hours:["⏱️","Horas de trabalho","Guarde entrada, saída e observações."],reports:["📄","Relatórios","Acesso ao resumo e preparação do relatório da obra."],occurrences:["⚠️","Ocorrências","Registe problemas, atrasos ou situações de segurança."]};
   const [icon,title,desc]=labels[action]||["📌","Painel de obra","Registo operacional da obra."];
   const head=`<div class="work-module-head"><div><h3>${title}</h3><p>${desc}</p></div><span class="work-module-icon">${icon}</span></div>`;
-  if(action==="checklist"){
-    const items=["EPI verificado","Acesso seguro","Água disponível","Eletricidade disponível","Zona protegida","Cliente informado","Ferramentas verificadas","Limpeza final"];
-    const saved=readLocal("checklist",{});
-    host.innerHTML=`<section class="work-module-card">${head}<div class="daily-checklist">${items.map((x,i)=>`<label class="daily-check"><input type="checkbox" data-check-index="${i}" ${saved[i]?"checked":""}><span>${x}</span></label>`).join("")}</div><p class="work-local-note">Guardado neste dispositivo. A sincronização Supabase será ligada na próxima fase.</p></section>`;
-    host.querySelectorAll("[data-check-index]").forEach(el=>el.addEventListener("change",()=>{saved[el.dataset.checkIndex]=el.checked;writeLocal("checklist",saved);toast("Checklist guardada.")}));
-    return;
+  host.innerHTML=`<section class="work-module-card">${head}<p class="work-local-note">A carregar registos…</p></section>`;
+
+  try{
+    if(action==="checklist"){
+      const items=["EPI verificado","Acesso seguro","Água disponível","Eletricidade disponível","Zona protegida","Cliente informado","Ferramentas verificadas","Limpeza final"];
+      const {data,error}=await db.from("obra_checklists")
+        .select("*")
+        .eq("obra_id",obraFichaAtual.id)
+        .eq("data",today())
+        .maybeSingle();
+      if(error)throw error;
+      const record=data||null;
+      const saved=record?.itens||{};
+      host.innerHTML=`<section class="work-module-card">${head}<div class="daily-checklist">${items.map((x,i)=>`<label class="daily-check"><input type="checkbox" data-check-index="${i}" ${saved[i]?"checked":""}><span>${x}</span></label>`).join("")}</div><label>Observações<textarea data-check-observations rows="2">${esc(record?.observacoes||"")}</textarea></label><p class="work-local-note">Sincronizado com o Supabase para esta obra e data.</p></section>`;
+      const persist=async()=>{
+        const payload={obra_id:obraFichaAtual.id,data:today(),itens:saved,observacoes:host.querySelector("[data-check-observations]")?.value||null,atualizado_em:new Date().toISOString()};
+        const query=record?.id
+          ?db.from("obra_checklists").update(payload).eq("id",record.id)
+          :db.from("obra_checklists").insert(payload);
+        const {error:saveError}=await query;
+        if(saveError)throw saveError;
+      };
+      host.querySelectorAll("[data-check-index]").forEach(el=>el.addEventListener("change",async()=>{
+        saved[el.dataset.checkIndex]=el.checked;
+        try{await persist();toast("Checklist sincronizada.")}catch(err){toast(err.message,"error")}
+      }));
+      host.querySelector("[data-check-observations]")?.addEventListener("change",async()=>{
+        try{await persist();toast("Observações sincronizadas.")}catch(err){toast(err.message,"error")}
+      });
+      return;
+    }
+
+    const fields={
+      team:`<label>Nome do funcionário<input name="nome" required placeholder="Nome"></label><label>Função<input name="detalhe" placeholder="Ex.: Pintor, pedreiro"></label>`,
+      materials:`<label>Material<input name="nome" required placeholder="Ex.: Primário"></label><label>Quantidade<input name="detalhe" placeholder="Ex.: 2 latas"></label>`,
+      hours:`<label>Funcionário<input name="nome" required placeholder="Nome"></label><label>Horário<input name="detalhe" placeholder="Ex.: 08:30–17:30"></label>`,
+      occurrences:`<label>Tipo<select name="nome"><option>Cliente</option><option>Material</option><option>Segurança</option><option>Tempo</option><option>Outro</option></select></label><label>Descrição<textarea name="detalhe" rows="4" required placeholder="Descreva a ocorrência"></textarea></label>`
+    };
+    if(action==="reports"){
+      host.innerHTML=`<section class="work-module-card">${head}<div class="work-entry-list"><div class="work-entry"><strong>${esc(obraFichaAtual.nome)}</strong><small>Estado: ${esc(obraFichaAtual.estado||"—")} · Progresso: ${obraFichaAtual.progresso||0}%</small></div><div class="work-entry"><strong>Relatório fotográfico</strong><small>Abra Fotografias para consultar e organizar os registos.</small></div></div><div class="work-form-actions"><button class="btn primary" type="button" data-work-report-photos>Ver fotografias</button></div></section>`;
+      host.querySelector("[data-work-report-photos]")?.addEventListener("click",()=>activateObraTab("fotografias"));
+      return;
+    }
+
+    const entries=await fetchWorkEntries(action);
+    const config=operationalTables[action];
+    host.innerHTML=`<section class="work-module-card">${head}<form class="work-form" data-work-form="${action}">${fields[action]||""}<label>Observação opcional<textarea name="obs" rows="2"></textarea></label><div class="work-form-actions"><button class="btn primary" type="submit">Guardar e sincronizar</button></div></form><p class="work-local-note">Registos sincronizados com o Supabase.</p><div class="work-entry-list">${entries.map(e=>`<div class="work-entry"><strong>${esc(e[config.name]||title)}</strong><span>${esc(e[config.detail]||"")}${e.observacoes?` · ${esc(e.observacoes)}`:""}</span><small>${esc(formatWorkDate(e.criado_em))}</small></div>`).join("")}</div></section>`;
+    host.querySelector("form")?.addEventListener("submit",async e=>{
+      e.preventDefault();
+      const button=e.currentTarget.querySelector("button[type=submit]");
+      const fd=new FormData(e.currentTarget);
+      const payload={obra_id:obraFichaAtual.id,observacoes:fd.get("obs")||null};
+      payload[config.name]=fd.get("nome")||title;
+      payload[config.detail]=fd.get("detalhe")||null;
+      button.disabled=true;
+      try{
+        const {error}=await db.from(config.table).insert(payload);
+        if(error)throw error;
+        toast("Registo sincronizado.");
+        await renderWorkModule(action);
+      }catch(err){
+        toast(err.message,"error");
+        button.disabled=false;
+      }
+    });
+  }catch(err){
+    host.innerHTML=`<section class="work-module-card">${head}<p class="error">${esc(err.message)}</p><button class="btn light" type="button" data-work-retry>Voltar a tentar</button></section>`;
+    host.querySelector("[data-work-retry]")?.addEventListener("click",()=>renderWorkModule(action));
   }
-  const fields={
-    team:`<label>Nome do funcionário<input name="nome" required placeholder="Nome"></label><label>Função<input name="detalhe" placeholder="Ex.: Pintor, pedreiro"></label>`,
-    materials:`<label>Material<input name="nome" required placeholder="Ex.: Primário"></label><label>Quantidade<input name="detalhe" placeholder="Ex.: 2 latas"></label>`,
-    hours:`<label>Funcionário<input name="nome" required placeholder="Nome"></label><label>Horário<input name="detalhe" placeholder="Ex.: 08:30–17:30"></label>`,
-    occurrences:`<label>Tipo<select name="nome"><option>Cliente</option><option>Material</option><option>Segurança</option><option>Tempo</option><option>Outro</option></select></label><label>Descrição<textarea name="detalhe" rows="4" required placeholder="Descreva a ocorrência"></textarea></label>`
-  };
-  if(action==="reports"){
-    host.innerHTML=`<section class="work-module-card">${head}<div class="work-entry-list"><div class="work-entry"><strong>${esc(obraFichaAtual.nome)}</strong><small>Estado: ${esc(obraFichaAtual.estado||"—")} · Progresso: ${obraFichaAtual.progresso||0}%</small></div><div class="work-entry"><strong>Relatório fotográfico</strong><small>Abra Fotografias para consultar e organizar os registos.</small></div></div><div class="work-form-actions"><button class="btn primary" type="button" data-work-report-photos>Ver fotografias</button></div></section>`;
-    host.querySelector("[data-work-report-photos]")?.addEventListener("click",()=>activateObraTab("fotografias"));return;
-  }
-  const entries=readLocal(action,[]);
-  host.innerHTML=`<section class="work-module-card">${head}<form class="work-form" data-work-form="${action}">${fields[action]||""}<label>Observação opcional<textarea name="obs" rows="2"></textarea></label><div class="work-form-actions"><button class="btn primary" type="submit">Guardar</button></div></form><p class="work-local-note">Registo provisório guardado neste dispositivo.</p><div class="work-entry-list">${entries.slice().reverse().map(e=>`<div class="work-entry"><strong>${esc(e.nome)}</strong><span>${esc(e.detalhe||"")}</span><small>${esc(e.data)}</small></div>`).join("")}</div></section>`;
-  host.querySelector("form")?.addEventListener("submit",e=>{e.preventDefault();const fd=new FormData(e.currentTarget);entries.push({nome:fd.get("nome")||title,detalhe:[fd.get("detalhe"),fd.get("obs")].filter(Boolean).join(" · "),data:new Date().toLocaleString("pt-PT")});writeLocal(action,entries);toast("Registo guardado.");renderWorkModule(action)});
 }
 
 function handleWorkAction(action){
