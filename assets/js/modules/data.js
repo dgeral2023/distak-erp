@@ -5,7 +5,7 @@ export async function refreshData(){
   store.clientes = await query("clientes");
   store.obras = await query("obras", "*,clientes(nome)");
 
-  store.orcamentos = await query("orcamentos", "*,obras(nome),clientes(nome)");
+  store.orcamentos = await query("orcamentos", "*,obras(nome),clientes(nome,nif,email,telefone,morada,codigo_postal,localidade),orcamento_itens(*)");
 
   store.custos = await query("custos", "*,obras(nome),custo_pagamentos(*)");
   store.pagamentos = await query("pagamentos", "*,obras(nome)");
