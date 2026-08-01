@@ -4,6 +4,9 @@ import {save,remove,db} from "../core/supabase.js";
 
 let crmClienteId=null;
 let crmData={};
+const CLIENT_DOCUMENT_BUCKET="distak-documentos";
+const safeFileName=name=>name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9._-]+/g,"-");
+const fileSize=value=>Number(value||0)<1048576?`${(Number(value||0)/1024).toFixed(1)} KB`:`${(Number(value||0)/1048576).toFixed(1)} MB`;
 
 export function renderClientes(rows=store.clientes){
   $("clientesTable").innerHTML=rows.length?`<table><thead><tr><th>Nome</th><th>NIF</th><th>Email</th><th>Telefone</th><th>Tipo</th><th>Estado</th><th>Ações</th></tr></thead><tbody>${rows.map(c=>`<tr><td><button class="crm-client-link" data-view-cliente="${c.id}">${esc(c.nome)}</button></td><td>${esc(c.nif||"")}</td><td>${esc(c.email||"")}</td><td>${esc(c.telefone||"")}</td><td>${esc(c.tipo||"")}</td><td><span class="badge">${esc(c.estado||"Ativo")}</span></td><td><button class="btn small primary" data-view-cliente="${c.id}">Ficha</button> <button class="btn small light" data-edit-cliente="${c.id}">Editar</button> <button class="btn small danger" data-del-cliente="${c.id}">Apagar</button></td></tr>`).join("")}</tbody></table>`:"<p>Sem clientes.</p>";
@@ -133,7 +136,7 @@ function renderCrm(){
   $("crmPagamentosLista").innerHTML=pagamentos.length?simpleTable(["Descrição","Valor","Estado"],pagamentos.map(p=>[p.descricao,money(p.valor),p.estado])):empty("Sem pagamentos.");
   $("crmNotasLista").innerHTML=notas.length?cards(notas,n=>`${n.importante?'<span class="badge crm-important">Importante</span> ':''}${new Date(n.criado_em).toLocaleDateString("pt-PT")}`,esc(n.nota),"nota",n.id):empty("Sem notas.");
   $("crmComunicacoesLista").innerHTML=comunicacoes.length?cards(comunicacoes,c=>`${esc(c.tipo)} · ${new Date(c.data_comunicacao).toLocaleString("pt-PT")}`,`${esc(c.assunto||"")} — ${esc(c.descricao)}`,"comunicacao",c.id):empty("Sem comunicações.");
-  $("crmDocumentosLista").innerHTML=documentos.length?cards(documentos,d=>esc(d.nome),`${esc(d.categoria)} · ${esc(d.mime_type||"")}`,"documento",d.id,false):empty("Sem documentos.");
+  $("crmDocumentosLista").innerHTML=documentos.length?documentos.map(d=>`<article class="crm-list-card"><div><strong>${esc(d.nome)}</strong><p>${esc(d.categoria)} · ${esc(fileSize(d.tamanho_bytes))} · ${new Date(d.criado_em).toLocaleDateString("pt-PT")}</p></div><div class="crm-document-actions"><button class="btn small primary" data-crm-document-open="${d.id}">Abrir</button><button class="btn small danger" data-crm-document-delete="${d.id}">Apagar</button></div></article>`).join(""):empty("Sem documentos.");
 }
 
 const field=(label,value)=>`<article class="crm-field"><span>${label}</span><strong>${esc(value||"—")}</strong></article>`;
@@ -211,6 +214,41 @@ async function deleteCrmRecord(value){
   catch(err){toast(err.message,"error")}
 }
 
+async function addDocument(event){
+  event.preventDefault();
+  if(!crmClienteId)return;
+  const file=$("crmDocumentoFicheiro").files?.[0];
+  if(!file)return;
+  if(file.size>25*1048576)return toast("O ficheiro excede 25 MB.","error");
+  const button=$("crmDocumentoSubmit");button.disabled=true;
+  const path=`clientes/${crmClienteId}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
+  try{
+    const {data:{user}}=await db.auth.getUser();
+    const {error:uploadError}=await db.storage.from(CLIENT_DOCUMENT_BUCKET).upload(path,file,{contentType:file.type||undefined});
+    if(uploadError)throw uploadError;
+    const {error}=await db.from("cliente_documentos").insert({cliente_id:crmClienteId,nome:$("crmDocumentoNome").value.trim(),categoria:$("crmDocumentoCategoria").value,storage_path:path,mime_type:file.type||null,tamanho_bytes:file.size,inserido_por:user?.id||null});
+    if(error){await db.storage.from(CLIENT_DOCUMENT_BUCKET).remove([path]);throw error}
+    event.currentTarget.reset();toast("Documento do cliente carregado.");await loadCrm(crmClienteId);
+  }catch(err){toast(err.message,"error")}finally{button.disabled=false}
+}
+
+async function openClientDocument(id){
+  const documentRow=crmData.documentos?.find(d=>String(d.id)===String(id));if(!documentRow)return;
+  const {data,error}=await db.storage.from(CLIENT_DOCUMENT_BUCKET).createSignedUrl(documentRow.storage_path,60);
+  if(error)return toast(error.message,"error");
+  const link=document.createElement("a");link.href=data.signedUrl;link.target="_blank";link.rel="noopener";link.click();
+}
+
+async function deleteClientDocument(id){
+  const documentRow=crmData.documentos?.find(d=>String(d.id)===String(id));
+  if(!documentRow||!confirm(`Apagar o documento "${documentRow.nome}"?`))return;
+  try{
+    const {error:storageError}=await db.storage.from(CLIENT_DOCUMENT_BUCKET).remove([documentRow.storage_path]);if(storageError)throw storageError;
+    const {error}=await db.from("cliente_documentos").delete().eq("id",id);if(error)throw error;
+    toast("Documento apagado.");await loadCrm(crmClienteId);
+  }catch(err){toast(err.message,"error")}
+}
+
 document.addEventListener("click",async e=>{
   const view=e.target.closest("[data-view-cliente]")?.dataset.viewCliente;
   if(view){
@@ -228,6 +266,10 @@ document.addEventListener("click",async e=>{
 
   const del=e.target.closest("[data-crm-delete]")?.dataset.crmDelete;
   if(del)deleteCrmRecord(del);
+  const openDocument=e.target.closest("[data-crm-document-open]")?.dataset.crmDocumentOpen;
+  if(openDocument)openClientDocument(openDocument);
+  const deleteDocument=e.target.closest("[data-crm-document-delete]")?.dataset.crmDocumentDelete;
+  if(deleteDocument)deleteClientDocument(deleteDocument);
 });
 
 document.addEventListener("DOMContentLoaded",()=>{
@@ -235,4 +277,5 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("crmMoradaForm")?.addEventListener("submit",addMorada);
   $("crmNotaForm")?.addEventListener("submit",addNota);
   $("crmComunicacaoForm")?.addEventListener("submit",addComunicacao);
+  $("crmDocumentoForm")?.addEventListener("submit",addDocument);
 });

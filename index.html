@@ -273,11 +273,298 @@
     </section>
 
     <section id="view-orcamentos" class="view hidden">
-      <div class="toolbar"><input id="orcamentoSearch" placeholder="Pesquisar orçamento"><button id="novoOrcamentoBtn" class="btn primary">Novo orçamento</button></div>
+      <div class="toolbar orcamento-toolbar">
+        <input id="orcamentoSearch" placeholder="Pesquisar número, cliente ou descrição">
+        <select id="orcamentoEstadoFiltro" aria-label="Filtrar orçamentos por estado"><option value="">Todos os estados</option><option>Rascunho</option><option>Enviado</option><option>Aprovado</option><option>Recusado</option></select>
+        <select id="orcamentoClienteFiltro" aria-label="Filtrar orçamentos por cliente"><option value="">Todos os clientes</option></select>
+        <button id="novoOrcamentoBtn" class="btn primary">Novo orçamento</button>
+      </div>
       <div class="panel"><div id="orcamentosTable"></div></div>
     </section>
 
-    <section id="view-cus…6367 tokens truncated…abel>
+    <section id="view-custos" class="view hidden">
+      <div class="toolbar custo-toolbar">
+        <input id="custoSearch" placeholder="Pesquisar empresa, fatura ou descrição">
+        <select id="custoObraFiltro" aria-label="Filtrar por obra"><option value="">Todas as obras</option></select>
+        <select id="custoEstadoFiltro" aria-label="Filtrar por estado"><option value="">Todos os estados</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
+        <input id="custoDataInicioFiltro" type="date" aria-label="Data inicial">
+        <input id="custoDataFimFiltro" type="date" aria-label="Data final">
+        <button id="custoLimparFiltros" class="btn light" type="button">Limpar</button>
+        <button id="novoCustoBtn" class="btn primary">Novo custo</button>
+      </div>
+      <div class="panel"><div id="custosTable"></div></div>
+      <div class="panel custo-supplier-panel"><h3>Resumo por fornecedor</h3><div id="custoSupplierReport"></div></div>
+    </section>
+
+    <section id="view-pagamentos" class="view hidden">
+      <div class="toolbar"><input id="pagamentoSearch" placeholder="Pesquisar pagamento"><button id="novoPagamentoBtn" class="btn primary">Novo pagamento</button></div>
+      <div class="panel"><div id="pagamentosTable"></div></div>
+    </section>
+
+    <section id="view-funcionario" class="view hidden">
+      <div class="panel"><h3>Obras atribuídas</h3><div id="funcionarioObras"></div></div>
+    </section>
+  </main>
+</section>
+
+<dialog id="clienteDialog"><form id="clienteForm" class="modal-form crm-client-form">
+  <h3>Novo / editar cliente</h3><input type="hidden" id="clienteId">
+  <label>Nome<input id="clienteNome" required></label>
+  <label>Tipo<select id="clienteTipo"><option>Particular</option><option>Empresa</option><option>Condomínio</option></select></label>
+  <label>NIF<input id="clienteNif"></label>
+  <label>Estado<select id="clienteEstado"><option>Potencial</option><option>Ativo</option><option>Inativo</option></select></label>
+  <label>Email<input id="clienteEmail" type="email"></label>
+  <label>Telefone<input id="clienteTelefone"></label>
+  <label>Telefone alternativo<input id="clienteTelefoneAlternativo"></label>
+  <label>Website<input id="clienteWebsite" type="url"></label>
+  <label>CAE<input id="clienteCae"></label>
+  <label>Morada<input id="clienteMorada"></label>
+  <label>Código postal<input id="clienteCodigoPostal"></label>
+  <label>Localidade<input id="clienteLocalidade"></label>
+  <label>País<input id="clientePais" value="Portugal"></label>
+  <label>Condições de pagamento<input id="clienteCondicoesPagamento"></label>
+  <label>Limite de crédito<input id="clienteLimiteCredito" type="number" step="0.01"></label>
+  <label class="full">Observações<textarea id="clienteObservacoes" rows="4"></textarea></label>
+  <div class="actions"><button type="button" class="btn light" data-close="clienteDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
+</form></dialog>
+
+
+<dialog id="clienteCrmDialog" class="crm-dialog">
+  <section class="crm-shell">
+    <header class="crm-head">
+      <div>
+        <span class="crm-kicker">Ficha de cliente</span>
+        <h2 id="crmClienteNome">Cliente</h2>
+        <p id="crmClienteMeta"></p>
+      </div>
+      <button type="button" class="crm-close" data-close="clienteCrmDialog" aria-label="Fechar">×</button>
+    </header>
+
+    <div class="crm-summary">
+      <article><span>Obras</span><strong id="crmTotalObras">0</strong></article>
+      <article><span>Orçamentos</span><strong id="crmTotalOrcamentos">0</strong></article>
+      <article><span>Recebido</span><strong id="crmTotalRecebido">0,00 €</strong></article>
+      <article><span>Contactos</span><strong id="crmTotalContactos">0</strong></article>
+      <article><span>Documentos</span><strong id="crmTotalDocumentos">0</strong></article>
+      <article><span>Último contacto</span><strong id="crmUltimaComunicacao">—</strong></article>
+    </div>
+
+    <nav class="crm-tabs" id="crmTabs">
+      <button class="active" data-crm-tab="dados">Dados gerais</button>
+      <button data-crm-tab="contactos">Contactos</button>
+      <button data-crm-tab="moradas">Moradas</button>
+      <button data-crm-tab="obras">Obras</button>
+      <button data-crm-tab="orcamentos">Orçamentos</button>
+      <button data-crm-tab="pagamentos">Pagamentos</button>
+      <button data-crm-tab="notas">Notas</button>
+      <button data-crm-tab="comunicacoes">Comunicações</button>
+      <button data-crm-tab="documentos">Documentos</button>
+    </nav>
+
+    <div class="crm-body">
+      <div id="crm-tab-dados" class="crm-tab-panel"></div>
+
+      <div id="crm-tab-contactos" class="crm-tab-panel hidden">
+        <form id="crmContactoForm" class="crm-inline-form">
+          <input type="hidden" id="crmContactoId">
+          <input id="crmContactoNome" placeholder="Nome" required>
+          <input id="crmContactoCargo" placeholder="Cargo">
+          <input id="crmContactoTelefone" placeholder="Telefone">
+          <input id="crmContactoEmail" type="email" placeholder="Email">
+          <label class="crm-check"><input id="crmContactoPrincipal" type="checkbox"> Principal</label>
+          <button class="btn primary">Guardar contacto</button>
+        </form>
+        <div id="crmContactosLista"></div>
+      </div>
+
+      <div id="crm-tab-moradas" class="crm-tab-panel hidden">
+        <form id="crmMoradaForm" class="crm-inline-form">
+          <input type="hidden" id="crmMoradaId">
+          <select id="crmMoradaTipo"><option>Faturação</option><option>Sede</option><option>Obra</option><option>Outra</option></select>
+          <input id="crmMoradaTexto" placeholder="Morada" required>
+          <input id="crmMoradaCodigoPostal" placeholder="Código postal">
+          <input id="crmMoradaLocalidade" placeholder="Localidade">
+          <label class="crm-check"><input id="crmMoradaPrincipal" type="checkbox"> Principal</label>
+          <button class="btn primary">Guardar morada</button>
+        </form>
+        <div id="crmMoradasLista"></div>
+      </div>
+
+      <div id="crm-tab-obras" class="crm-tab-panel hidden"><div id="crmObrasLista"></div></div>
+      <div id="crm-tab-orcamentos" class="crm-tab-panel hidden"><div id="crmOrcamentosLista"></div></div>
+      <div id="crm-tab-pagamentos" class="crm-tab-panel hidden"><div id="crmPagamentosLista"></div></div>
+
+      <div id="crm-tab-notas" class="crm-tab-panel hidden">
+        <form id="crmNotaForm" class="crm-note-form">
+          <textarea id="crmNotaTexto" rows="3" placeholder="Nova nota interna..." required></textarea>
+          <label class="crm-check"><input id="crmNotaImportante" type="checkbox"> Importante</label>
+          <button class="btn primary">Adicionar nota</button>
+        </form>
+        <div id="crmNotasLista"></div>
+      </div>
+
+      <div id="crm-tab-comunicacoes" class="crm-tab-panel hidden">
+        <form id="crmComunicacaoForm" class="crm-inline-form">
+          <select id="crmComunicacaoTipo"><option>Nota</option><option>Chamada</option><option>Email</option><option>Reunião</option><option>Visita técnica</option><option>Cobrança</option></select>
+          <input id="crmComunicacaoAssunto" placeholder="Assunto">
+          <input id="crmComunicacaoDescricao" placeholder="Descrição" required>
+          <input id="crmComunicacaoData" type="datetime-local">
+          <button class="btn primary">Registar comunicação</button>
+        </form>
+        <div id="crmComunicacoesLista"></div>
+      </div>
+
+      <div id="crm-tab-documentos" class="crm-tab-panel hidden">
+        <form id="crmDocumentoForm" class="crm-document-form">
+          <input id="crmDocumentoNome" placeholder="Nome do documento" required>
+          <select id="crmDocumentoCategoria"><option>Contrato</option><option>Identificação</option><option>Fiscal</option><option>Correspondência</option><option>Outro</option></select>
+          <input id="crmDocumentoFicheiro" type="file" required accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx">
+          <button id="crmDocumentoSubmit" class="btn primary">Carregar documento</button>
+        </form>
+        <div id="crmDocumentosLista"></div>
+      </div>
+    </div>
+  </section>
+</dialog>
+
+<dialog id="obraDialog"><form id="obraForm" class="modal-form obra-edit-form">
+  <h3>Nova / editar obra</h3><input type="hidden" id="obraId">
+  <label>Cliente<select id="obraClienteId" required></select></label>
+  <label>Nome<input id="obraNome" required></label>
+  <label>Morada<input id="obraMorada"></label>
+  <label>Estado<select id="obraEstado"><option>Orçamento</option><option>Aguardando adjudicação</option><option>Adjudicada</option><option>Em preparação</option><option>Em execução</option><option>Suspensa</option><option>Pagamento em atraso</option><option>Concluída</option><option>Em garantia</option><option>Arquivada</option></select></label>
+  <label>Valor contratado<input id="obraValor" type="number" step="0.01"></label>
+  <label>Progresso %<input id="obraProgresso" type="number" min="0" max="100"></label>
+  <label>Prazo<input id="obraPrazo" placeholder="Ex.: 120 dias úteis"></label>
+  <label>Responsável<input id="obraResponsavel"></label>
+  <label class="full">Notas<textarea id="obraNotas" rows="4"></textarea></label>
+  <div class="actions"><button type="button" class="btn light" data-close="obraDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
+</form></dialog>
+
+<dialog id="obraFichaDialog" class="obra-ficha-dialog">
+  <section class="obra-ficha-shell">
+    <header class="obra-ficha-head">
+      <div>
+        <span class="obra-kicker">Ficha profissional da obra</span>
+        <h2 id="obraFichaNome">Obra</h2>
+        <p id="obraFichaMeta"></p>
+      </div>
+      <div class="obra-head-actions">
+        <button id="obraFichaEditar" type="button" class="btn light">Editar obra</button>
+        <button type="button" class="obra-ficha-close" data-close="obraFichaDialog" aria-label="Fechar">×</button>
+      </div>
+    </header>
+
+    <section class="mobile-work-panel" aria-label="Painel móvel da obra">
+      <div class="mobile-work-status">
+        <div>
+          <span class="mobile-work-kicker">Painel de obra</span>
+          <strong id="mobileWorkTitle">Ações rápidas</strong>
+          <small id="mobileWorkSync">Pronto para trabalhar</small>
+        </div>
+        <span id="mobileWorkState" class="mobile-work-state">Em execução</span>
+      </div>
+      <div class="mobile-work-grid">
+        <button type="button" class="mobile-work-action primary" data-work-action="camera"><span>📷</span><strong>Tirar foto</strong><small>Câmara traseira</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="gallery"><span>🖼️</span><strong>Galeria</strong><small>Fotos da obra</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="checklist"><span>✅</span><strong>Checklist</strong><small>Verificação diária</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="team"><span>👷</span><strong>Equipa</strong><small>Pessoal em obra</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="materials"><span>🧱</span><strong>Materiais</strong><small>Consumos e faltas</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="hours"><span>⏱️</span><strong>Horas</strong><small>Entrada e saída</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="reports"><span>📄</span><strong>Relatórios</strong><small>Resumo da obra</small></button>
+        <button type="button" class="mobile-work-action" data-work-action="documents"><span>📁</span><strong>Documentos</strong><small>Contratos e PDFs</small></button>
+        <button type="button" class="mobile-work-action warning" data-work-action="occurrences"><span>⚠️</span><strong>Ocorrências</strong><small>Registar problema</small></button>
+      </div>
+    </section>
+
+    <div class="obra-finance-summary">
+      <article><span>Valor contratado</span><strong id="obraFichaContratado">0,00 €</strong></article>
+      <article><span>Orçamento total</span><strong id="obraFichaOrcamento">0,00 €</strong></article>
+      <article><span>Custos</span><strong id="obraFichaCustos">0,00 €</strong></article>
+      <article><span>Recebido</span><strong id="obraFichaRecebido">0,00 €</strong></article>
+      <article><span>Por receber</span><strong id="obraFichaPorReceber">0,00 €</strong></article>
+      <article><span>Lucro estimado</span><strong id="obraFichaLucro">0,00 €</strong></article>
+      <article><span>Margem</span><strong id="obraFichaMargem">0%</strong></article>
+      <article><span>Progresso</span><strong id="obraFichaProgresso">0%</strong></article>
+    </div>
+
+    <nav class="obra-tabs">
+      <button class="active" data-obra-tab="resumo">Resumo</button>
+      <button data-obra-tab="orcamentos">Orçamentos</button>
+      <button data-obra-tab="custos">Custos</button>
+      <button data-obra-tab="pagamentos">Pagamentos</button>
+      <button data-obra-tab="documentos">Documentos</button>
+      <button data-obra-tab="fotografias">Fotografias</button>
+      <button data-obra-tab="diario">Diário de obra</button>
+    </nav>
+
+    <div class="obra-ficha-body">
+      <div id="obra-tab-resumo" class="obra-tab-panel"></div>
+      <div id="obra-tab-orcamentos" class="obra-tab-panel hidden"></div>
+      <div id="obra-tab-custos" class="obra-tab-panel hidden"></div>
+      <div id="obra-tab-pagamentos" class="obra-tab-panel hidden"></div>
+      <div id="obra-tab-documentos" class="obra-tab-panel hidden">
+        <section class="work-documents">
+          <header class="work-module-head"><div><h3>Documentos da obra</h3><p>Ficheiros privados associados a esta obra.</p></div><span class="work-module-icon">📁</span></header>
+          <form id="workDocumentForm" class="work-document-form">
+            <label>Nome<input id="workDocumentName" required placeholder="Ex.: Contrato assinado"></label>
+            <label>Categoria<select id="workDocumentCategory"><option>Contrato</option><option>Relatório</option><option>Garantia</option><option>Fatura</option><option>Planta</option><option>Outro</option></select></label>
+            <label class="full">Ficheiro<input id="workDocumentFile" type="file" required accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx"><small>PDF, imagem, Word ou Excel · máximo 25 MB</small></label>
+            <div class="full work-form-actions"><button id="workDocumentSubmit" class="btn primary" type="submit">Carregar documento</button></div>
+          </form>
+          <div class="work-document-toolbar">
+            <input id="workDocumentSearch" type="search" placeholder="Pesquisar documento">
+            <select id="workDocumentFilter" aria-label="Filtrar documentos por categoria">
+              <option value="Todas">Todas as categorias</option><option>Contrato</option><option>Relatório</option><option>Garantia</option><option>Fatura</option><option>Planta</option><option>Outro</option>
+            </select>
+            <span id="workDocumentCount" class="work-document-count"></span>
+          </div>
+          <div id="workDocumentList" class="work-document-list"></div>
+        </section>
+      </div>
+      <div id="obra-tab-fotografias" class="obra-tab-panel hidden">
+        <section class="photo-manager">
+          <header class="photo-manager-head">
+            <div>
+              <span class="photo-kicker">Registo fotográfico</span>
+              <h3>Fotografias da obra</h3>
+              <p>Registo rápido, organizado e preparado para utilização em obra.</p>
+            </div>
+            <div class="photo-head-actions">
+              <button id="photoReportBtn" type="button" class="btn light">Criar relatório</button>
+              <button id="photoUploadToggle" type="button" class="btn primary desktop-photo-add">Adicionar fotografias</button>
+            </div>
+          </header>
+
+          <section class="photo-mobile-dashboard" aria-label="Ações rápidas de fotografias">
+            <button id="photoQuickCamera" type="button" class="photo-mobile-action primary">
+              <span class="photo-mobile-icon">📷</span>
+              <strong>Tirar fotografia</strong>
+              <small>Abrir a câmara traseira</small>
+            </button>
+            <button id="photoQuickGallery" type="button" class="photo-mobile-action">
+              <span class="photo-mobile-icon">🖼️</span>
+              <strong>Galeria</strong>
+              <small>Ver fotografias da obra</small>
+            </button>
+            <button id="photoQuickReport" type="button" class="photo-mobile-action">
+              <span class="photo-mobile-icon">📄</span>
+              <strong>Relatório</strong>
+              <small>Preparar relatório fotográfico</small>
+            </button>
+          </section>
+
+          <form id="photoUploadForm" class="photo-upload-form hidden">
+            <div class="photo-form-grid">
+              <label>Categoria
+                <select id="photoCategoria" required>
+                  <option>Antes</option>
+                  <option selected>Durante</option>
+                  <option>Depois</option>
+                  <option>Patologias</option>
+                  <option>Outros</option>
+                </select>
+              </label>
               <label>Zona da obra
                 <input id="photoZona" placeholder="Ex.: Cobertura, fachada, WC">
               </label>
@@ -418,13 +705,23 @@
 </dialog>
 
 
-<dialog id="orcamentoDialog"><form id="orcamentoForm" class="modal-form">
-  <h3>Novo / editar orçamento</h3><input type="hidden" id="orcamentoId">
+<dialog id="orcamentoDialog" class="orcamento-dialog"><form id="orcamentoForm" class="modal-form orcamento-form">
+  <header class="orcamento-form-head"><div><span>Proposta comercial</span><h3>Novo / editar orçamento</h3></div><button type="button" class="crm-close dark" data-close="orcamentoDialog" aria-label="Fechar">×</button></header>
+  <input type="hidden" id="orcamentoId">
   <label>Cliente<select id="orcamentoClienteId" required></select></label><label>Obra<select id="orcamentoObraId"></select></label>
-  <label>Número<input id="orcamentoNumero" required></label><label>Descrição<input id="orcamentoDescricao" required></label>
-  <label>Valor sem IVA<input id="orcamentoValor" type="number" step="0.01" required></label><label>IVA %<select id="orcamentoIva"><option value="6">6%</option><option value="23">23%</option></select></label>
-  <label>Estado<select id="orcamentoEstado"><option>Rascunho</option><option>Enviado</option><option>Aprovado</option><option>Recusado</option></select></label>
-  <div class="actions"><button type="button" class="btn light" data-close="orcamentoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
+  <label>Número<input id="orcamentoNumero" required></label><label>Referência<input id="orcamentoReferencia" placeholder="Ex.: Pedido por email de 01/08"></label>
+  <label>Data de emissão<input id="orcamentoDataEmissao" type="date" required></label><label>Validade em dias<input id="orcamentoValidadeDias" type="number" min="1" max="365" value="15" required></label>
+  <label class="full">Descrição / objeto do orçamento<textarea id="orcamentoDescricao" rows="2" required></textarea></label>
+  <section class="full orcamento-itens-section">
+    <header><div><strong>Trabalhos e materiais</strong><small>Adicione todas as linhas que serão apresentadas ao cliente.</small></div><button id="orcamentoAddItem" class="btn light small" type="button">+ Adicionar linha</button></header>
+    <div class="orcamento-item-head"><span>Descrição</span><span>Unidade</span><span>Quantidade</span><span>Preço unitário</span><span>Total</span><span></span></div>
+    <div id="orcamentoItens"></div>
+  </section>
+  <label>Desconto (€)<input id="orcamentoDesconto" type="number" min="0" step="0.01" value="0"></label><label>IVA %<select id="orcamentoIva"><option value="0">0%</option><option value="6">6%</option><option value="23">23%</option></select></label>
+  <label>Estado<select id="orcamentoEstado"><option>Rascunho</option><option>Enviado</option><option>Aprovado</option><option>Recusado</option></select></label><label class="full">Condições comerciais<textarea id="orcamentoCondicoes" rows="3" placeholder="Prazo, forma de pagamento, exclusões e observações."></textarea></label>
+  <label class="full">Notas internas<textarea id="orcamentoNotas" rows="2" placeholder="Estas notas não aparecem no relatório entregue ao cliente."></textarea></label>
+  <div class="full orcamento-total-box"><span>Subtotal <strong id="orcamentoSubtotalPreview">0,00 €</strong></span><span>Desconto <strong id="orcamentoDescontoPreview">0,00 €</strong></span><span>IVA <strong id="orcamentoIvaPreview">0,00 €</strong></span><span class="grand">Total <strong id="orcamentoTotalPreview">0,00 €</strong></span></div>
+  <div class="actions full"><button type="button" class="btn light" data-close="orcamentoDialog">Cancelar</button><button id="orcamentoSubmit" class="btn primary">Guardar orçamento</button></div>
 </form></dialog>
 
 <dialog id="custoDialog"><form id="custoForm" class="modal-form">
