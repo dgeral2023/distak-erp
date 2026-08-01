@@ -678,6 +678,7 @@
 <dialog id="custoDialog"><form id="custoForm" class="modal-form">
   <h3>Novo / editar custo</h3><input type="hidden" id="custoId">
   <label>Obra<select id="custoObraId" required></select></label><label>Categoria<select id="custoCategoria"><option>Materiais</option><option>Mão de obra</option><option>Subempreiteiros</option><option>Máquinas</option><option>Andaimes</option><option>Entulho</option><option>Combustível</option><option>Portagens</option><option>Ferramentas</option><option>Seguros</option><option>Outros</option></select></label>
+  <label>Nome da empresa / fornecedor<input id="custoNomeEmpresa" placeholder="Ex.: Fornecedor, Lda."></label><label>Nº da fatura<input id="custoNumeroFatura" placeholder="Ex.: FT 2026/123"></label>
   <label>Descrição<input id="custoDescricao" required></label><label>Valor sem IVA<input id="custoValor" type="number" step="0.01" required></label>
   <label>IVA %<select id="custoIva"><option value="0">0%</option><option value="6">6%</option><option value="23">23%</option></select></label><label>Data<input id="custoData" type="date"></label>
   <div class="actions"><button type="button" class="btn light" data-close="custoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
