@@ -108,4 +108,3 @@ export function initDocumentos(){
     if(o)openDoc(o);if(d)deleteDoc(d);if(edit)openEdit(edit);
   });
 }
-
