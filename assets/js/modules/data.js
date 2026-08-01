@@ -7,7 +7,7 @@ export async function refreshData(){
 
   store.orcamentos = await query("orcamentos", "*,obras(nome),clientes(nome)");
 
-  store.custos = await query("custos", "*,obras(nome)");
+  store.custos = await query("custos", "*,obras(nome),custo_pagamentos(*)");
   store.pagamentos = await query("pagamentos", "*,obras(nome)");
 
   // Uma falha no módulo de fotografias não deve bloquear os restantes dados do ERP.

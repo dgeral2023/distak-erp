@@ -288,6 +288,7 @@
         <button id="novoCustoBtn" class="btn primary">Novo custo</button>
       </div>
       <div class="panel"><div id="custosTable"></div></div>
+      <div class="panel custo-supplier-panel"><h3>Resumo por fornecedor</h3><div id="custoSupplierReport"></div></div>
     </section>
 
     <section id="view-pagamentos" class="view hidden">
@@ -694,6 +695,18 @@
   <div id="custoAnexoAtual" class="full custo-anexo-atual hidden"></div>
   <div class="full custo-total-preview"><span>Total com IVA</span><strong id="custoTotalPreview">0,00 €</strong></div>
   <div class="actions"><button type="button" class="btn light" data-close="custoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
+</form></dialog>
+
+<dialog id="custoPagamentoDialog"><form id="custoPagamentoForm" class="modal-form">
+  <h3>Pagamentos ao fornecedor</h3><input type="hidden" id="custoPagamentoCustoId">
+  <div id="custoPagamentoResumo" class="full custo-total-preview"></div>
+  <label>Valor pago<input id="custoPagamentoValor" type="number" min="0.01" step="0.01" required></label>
+  <label>Data<input id="custoPagamentoData" type="date" required></label>
+  <label>Método<select id="custoPagamentoMetodo"><option>Transferência</option><option>Cartão</option><option>Numerário</option><option>Cheque</option><option>Débito direto</option><option>Outro</option></select></label>
+  <label>Referência<input id="custoPagamentoReferencia" placeholder="Ex.: comprovativo ou operação"></label>
+  <label class="full">Observações<textarea id="custoPagamentoObservacoes" rows="2"></textarea></label>
+  <div id="custoPagamentoLista" class="full"></div>
+  <div class="actions"><button type="button" class="btn light" data-close="custoPagamentoDialog">Fechar</button><button class="btn primary">Registar pagamento</button></div>
 </form></dialog>
 
 <dialog id="pagamentoDialog"><form id="pagamentoForm" class="modal-form">

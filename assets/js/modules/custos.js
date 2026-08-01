@@ -6,6 +6,9 @@ const BUCKET="distak-documentos";
 const today=()=>new Date().toISOString().slice(0,10);
 const safe=name=>name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9._-]+/g,"-");
 const total=c=>Number(c.valor_sem_iva||0)*(1+Number(c.iva||0)/100);
+const paid=c=>(c.custo_pagamentos||[]).reduce((sum,p)=>sum+Number(p.valor||0),0);
+const balance=c=>Math.max(0,total(c)-paid(c));
+let refreshApp=null;
 
 function fillObras(){
   const options=store.obras.map(x=>`<option value="${x.id}">${esc(x.nome)}</option>`).join("");
@@ -25,7 +28,8 @@ function filteredRows(){
 }
 
 function status(c){
-  if((c.estado_pagamento||"pendente")==="pago")return {label:"Pago",className:"status-pago"};
+  if(paid(c)>0&&balance(c)>0)return {label:"Parcial",className:"status-parcial"};
+  if(balance(c)<=0||(c.estado_pagamento||"pendente")==="pago")return {label:"Pago",className:"status-pago"};
   if(c.data_vencimento&&c.data_vencimento<today())return {label:"Em atraso",className:"status-atrasado"};
   return {label:"Pendente",className:"status-pendente"};
 }
@@ -34,8 +38,33 @@ export function renderCustos(rows){
   fillObras();
   rows=rows||filteredRows();
   const subtotal=rows.reduce((sum,c)=>sum+Number(c.valor_sem_iva||0),0);
-  const totalIva=rows.reduce((sum,c)=>sum+total(c),0);
-  $("custosTable").innerHTML=`<div class="custo-summary"><span>${rows.length} registo(s)</span><span>Subtotal: <strong>${money(subtotal)}</strong></span><span>Total com IVA: <strong>${money(totalIva)}</strong></span></div>`+(rows.length?`<table><thead><tr><th>Obra</th><th>Empresa</th><th>Nº fatura</th><th>Descrição</th><th>Subtotal</th><th>IVA</th><th>Total</th><th>Estado</th><th>Vencimento</th><th>Fatura</th><th>Ações</th></tr></thead><tbody>${rows.map(c=>{const s=status(c);return `<tr><td>${esc(c.obras?.nome||"")}</td><td>${esc(c.nome_empresa||"")}</td><td>${esc(c.numero_fatura||"")}</td><td>${esc(c.descricao||"")}</td><td>${money(c.valor_sem_iva)}</td><td>${esc(String(c.iva||0))}%</td><td>${money(total(c))}</td><td><span class="badge ${s.className}">${s.label}</span></td><td>${esc(c.data_vencimento||"")}</td><td>${c.anexo_path?`<button class="btn small light" type="button" data-custo-open="${c.id}">Abrir</button>`:"—"}</td><td><button class="btn small light" data-edit-custo="${c.id}">Editar</button> <button class="btn small danger" data-del-custo="${c.id}">Apagar</button></td></tr>`}).join("")}</tbody></table>`:"<p>Sem custos para os filtros selecionados.</p>");
+  const totalIva=rows.reduce((sum,c)=>sum+total(c),0),totalPago=rows.reduce((sum,c)=>sum+paid(c),0);
+  $("custosTable").innerHTML=`<div class="custo-summary"><span>${rows.length} registo(s)</span><span>Total: <strong>${money(totalIva)}</strong></span><span>Pago: <strong>${money(totalPago)}</strong></span><span>Por pagar: <strong>${money(Math.max(0,totalIva-totalPago))}</strong></span></div>`+(rows.length?`<table><thead><tr><th>Obra</th><th>Empresa</th><th>Nº fatura</th><th>Total</th><th>Pago</th><th>Saldo</th><th>Estado</th><th>Vencimento</th><th>Fatura</th><th>Ações</th></tr></thead><tbody>${rows.map(c=>{const s=status(c);return `<tr><td>${esc(c.obras?.nome||"")}</td><td>${esc(c.nome_empresa||"")}</td><td>${esc(c.numero_fatura||"")}</td><td>${money(total(c))}</td><td>${money(paid(c))}</td><td>${money(balance(c))}</td><td><span class="badge ${s.className}">${s.label}</span></td><td>${esc(c.data_vencimento||"")}</td><td>${c.anexo_path?`<button class="btn small light" type="button" data-custo-open="${c.id}">Abrir</button>`:"—"}</td><td><button class="btn small primary" type="button" data-custo-pay="${c.id}">Pagamentos</button> <button class="btn small light" data-edit-custo="${c.id}">Editar</button> <button class="btn small danger" data-del-custo="${c.id}">Apagar</button></td></tr>`}).join("")}</tbody></table>`:"<p>Sem custos para os filtros selecionados.</p>");
+  const suppliers=new Map();rows.forEach(c=>{const key=c.nome_empresa||"Sem fornecedor";const current=suppliers.get(key)||{count:0,total:0,paid:0};current.count++;current.total+=total(c);current.paid+=paid(c);suppliers.set(key,current)});
+  $("custoSupplierReport").innerHTML=suppliers.size?`<table><thead><tr><th>Fornecedor</th><th>Faturas</th><th>Total</th><th>Pago</th><th>Por pagar</th></tr></thead><tbody>${[...suppliers.entries()].sort((a,b)=>b[1].total-a[1].total).map(([name,v])=>`<tr><td>${esc(name)}</td><td>${v.count}</td><td>${money(v.total)}</td><td>${money(v.paid)}</td><td>${money(Math.max(0,v.total-v.paid))}</td></tr>`).join("")}</tbody></table>`:"<p>Sem dados de fornecedores.</p>";
+}
+
+function drawPayments(c){
+  $("custoPagamentoResumo").innerHTML=`<span>${esc(c.numero_fatura||c.descricao||"Custo")} · ${esc(c.nome_empresa||"")}</span><strong>${money(balance(c))} por pagar</strong>`;
+  const rows=[...(c.custo_pagamentos||[])].sort((a,b)=>String(b.data).localeCompare(String(a.data)));
+  $("custoPagamentoLista").innerHTML=rows.length?`<div class="custo-payment-list"><strong>Histórico</strong>${rows.map(p=>`<div class="custo-payment-row"><span>${money(p.valor)}</span><span>${esc(p.data||"")}</span><small>${esc(p.metodo||"")}${p.referencia?` · ${esc(p.referencia)}`:""}</small><button class="btn small danger" type="button" data-custo-payment-delete="${p.id}">Eliminar</button></div>`).join("")}</div>`:"<p>Sem pagamentos registados.</p>";
+}
+
+function openCostPayments(id){
+  const c=store.custos.find(x=>String(x.id)===String(id));if(!c)return;
+  $("custoPagamentoForm").reset();$("custoPagamentoCustoId").value=c.id;$("custoPagamentoData").value=today();
+  $("custoPagamentoValor").value=balance(c)>0?balance(c).toFixed(2):"";drawPayments(c);if(!$("custoPagamentoDialog").open)$("custoPagamentoDialog").showModal();
+}
+
+async function submitCostPayment(e){
+  e.preventDefault();const custoId=$("custoPagamentoCustoId").value,c=store.custos.find(x=>String(x.id)===String(custoId)),value=Number($("custoPagamentoValor").value);
+  if(!c||value<=0||value>balance(c)+0.005)return toast("O valor deve ser positivo e não pode ultrapassar o saldo por pagar.","error");
+  try{const {error}=await db.from("custo_pagamentos").insert({custo_id:custoId,valor:value,data:$("custoPagamentoData").value,metodo:$("custoPagamentoMetodo").value,referencia:$("custoPagamentoReferencia").value.trim()||null,observacoes:$("custoPagamentoObservacoes").value.trim()||null});if(error)throw error;await refreshApp();toast("Pagamento ao fornecedor registado.");openCostPayments(custoId)}catch(err){toast(err.message,"error")}
+}
+
+async function deleteCostPayment(id){
+  if(!confirm("Eliminar este pagamento?"))return;const custoId=$("custoPagamentoCustoId").value;
+  try{const {error}=await db.from("custo_pagamentos").delete().eq("id",id);if(error)throw error;await refreshApp();toast("Pagamento eliminado.");openCostPayments(custoId)}catch(err){toast(err.message,"error")}
 }
 
 function updatePreview(){
@@ -114,9 +143,11 @@ export async function deleteCusto(id,refresh){
   }catch(err){toast(err.message,"error")}
 }
 
-export function initCustos(){
+export function initCustos(refresh){
+  refreshApp=refresh;
   ["custoSearch","custoObraFiltro","custoEstadoFiltro","custoDataInicioFiltro","custoDataFimFiltro"].forEach(id=>$(id).addEventListener("input",()=>renderCustos()));
   $("custoLimparFiltros").onclick=()=>{["custoSearch","custoObraFiltro","custoEstadoFiltro","custoDataInicioFiltro","custoDataFimFiltro"].forEach(id=>$(id).value="");renderCustos()};
   $("custoValor").addEventListener("input",updatePreview);$("custoIva").addEventListener("change",updatePreview);
-  document.addEventListener("click",e=>{const id=e.target.closest("[data-custo-open]")?.dataset.custoOpen;if(id)openAttachment(id)});
+  $("custoPagamentoForm").addEventListener("submit",submitCostPayment);
+  document.addEventListener("click",e=>{const id=e.target.closest("[data-custo-open]")?.dataset.custoOpen,pay=e.target.closest("[data-custo-pay]")?.dataset.custoPay,del=e.target.closest("[data-custo-payment-delete]")?.dataset.custoPaymentDelete;if(id)openAttachment(id);if(pay)openCostPayments(pay);if(del)deleteCostPayment(del)});
 }

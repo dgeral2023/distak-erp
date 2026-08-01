@@ -30,5 +30,5 @@ document.body.onclick=e=>{
   if(delPag)deletePagamento(delPag,refresh);
 }
 $("clienteSearch").oninput=e=>renderClientes(store.clientes.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())));$("obraSearch").oninput=e=>renderObras(store.obras.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())));$("orcamentoSearch").oninput=e=>renderOrcamentos(store.orcamentos.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())));$("pagamentoSearch").oninput=e=>renderPagamentos(store.pagamentos.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())))
-initCustos();initFotografias();initDocumentos();initDiario();
+initCustos(refresh);initFotografias();initDocumentos();initDiario();
 session().then(s=>s&&enter(s))

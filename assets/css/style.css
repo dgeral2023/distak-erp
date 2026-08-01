@@ -25,6 +25,9 @@ dialog{border:0;border-radius:16px;padding:0;width:min(560px,calc(100% - 30px));
 .custo-anexo-atual{display:flex;align-items:center;justify-content:space-between;gap:10px}.custo-anexo-atual small{color:var(--muted)}
 .custo-summary{display:flex;justify-content:flex-end;gap:18px;flex-wrap:wrap;margin-bottom:12px;color:var(--muted)}.custo-summary strong{color:var(--text)}
 .status-pago{background:#dcfce7;color:#166534}.status-pendente{background:#fef3c7;color:#92400e}.status-atrasado{background:#fee2e2;color:#991b1b}
+.status-parcial{background:#dbeafe;color:#1d4ed8}.custo-payment-list{display:grid;gap:8px}.custo-payment-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:9px 0}.custo-payment-row small{color:var(--muted)}
+.custo-supplier-panel{margin-top:14px}.custo-supplier-panel h3{margin-top:0}
+@media(max-width:650px){.custo-payment-row{grid-template-columns:1fr 1fr}.custo-payment-row .btn{justify-self:start}}
 @media(max-width:1200px){.custo-toolbar{grid-template-columns:repeat(3,1fr)}.custo-toolbar #custoSearch{grid-column:span 2}}
 @media(max-width:650px){.custo-toolbar{grid-template-columns:1fr}.custo-toolbar #custoSearch{grid-column:auto}}
 
