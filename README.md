@@ -1,25 +1,35 @@
-# DISTAK ERP v2.7 — Painel Mobile de Obra
+# DISTAK ERP v2.8
 
-Atualização mobile-first baseada na v2.6.
+Aplicação web de gestão comercial, financeira e operacional da DISTAK, otimizada para computador e telemóvel.
 
-## Novidades
-- Painel móvel dentro da ficha de cada obra.
-- Acesso rápido à câmara e galeria.
-- Checklist diária funcional.
-- Registos rápidos de equipa, materiais, horas e ocorrências.
-- Atalhos para relatórios e documentos.
-- Dados operacionais provisórios guardados localmente no dispositivo.
-- Interface pensada para utilização com uma mão no telemóvel.
+## Funcionalidades
 
-## Ficheiros a substituir
-- `index.html`
-- `assets/js/modules/obras.js`
-- `assets/css/fotografias.css`
+- Dashboard executivo com indicadores financeiros, obras, equipa e orçamentos.
+- Gestão de clientes, contactos, moradas, notas, comunicações e documentos.
+- Obras com resumo financeiro, fotografias, documentos, diário e registos operacionais.
+- Orçamentos com itens, estados e conversão em obra.
+- Custos, faturas, pagamentos e anexos ligados automaticamente à obra.
+- Funcionários, horas trabalhadas e custo operacional por obra.
+- Autenticação, dados e ficheiros sincronizados através do Supabase.
 
-Os restantes ficheiros incluídos mantêm a integração da v2.6.
+## Segurança
 
-## Nota técnica
-Checklist e registos operacionais usam `localStorage` nesta versão. A sincronização com Supabase deve ser feita numa etapa posterior, após criação das tabelas e políticas RLS.
+- A chave presente no frontend é apenas a chave pública/publishable do Supabase.
+- As tabelas usam Row Level Security (RLS) e políticas para utilizadores autenticados.
+- O papel anónimo não possui privilégios sobre os dados da aplicação.
+- A biblioteca `supabase-js` é fixada numa versão exata.
 
-## Commit sugerido
-`DISTAK ERP v2.7 - Painel mobile de obra`
+## Verificação local
+
+Execute os testes estáticos com:
+
+```powershell
+node tests/smoke.mjs
+Get-ChildItem assets/js -Recurse -Filter *.js | ForEach-Object { node --check $_.FullName }
+```
+
+## Publicação
+
+A versão de produção é publicada pelo GitHub Pages a partir do branch `main`:
+
+https://dgeral2023.github.io/distak-erp/
