@@ -139,8 +139,10 @@ const valorContratado=o=>Number(o.valor_contratado||o.valor||0);
 const totalCustos=id=>store.custos.filter(x=>String(x.obra_id)===String(id)).reduce((s,x)=>s+Number(x.valor||x.valor_sem_iva||0),0);
 const totalRecebido=id=>store.pagamentos.filter(x=>String(x.obra_id)===String(id)).reduce((s,x)=>s+Number(x.valor||0),0);
 const orcamentoTotal=o=>{
-  const base=Number(o.mao_obra||0)+Number(o.materiais||0)+Number(o.logistica||0);
-  return base*(1+Number(o.iva||0)/100);
+  const componentes=Number(o.mao_obra||0)+Number(o.materiais||0)+Number(o.logistica||0);
+  if(componentes)return componentes*(1+Number(o.iva||0)/100);
+  if(Number(o.valor_sem_iva||0))return Number(o.valor_sem_iva)*(1+Number(o.iva||0)/100);
+  return Number(o.total||0);
 };
 
 
