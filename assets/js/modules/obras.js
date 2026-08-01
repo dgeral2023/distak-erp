@@ -194,10 +194,8 @@ async function renderWorkModule(action){
       host.innerHTML=`<section class="work-module-card">${head}<div class="daily-checklist">${items.map((x,i)=>`<label class="daily-check"><input type="checkbox" data-check-index="${i}" ${saved[i]?"checked":""}><span>${x}</span></label>`).join("")}</div><label>Observações<textarea data-check-observations rows="2">${esc(record?.observacoes||"")}</textarea></label><p class="work-local-note">Sincronizado com o Supabase para esta obra e data.</p></section>`;
       const persist=async()=>{
         const payload={obra_id:obraFichaAtual.id,data:today(),itens:saved,observacoes:host.querySelector("[data-check-observations]")?.value||null,atualizado_em:new Date().toISOString()};
-        const query=record?.id
-          ?db.from("obra_checklists").update(payload).eq("id",record.id)
-          :db.from("obra_checklists").insert(payload);
-        const {error:saveError}=await query;
+        const {error:saveError}=await db.from("obra_checklists")
+          .upsert(payload,{onConflict:"obra_id,data,criado_por"});
         if(saveError)throw saveError;
       };
       host.querySelectorAll("[data-check-index]").forEach(el=>el.addEventListener("change",async()=>{
