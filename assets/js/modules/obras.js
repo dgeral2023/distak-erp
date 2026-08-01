@@ -3,6 +3,7 @@ import {$,esc,money,toast} from "../core/ui.js";
 import {db,save,remove} from "../core/supabase.js";
 import {renderObraFotografias} from "./fotografias.js";
 import {renderObraDocumentos} from "./documentos.js";
+import {renderObraDiario} from "./diario.js";
 
 let obraFichaAtual=null;
 
@@ -130,6 +131,7 @@ function renderObraFicha(obra){
 
   renderObraFotografias(obra);
   renderObraDocumentos(obra);
+  renderObraDiario(obra);
 }
 
 const field=(label,value)=>`<article class="obra-field"><span>${label}</span><strong>${esc(value||"—")}</strong></article>`;
@@ -260,6 +262,12 @@ function handleWorkAction(action){
     },80);return;
   }
   if(action==="documents"){activateObraTab("documentos");return}
+  const diarioFields={checklist:"diarioDescricao",team:"diarioEquipa",materials:"diarioMateriais",hours:"diarioHoras",reports:"diarioPesquisa",occurrences:"diarioOcorrencias"};
+  if(diarioFields[action]){
+    activateObraTab("diario");
+    setTimeout(()=>$(diarioFields[action])?.focus(),80);
+    return;
+  }
   renderWorkModule(action);
 }
 

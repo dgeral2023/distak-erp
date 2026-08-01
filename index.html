@@ -4,11 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
-  <title>DISTAK ERP v2.7</title>
+  <title>DISTAK ERP v2.8</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
   <link rel="stylesheet" href="assets/css/dashboard-executivo.css">
   <link rel="stylesheet" href="assets/css/fotografias.css">
+  <link rel="stylesheet" href="assets/css/diario.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
 </head>
@@ -29,7 +30,7 @@
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="brand">DISTAK ERP <small>v2.7</small></div>
+    <div class="brand">DISTAK ERP <small>v2.8</small></div>
     <nav id="mainNav">
       <button class="nav active" data-view="dashboard">Dashboard</button>
       <button class="nav admin-only" data-view="empresa">Empresa</button>
@@ -601,24 +602,28 @@
         </section>
       </div>
       <div id="obra-tab-diario" class="obra-tab-panel hidden">
-        <section class="diario-work-panel">
-          <header class="work-module-head">
-            <div>
-              <h3>Diário de obra</h3>
-              <p>Registe e consulte a atividade diária sincronizada desta obra.</p>
-            </div>
-            <span class="work-module-icon">📋</span>
+        <section class="diario-v28">
+          <header class="diario-header">
+            <div><span class="diario-kicker">DISTAK ERP v2.8</span><h3>Diário de obra</h3><p>Registe o trabalho diário e mantenha o histórico completo da obra.</p></div>
+            <button id="diarioNovo" class="btn primary" type="button">Novo registo</button>
           </header>
-          <div class="mobile-work-grid diario-work-grid">
-            <button type="button" class="mobile-work-action primary" data-work-action="checklist"><span>✅</span><strong>Checklist</strong><small>Verificação diária</small></button>
-            <button type="button" class="mobile-work-action" data-work-action="team"><span>👷</span><strong>Equipa</strong><small>Pessoal em obra</small></button>
-            <button type="button" class="mobile-work-action" data-work-action="materials"><span>🧱</span><strong>Materiais</strong><small>Consumos e faltas</small></button>
-            <button type="button" class="mobile-work-action" data-work-action="hours"><span>⏱️</span><strong>Horas</strong><small>Entrada e saída</small></button>
-            <button type="button" class="mobile-work-action warning" data-work-action="occurrences"><span>⚠️</span><strong>Ocorrências</strong><small>Registar problema</small></button>
-          </div>
-          <div id="mobileWorkModule" class="mobile-work-module diario-work-module">
-            <div class="obra-placeholder"><strong>Selecione uma opção</strong><p>Escolha uma das ações acima para consultar ou adicionar registos.</p></div>
-          </div>
+          <form id="diarioForm" class="diario-form">
+            <input id="diarioId" type="hidden">
+            <div class="diario-form-head"><strong id="diarioFormTitle">Novo registo diário</strong><button id="diarioCancelar" class="btn light small hidden" type="button">Cancelar edição</button></div>
+            <label>Data<input id="diarioData" type="date" required></label>
+            <label class="wide">Título<input id="diarioTitulo" required maxlength="120" placeholder="Ex.: Aplicação de primário no piso 1"></label>
+            <label>Clima<select id="diarioClima"><option value="">Não indicado</option><option>Ensolarado</option><option>Nublado</option><option>Chuva</option><option>Vento</option><option>Frio</option><option>Calor</option></select></label>
+            <label>Horas trabalhadas<input id="diarioHoras" type="number" min="0" step="0.5" placeholder="Ex.: 16"></label>
+            <label class="full">Trabalhos realizados<textarea id="diarioDescricao" rows="4" required placeholder="Descreva o trabalho executado, zonas intervencionadas e progresso."></textarea></label>
+            <label class="full">Equipa presente<textarea id="diarioEquipa" rows="2" placeholder="Nomes e funções da equipa."></textarea></label>
+            <label class="full">Materiais utilizados<textarea id="diarioMateriais" rows="2" placeholder="Materiais, quantidades e eventuais faltas."></textarea></label>
+            <label class="full">Ocorrências e observações<textarea id="diarioOcorrencias" rows="3" placeholder="Atrasos, segurança, visitas, decisões do cliente ou outras ocorrências."></textarea></label>
+            <label>Fotografias relacionadas<select id="diarioFotografias" multiple size="4"></select><small>Use Ctrl/Cmd para selecionar várias.</small></label>
+            <label>Documentos relacionados<select id="diarioDocumentos" multiple size="4"></select><small>Use Ctrl/Cmd para selecionar vários.</small></label>
+            <div class="diario-actions full"><button id="diarioSubmit" class="btn primary" type="submit">Guardar registo</button></div>
+          </form>
+          <div class="diario-toolbar"><strong>Histórico</strong><input id="diarioPesquisa" type="search" placeholder="Pesquisar no diário"></div>
+          <div id="diarioLista" class="diario-list"><p>A carregar diário…</p></div>
         </section>
       </div>
     </div>
