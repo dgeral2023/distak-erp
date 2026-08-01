@@ -173,7 +173,7 @@ async function fetchWorkEntries(action){
 
 async function renderWorkModule(action){
   if(!obraFichaAtual)return;
-  activateObraTab("operacional");
+  activateObraTab("diario");
   const host=$("mobileWorkModule");
   const labels={checklist:["✅","Checklist diário","Verificações essenciais antes e no final do trabalho."],team:["👷","Equipa em obra","Registo rápido da equipa presente."],materials:["🧱","Materiais","Registe material utilizado ou em falta."],hours:["⏱️","Horas de trabalho","Guarde entrada, saída e observações."],reports:["📄","Relatórios","Acesso ao resumo e preparação do relatório da obra."],occurrences:["⚠️","Ocorrências","Registe problemas, atrasos ou situações de segurança."]};
   const [icon,title,desc]=labels[action]||["📌","Painel de obra","Registo operacional da obra."];
