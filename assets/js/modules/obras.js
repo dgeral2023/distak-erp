@@ -2,6 +2,7 @@ import {store} from "../core/store.js";
 import {$,esc,money,toast} from "../core/ui.js";
 import {db,save,remove} from "../core/supabase.js";
 import {renderObraFotografias} from "./fotografias.js";
+import {renderObraDocumentos} from "./documentos.js";
 
 let obraFichaAtual=null;
 
@@ -128,6 +129,7 @@ function renderObraFicha(obra){
   $("obra-tab-pagamentos").innerHTML=pagamentos.length?`<table><thead><tr><th>Valor</th><th>Data</th><th>Método</th><th>Observações</th></tr></thead><tbody>${pagamentos.map(p=>`<tr><td>${money(p.valor)}</td><td>${formatDate(p.data)}</td><td>${esc(p.metodo||"")}</td><td>${esc(p.observacoes||"")}</td></tr>`).join("")}</tbody></table>`:empty("Nenhum pagamento associado a esta obra.");
 
   renderObraFotografias(obra);
+  renderObraDocumentos(obra);
 }
 
 const field=(label,value)=>`<article class="obra-field"><span>${label}</span><strong>${esc(value||"—")}</strong></article>`;
