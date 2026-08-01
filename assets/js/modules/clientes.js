@@ -16,100 +16,266 @@ export function openCliente(c={}){
   clienteId.value=c.id||"";
   clienteNome.value=c.nome||"";
   clienteNif.value=c.nif||"";
-  clienteMorada.value=c.mor…21505 tokens truncated…</div>
-  </form>
-</dialog>
+  clienteMorada.value=c.morada||"";
+  clienteEmail.value=c.email||"";
+  clienteTelefone.value=c.telefone||"";
+  clienteTipo.value=c.tipo||"Particular";
+  clienteEstado.value=c.estado||"Ativo";
+  clienteTelefoneAlternativo.value=c.telefone_alternativo||"";
+  clienteWebsite.value=c.website||"";
+  clienteCae.value=c.cae||"";
+  clienteCodigoPostal.value=c.codigo_postal||"";
+  clienteLocalidade.value=c.localidade||"";
+  clientePais.value=c.pais||"Portugal";
+  clienteCondicoesPagamento.value=c.condicoes_pagamento||"";
+  clienteLimiteCredito.value=c.limite_credito||0;
+  clienteObservacoes.value=c.observacoes||"";
+  clienteDialog.showModal();
+}
 
+export async function submitCliente(e,refresh){
+  e.preventDefault();
+  try{
+    await save("clientes",{
+      nome:clienteNome.value.trim(),
+      nif:clienteNif.value||null,
+      morada:clienteMorada.value||null,
+      email:clienteEmail.value||null,
+      telefone:clienteTelefone.value||null,
+      tipo:clienteTipo.value,
+      estado:clienteEstado.value,
+      telefone_alternativo:clienteTelefoneAlternativo.value||null,
+      website:clienteWebsite.value||null,
+      cae:clienteCae.value||null,
+      codigo_postal:clienteCodigoPostal.value||null,
+      localidade:clienteLocalidade.value||null,
+      pais:clientePais.value||"Portugal",
+      condicoes_pagamento:clienteCondicoesPagamento.value||null,
+      limite_credito:Number(clienteLimiteCredito.value||0),
+      observacoes:clienteObservacoes.value||null
+    },clienteId.value||null);
+    clienteDialog.close();toast("Cliente guardado.");await refresh();
+  }catch(err){toast(err.message,"error")}
+}
 
-<dialog id="photoEditDialog" class="photo-edit-dialog">
-  <form id="photoEditForm" class="modal-form">
-    <h3>Editar fotografia</h3>
-    <input id="photoEditId" type="hidden">
-    <label>Categoria
-      <select id="photoEditCategoria">
-        <option>Antes</option><option>Durante</option><option>Depois</option><option>Patologias</option><option>Outros</option>
-      </select>
-    </label>
-    <label>Zona<input id="photoEditZona"></label>
-    <label>Data<input id="photoEditData" type="date"></label>
-    <label>Título<input id="photoEditTitulo"></label>
-    <label class="full">Descrição<textarea id="photoEditDescricao" rows="4"></textarea></label>
-    <div class="actions">
-      <button type="button" class="btn light" data-close="photoEditDialog">Cancelar</button>
-      <button class="btn primary">Guardar alterações</button>
-    </div>
-  </form>
-</dialog>
+export async function deleteCliente(id,refresh){
+  if(!confirm("Confirmar eliminação?"))return;
+  try{await remove("clientes",id);toast("Cliente apagado.");await refresh()}
+  catch(err){toast(err.message,"error")}
+}
 
-<dialog id="photoLightbox" class="photo-lightbox">
-  <button type="button" class="photo-lightbox-close" data-close="photoLightbox" aria-label="Fechar">×</button>
-  <button id="photoLightboxPrev" type="button" class="photo-lightbox-nav prev" aria-label="Anterior">‹</button>
-  <figure>
-    <img id="photoLightboxImage" alt="">
-    <figcaption>
-      <strong id="photoLightboxTitle"></strong>
-      <span id="photoLightboxMeta"></span>
-      <p id="photoLightboxDescription"></p>
-    </figcaption>
-  </figure>
-  <button id="photoLightboxNext" type="button" class="photo-lightbox-nav next" aria-label="Seguinte">›</button>
-</dialog>
+async function selectRows(table,foreignKey,id,select="*"){
+  const {data,error}=await db.from(table).select(select).eq(foreignKey,id).order("criado_em",{ascending:false});
+  if(error)throw error;
+  return data||[];
+}
 
+async function loadCrm(id){
+  crmClienteId=id;
+  const cliente=store.clientes.find(c=>String(c.id)===String(id));
+  if(!cliente)throw new Error("Cliente não encontrado.");
 
-<dialog id="orcamentoDialog" class="orcamento-dialog"><form id="orcamentoForm" class="modal-form orcamento-form">
-  <header class="orcamento-form-head"><div><span>Proposta comercial</span><h3>Novo / editar orçamento</h3></div><button type="button" class="crm-close dark" data-close="orcamentoDialog" aria-label="Fechar">×</button></header>
-  <input type="hidden" id="orcamentoId">
-  <label>Cliente<select id="orcamentoClienteId" required></select></label><label>Obra<select id="orcamentoObraId"></select></label>
-  <label>Número<input id="orcamentoNumero" required></label><label>Referência<input id="orcamentoReferencia" placeholder="Ex.: Pedido por email de 01/08"></label>
-  <label>Data de emissão<input id="orcamentoDataEmissao" type="date" required></label><label>Validade em dias<input id="orcamentoValidadeDias" type="number" min="1" max="365" value="15" required></label>
-  <label class="full">Descrição / objeto do orçamento<textarea id="orcamentoDescricao" rows="2" required></textarea></label>
-  <section class="full orcamento-itens-section">
-    <header><div><strong>Trabalhos e materiais</strong><small>Adicione todas as linhas que serão apresentadas ao cliente.</small></div><button id="orcamentoAddItem" class="btn light small" type="button">+ Adicionar linha</button></header>
-    <div class="orcamento-item-head"><span>Descrição</span><span>Unidade</span><span>Quantidade</span><span>Preço unitário</span><span>Total</span><span></span></div>
-    <div id="orcamentoItens"></div>
-  </section>
-  <label>Desconto (€)<input id="orcamentoDesconto" type="number" min="0" step="0.01" value="0"></label><label>IVA %<select id="orcamentoIva"><option value="0">0%</option><option value="6">6%</option><option value="23">23%</option></select></label>
-  <label>Estado<select id="orcamentoEstado"><option>Rascunho</option><option>Enviado</option><option>Aprovado</option><option>Recusado</option></select></label><label class="full">Condições comerciais<textarea id="orcamentoCondicoes" rows="3" placeholder="Prazo, forma de pagamento, exclusões e observações."></textarea></label>
-  <label class="full">Notas internas<textarea id="orcamentoNotas" rows="2" placeholder="Estas notas não aparecem no relatório entregue ao cliente."></textarea></label>
-  <div class="full orcamento-total-box"><span>Subtotal <strong id="orcamentoSubtotalPreview">0,00 €</strong></span><span>Desconto <strong id="orcamentoDescontoPreview">0,00 €</strong></span><span>IVA <strong id="orcamentoIvaPreview">0,00 €</strong></span><span class="grand">Total <strong id="orcamentoTotalPreview">0,00 €</strong></span></div>
-  <div class="actions full"><button type="button" class="btn light" data-close="orcamentoDialog">Cancelar</button><button id="orcamentoSubmit" class="btn primary">Guardar orçamento</button></div>
-</form></dialog>
+  const [
+    resumoResult,contactos,moradas,notas,comunicacoes,documentos,
+    obrasResult
+  ]=await Promise.all([
+    db.from("v_clientes_crm_resumo").select("*").eq("id",id).single(),
+    selectRows("cliente_contactos","cliente_id",id),
+    selectRows("cliente_moradas","cliente_id",id),
+    selectRows("cliente_notas","cliente_id",id),
+    selectRows("cliente_comunicacoes","cliente_id",id),
+    selectRows("cliente_documentos","cliente_id",id),
+    db.from("obras").select("*").eq("cliente_id",id).order("id",{ascending:false})
+  ]);
 
-<dialog id="custoDialog"><form id="custoForm" class="modal-form">
-  <h3>Novo / editar custo</h3><input type="hidden" id="custoId">
-  <label>Obra<select id="custoObraId" required></select></label><label>Categoria<select id="custoCategoria"><option>Materiais</option><option>Mão de obra</option><option>Subempreiteiros</option><option>Máquinas</option><option>Andaimes</option><option>Entulho</option><option>Combustível</option><option>Portagens</option><option>Ferramentas</option><option>Seguros</option><option>Outros</option></select></label>
-  <label>Nome da empresa / fornecedor<input id="custoNomeEmpresa" placeholder="Ex.: Fornecedor, Lda."></label><label>Nº da fatura<input id="custoNumeroFatura" placeholder="Ex.: FT 2026/123"></label>
-  <label>Descrição<input id="custoDescricao" required></label><label>Valor sem IVA<input id="custoValor" type="number" step="0.01" required></label>
-  <label>IVA %<select id="custoIva"><option value="0">0%</option><option value="6">6%</option><option value="23">23%</option></select></label><label>Data<input id="custoData" type="date"></label>
-  <label>Estado do pagamento<select id="custoEstadoPagamento"><option value="pendente">Pendente</option><option value="pago">Pago</option></select></label><label>Data de vencimento<input id="custoDataVencimento" type="date"></label>
-  <label class="full">Fatura (PDF ou imagem, máximo 25 MB)<input id="custoAnexo" type="file" accept="application/pdf,image/jpeg,image/png,image/webp,image/heic"></label>
-  <div id="custoAnexoAtual" class="full custo-anexo-atual hidden"></div>
-  <div class="full custo-total-preview"><span>Total com IVA</span><strong id="custoTotalPreview">0,00 €</strong></div>
-  <div class="actions"><button type="button" class="btn light" data-close="custoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
-</form></dialog>
+  if(resumoResult.error)throw resumoResult.error;
+  if(obrasResult.error)throw obrasResult.error;
 
-<dialog id="custoPagamentoDialog"><form id="custoPagamentoForm" class="modal-form">
-  <h3>Pagamentos ao fornecedor</h3><input type="hidden" id="custoPagamentoCustoId">
-  <div id="custoPagamentoResumo" class="full custo-total-preview"></div>
-  <label>Valor pago<input id="custoPagamentoValor" type="number" min="0.01" step="0.01" required></label>
-  <label>Data<input id="custoPagamentoData" type="date" required></label>
-  <label>Método<select id="custoPagamentoMetodo"><option>Transferência</option><option>Cartão</option><option>Numerário</option><option>Cheque</option><option>Débito direto</option><option>Outro</option></select></label>
-  <label>Referência<input id="custoPagamentoReferencia" placeholder="Ex.: comprovativo ou operação"></label>
-  <label class="full">Observações<textarea id="custoPagamentoObservacoes" rows="2"></textarea></label>
-  <div id="custoPagamentoLista" class="full"></div>
-  <div class="actions"><button type="button" class="btn light" data-close="custoPagamentoDialog">Fechar</button><button class="btn primary">Registar pagamento</button></div>
-</form></dialog>
+  const obras=obrasResult.data||[];
+  const obraIds=obras.map(o=>o.id);
+  let orcamentos=[],pagamentos=[];
+  if(obraIds.length){
+    const [o,p]=await Promise.all([
+      db.from("orcamentos").select("*").in("obra_id",obraIds).order("id",{ascending:false}),
+      db.from("pagamentos").select("*").in("obra_id",obraIds).order("id",{ascending:false})
+    ]);
+    if(o.error)throw o.error;if(p.error)throw p.error;
+    orcamentos=o.data||[];pagamentos=p.data||[];
+  }
 
-<dialog id="pagamentoDialog"><form id="pagamentoForm" class="modal-form">
-  <h3>Novo / editar pagamento</h3><input type="hidden" id="pagamentoId">
-  <label>Obra<select id="pagamentoObraId" required></select></label><label>Descrição<input id="pagamentoDescricao" required></label>
-  <label>Valor<input id="pagamentoValor" type="number" step="0.01" required></label><label>Data<input id="pagamentoData" type="date"></label>
-  <label>Estado<select id="pagamentoEstado"><option>Recebido</option><option>Pendente</option><option>Em atraso</option></select></label>
-  <div class="actions"><button type="button" class="btn light" data-close="pagamentoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
-</form></dialog>
+  crmData={cliente,resumo:resumoResult.data,contactos,moradas,notas,comunicacoes,documentos,obras,orcamentos,pagamentos};
+  renderCrm();
+}
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js"></script>
-</body>
-</html>
+function renderCrm(){
+  const {cliente,resumo,contactos,moradas,notas,comunicacoes,documentos,obras,orcamentos,pagamentos}=crmData;
+  crmClienteNome.textContent=cliente.nome;
+  crmClienteMeta.textContent=[cliente.tipo,cliente.nif,cliente.estado].filter(Boolean).join(" · ");
+  crmTotalObras.textContent=resumo.total_obras||0;
+  crmTotalOrcamentos.textContent=resumo.total_orcamentos||0;
+  crmTotalRecebido.textContent=money(resumo.total_recebido||0);
+  crmTotalContactos.textContent=resumo.total_contactos||0;
+  crmTotalDocumentos.textContent=resumo.total_documentos||0;
+  crmUltimaComunicacao.textContent=resumo.ultima_comunicacao?new Date(resumo.ultima_comunicacao).toLocaleDateString("pt-PT"):"—";
+
+  $("crm-tab-dados").innerHTML=`<div class="crm-data-grid">
+    ${field("Nome",cliente.nome)}${field("Tipo",cliente.tipo)}${field("Estado",cliente.estado)}
+    ${field("NIF",cliente.nif)}${field("CAE",cliente.cae)}${field("Email",cliente.email)}
+    ${field("Telefone",cliente.telefone)}${field("Telefone alternativo",cliente.telefone_alternativo)}
+    ${field("Website",cliente.website)}${field("Morada",cliente.morada)}
+    ${field("Código postal",cliente.codigo_postal)}${field("Localidade",cliente.localidade)}
+    ${field("País",cliente.pais)}${field("Condições de pagamento",cliente.condicoes_pagamento)}
+    ${field("Limite de crédito",money(cliente.limite_credito||0))}
+    <article class="crm-field full"><span>Observações</span><strong>${esc(cliente.observacoes||"—")}</strong></article>
+  </div>`;
+
+  $("crmContactosLista").innerHTML=contactos.length?cards(contactos,c=>`${esc(c.nome)}${c.principal?' <span class="badge">Principal</span>':''}`,`${esc(c.cargo||"")} · ${esc(c.telefone||"")} · ${esc(c.email||"")}`,"contacto",c.id):empty("Sem contactos adicionais.");
+  $("crmMoradasLista").innerHTML=moradas.length?cards(moradas,m=>`${esc(m.tipo)}${m.principal?' <span class="badge">Principal</span>':''}`,`${esc(m.morada)} · ${esc(m.codigo_postal||"")} ${esc(m.localidade||"")}`,"morada",m.id):empty("Sem moradas adicionais.");
+  $("crmObrasLista").innerHTML=obras.length?simpleTable(["Obra","Estado","Valor","Progresso"],obras.map(o=>[o.nome,o.estado,money(o.valor_contratado||0),`${o.progresso||0}%`])):empty("Sem obras.");
+  $("crmOrcamentosLista").innerHTML=orcamentos.length?simpleTable(["Número","Descrição","Estado"],orcamentos.map(o=>[o.numero,o.descricao,o.estado])):empty("Sem orçamentos.");
+  $("crmPagamentosLista").innerHTML=pagamentos.length?simpleTable(["Descrição","Valor","Estado"],pagamentos.map(p=>[p.descricao,money(p.valor),p.estado])):empty("Sem pagamentos.");
+  $("crmNotasLista").innerHTML=notas.length?cards(notas,n=>`${n.importante?'<span class="badge crm-important">Importante</span> ':''}${new Date(n.criado_em).toLocaleDateString("pt-PT")}`,esc(n.nota),"nota",n.id):empty("Sem notas.");
+  $("crmComunicacoesLista").innerHTML=comunicacoes.length?cards(comunicacoes,c=>`${esc(c.tipo)} · ${new Date(c.data_comunicacao).toLocaleString("pt-PT")}`,`${esc(c.assunto||"")} — ${esc(c.descricao)}`,"comunicacao",c.id):empty("Sem comunicações.");
+  $("crmDocumentosLista").innerHTML=documentos.length?documentos.map(d=>`<article class="crm-list-card"><div><strong>${esc(d.nome)}</strong><p>${esc(d.categoria)} · ${esc(fileSize(d.tamanho_bytes))} · ${new Date(d.criado_em).toLocaleDateString("pt-PT")}</p></div><div class="crm-document-actions"><button class="btn small primary" data-crm-document-open="${d.id}">Abrir</button><button class="btn small danger" data-crm-document-delete="${d.id}">Apagar</button></div></article>`).join(""):empty("Sem documentos.");
+}
+
+const field=(label,value)=>`<article class="crm-field"><span>${label}</span><strong>${esc(value||"—")}</strong></article>`;
+const empty=text=>`<div class="crm-empty">${text}</div>`;
+const cards=(rows,title,subtitle,type,id,allowDelete=true)=>rows.map(r=>`<article class="crm-list-card"><div><strong>${title(r)}</strong><p>${subtitle(r)}</p></div>${allowDelete?`<button class="btn small danger" data-crm-delete="${type}:${id(r)}">Apagar</button>`:""}</article>`).join("");
+const simpleTable=(headers,rows)=>`<table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(v=>`<td>${esc(v||"")}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+
+async function addContact(e){
+  e.preventDefault();
+  const form=e.currentTarget;
+  const button=form.querySelector("button[type=submit]");
+  if(button)button.disabled=true;
+  try{
+    await save("cliente_contactos",{
+      cliente_id:crmClienteId,nome:crmContactoNome.value.trim(),
+      cargo:crmContactoCargo.value||null,telefone:crmContactoTelefone.value||null,
+      email:crmContactoEmail.value||null,principal:crmContactoPrincipal.checked
+    },crmContactoId.value||null);
+    form.reset();crmContactoId.value="";toast("Contacto guardado.");await loadCrm(crmClienteId);
+  }catch(err){toast(err.message,"error")}
+  finally{if(button?.isConnected)button.disabled=false}
+}
+
+async function addMorada(e){
+  e.preventDefault();
+  const form=e.currentTarget;
+  const button=form.querySelector("button[type=submit]");
+  if(button)button.disabled=true;
+  try{
+    await save("cliente_moradas",{
+      cliente_id:crmClienteId,tipo:crmMoradaTipo.value,morada:crmMoradaTexto.value.trim(),
+      codigo_postal:crmMoradaCodigoPostal.value||null,localidade:crmMoradaLocalidade.value||null,
+      pais:"Portugal",principal:crmMoradaPrincipal.checked
+    },crmMoradaId.value||null);
+    form.reset();crmMoradaId.value="";toast("Morada guardada.");await loadCrm(crmClienteId);
+  }catch(err){toast(err.message,"error")}
+  finally{if(button?.isConnected)button.disabled=false}
+}
+
+async function addNota(e){
+  e.preventDefault();
+  const form=e.currentTarget;
+  const button=form.querySelector("button[type=submit]");
+  if(button)button.disabled=true;
+  try{
+    const {data:{user}}=await db.auth.getUser();
+    await save("cliente_notas",{cliente_id:crmClienteId,autor_id:user?.id||null,nota:crmNotaTexto.value.trim(),importante:crmNotaImportante.checked});
+    form.reset();toast("Nota adicionada.");await loadCrm(crmClienteId);
+  }catch(err){toast(err.message,"error")}
+  finally{if(button?.isConnected)button.disabled=false}
+}
+
+async function addComunicacao(e){
+  e.preventDefault();
+  const form=e.currentTarget;
+  const button=form.querySelector("button[type=submit]");
+  if(button)button.disabled=true;
+  try{
+    const {data:{user}}=await db.auth.getUser();
+    await save("cliente_comunicacoes",{
+      cliente_id:crmClienteId,autor_id:user?.id||null,tipo:crmComunicacaoTipo.value,
+      assunto:crmComunicacaoAssunto.value||null,descricao:crmComunicacaoDescricao.value.trim(),
+      data_comunicacao:crmComunicacaoData.value?new Date(crmComunicacaoData.value).toISOString():new Date().toISOString()
+    });
+    form.reset();toast("Comunicação registada.");await loadCrm(crmClienteId);
+  }catch(err){toast(err.message,"error")}
+  finally{if(button?.isConnected)button.disabled=false}
+}
+
+async function deleteCrmRecord(value){
+  const [type,id]=value.split(":");
+  const tables={contacto:"cliente_contactos",morada:"cliente_moradas",nota:"cliente_notas",comunicacao:"cliente_comunicacoes"};
+  if(!tables[type]||!confirm("Confirmar eliminação?"))return;
+  try{await remove(tables[type],id);toast("Registo apagado.");await loadCrm(crmClienteId)}
+  catch(err){toast(err.message,"error")}
+}
+
+async function addDocument(event){
+  event.preventDefault();
+  if(!crmClienteId)return;
+  const file=$("crmDocumentoFicheiro").files?.[0];
+  if(!file)return;
+  if(file.size>25*1048576)return toast("O ficheiro excede 25 MB.","error");
+  const button=$("crmDocumentoSubmit");button.disabled=true;
+  const path=`clientes/${crmClienteId}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
+  try{
+    const {data:{user}}=await db.auth.getUser();
+    const {error:uploadError}=await db.storage.from(CLIENT_DOCUMENT_BUCKET).upload(path,file,{contentType:file.type||undefined});
+    if(uploadError)throw uploadError;
+    const {error}=await db.from("cliente_documentos").insert({cliente_id:crmClienteId,nome:$("crmDocumentoNome").value.trim(),categoria:$("crmDocumentoCategoria").value,storage_path:path,mime_type:file.type||null,tamanho_bytes:file.size,inserido_por:user?.id||null});
+    if(error){await db.storage.from(CLIENT_DOCUMENT_BUCKET).remove([path]);throw error}
+    event.currentTarget.reset();toast("Documento do cliente carregado.");await loadCrm(crmClienteId);
+  }catch(err){toast(err.message,"error")}finally{button.disabled=false}
+}
+
+async function openClientDocument(id){
+  const documentRow=crmData.documentos?.find(d=>String(d.id)===String(id));if(!documentRow)return;
+  const {data,error}=await db.storage.from(CLIENT_DOCUMENT_BUCKET).createSignedUrl(documentRow.storage_path,60);
+  if(error)return toast(error.message,"error");
+  const link=document.createElement("a");link.href=data.signedUrl;link.target="_blank";link.rel="noopener";link.click();
+}
+
+async function deleteClientDocument(id){
+  const documentRow=crmData.documentos?.find(d=>String(d.id)===String(id));
+  if(!documentRow||!confirm(`Apagar o documento "${documentRow.nome}"?`))return;
+  try{
+    const {error:storageError}=await db.storage.from(CLIENT_DOCUMENT_BUCKET).remove([documentRow.storage_path]);if(storageError)throw storageError;
+    const {error}=await db.from("cliente_documentos").delete().eq("id",id);if(error)throw error;
+    toast("Documento apagado.");await loadCrm(crmClienteId);
+  }catch(err){toast(err.message,"error")}
+}
+
+document.addEventListener("click",async e=>{
+  const view=e.target.closest("[data-view-cliente]")?.dataset.viewCliente;
+  if(view){
+    try{await loadCrm(view);clienteCrmDialog.showModal()}
+    catch(err){toast(err.message,"error")}
+    return;
+  }
+
+  const tab=e.target.closest("[data-crm-tab]")?.dataset.crmTab;
+  if(tab){
+    document.querySelectorAll("[data-crm-tab]").forEach(b=>b.classList.toggle("active",b.dataset.crmTab===tab));
+    document.querySelectorAll(".crm-tab-panel").forEach(p=>p.classList.add("hidden"));
+    $(`crm-tab-${tab}`).classList.remove("hidden");
+  }
+
+  const del=e.target.closest("[data-crm-delete]")?.dataset.crmDelete;
+  if(del)deleteCrmRecord(del);
+  const openDocument=e.target.closest("[data-crm-document-open]")?.dataset.crmDocumentOpen;
+  if(openDocument)openClientDocument(openDocument);
+  const deleteDocument=e.target.closest("[data-crm-document-delete]")?.dataset.crmDocumentDelete;
+  if(deleteDocument)deleteClientDocument(deleteDocument);
+});
+
+document.addEventListener("DOMContentLoaded",()=>{
+  $("crmContactoForm")?.addEventListener("submit",addContact);
+  $("crmMoradaForm")?.addEventListener("submit",addMorada);
+  $("crmNotaForm")?.addEventListener("submit",addNota);
+  $("crmComunicacaoForm")?.addEventListener("submit",addComunicacao);
+  $("crmDocumentoForm")?.addEventListener("submit",addDocument);
+});
