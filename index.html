@@ -479,7 +479,6 @@
       <button data-obra-tab="documentos">Documentos</button>
       <button data-obra-tab="fotografias">Fotografias</button>
       <button data-obra-tab="diario">Diário de obra</button>
-      <button data-obra-tab="operacional" class="mobile-operational-tab">Painel de obra</button>
     </nav>
 
     <div class="obra-ficha-body">
@@ -592,11 +591,26 @@
           </nav>
         </section>
       </div>
-      <div id="obra-tab-operacional" class="obra-tab-panel hidden">
-        <div id="mobileWorkModule" class="mobile-work-module"></div>
-      </div>
       <div id="obra-tab-diario" class="obra-tab-panel hidden">
-        <div class="obra-placeholder"><strong>Diário de obra</strong><p>O diário será desenvolvido com data, autor, descrição, ocorrências, clima, equipa e anexos.</p></div>
+        <section class="diario-work-panel">
+          <header class="work-module-head">
+            <div>
+              <h3>Diário de obra</h3>
+              <p>Registe e consulte a atividade diária sincronizada desta obra.</p>
+            </div>
+            <span class="work-module-icon">📋</span>
+          </header>
+          <div class="mobile-work-grid diario-work-grid">
+            <button type="button" class="mobile-work-action primary" data-work-action="checklist"><span>✅</span><strong>Checklist</strong><small>Verificação diária</small></button>
+            <button type="button" class="mobile-work-action" data-work-action="team"><span>👷</span><strong>Equipa</strong><small>Pessoal em obra</small></button>
+            <button type="button" class="mobile-work-action" data-work-action="materials"><span>🧱</span><strong>Materiais</strong><small>Consumos e faltas</small></button>
+            <button type="button" class="mobile-work-action" data-work-action="hours"><span>⏱️</span><strong>Horas</strong><small>Entrada e saída</small></button>
+            <button type="button" class="mobile-work-action warning" data-work-action="occurrences"><span>⚠️</span><strong>Ocorrências</strong><small>Registar problema</small></button>
+          </div>
+          <div id="mobileWorkModule" class="mobile-work-module diario-work-module">
+            <div class="obra-placeholder"><strong>Selecione uma opção</strong><p>Escolha uma das ações acima para consultar ou adicionar registos.</p></div>
+          </div>
+        </section>
       </div>
     </div>
   </section>
