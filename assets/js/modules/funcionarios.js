@@ -15,6 +15,7 @@ function fillSelectors(){
   employee.value=selectedEmployee;work.value=selectedWork;
 }
 
+/* Implementação anterior preservada temporariamente para referência.
 export function renderFuncionarios(){
   const month=$("funcionarioMesFiltro")?.value||currentMonth();if($("funcionarioMesFiltro")&&!$("funcionarioMesFiltro").value)$("funcionarioMesFiltro").value=month;
   const term=$("funcionarioSearch")?.value.trim().toLowerCase()||"",state=$("funcionarioEstadoFiltro")?.value||"";
@@ -23,6 +24,26 @@ export function renderFuncionarios(){
   $("funcionariosResumo").innerHTML=`<article><span>Equipa ativa</span><strong>${store.funcionarios.filter(f=>f.estado==="Ativo").length}</strong></article><article><span>Horas no mês</span><strong>${totalHours.toFixed(1)} h</strong></article><article><span>Custo estimado</span><strong>${money(totalCost)}</strong></article><article><span>Registos no mês</span><strong>${monthHours.length}</strong></article>`;
   $("funcionariosTable").innerHTML=rows.length?`<div class="table-scroll"><table><thead><tr><th>Funcionário</th><th>Contacto</th><th>Entrada</th><th>Custo/hora</th><th>Horas no mês</th><th>Estado</th><th>Ações</th></tr></thead><tbody>${rows.map(f=>{const employeeHours=monthHours.filter(r=>String(r.funcionario_id)===String(f.id)).reduce((s,r)=>s+Number(r.horas||0),0);return `<tr><td><strong>${esc(f.nome)}</strong><small>${esc(f.funcao||"Sem função definida")}</small></td><td>${esc(f.telefone||"—")}<small>${esc(f.email||"")}</small></td><td>${formatDate(f.data_entrada)}</td><td>${money(f.custo_hora)}</td><td><strong>${employeeHours.toFixed(1)} h</strong><small>${money(employeeHours*Number(f.custo_hora||0))}</small></td><td>${badge(f.estado)}</td><td><div class="row-actions"><button class="btn small primary" data-employee-hours="${f.id}">Horas</button><button class="btn small light" data-edit-employee="${f.id}">Editar</button><button class="btn small danger" data-delete-employee="${f.id}">Apagar</button></div></td></tr>`}).join("")}</tbody></table></div>`:"<div class="crm-empty">Sem funcionários para apresentar.</div>";
   $("funcionarioHorasTable").innerHTML=monthHours.length?`<div class="table-scroll"><table><thead><tr><th>Data</th><th>Funcionário</th><th>Obra</th><th>Horário</th><th>Horas</th><th>Custo</th><th>Ações</th></tr></thead><tbody>${monthHours.map(r=>`<tr><td>${formatDate(r.data)}</td><td>${esc(r.funcionarios?.nome||"")}</td><td>${esc(r.obras?.nome||"Sem obra")}</td><td>${esc([r.hora_entrada,r.hora_saida].filter(Boolean).join("–")||"—")}</td><td>${Number(r.horas||0).toFixed(2)} h</td><td>${money(Number(r.horas||0)*Number(r.funcionarios?.custo_hora||0))}</td><td><button class="btn small danger" data-delete-employee-hours="${r.id}">Apagar</button></td></tr>`).join("")}</tbody></table></div>`:"<div class="crm-empty">Sem horas registadas neste mês.</div>";
+  fillSelectors();
+}
+*/
+export function renderFuncionarios(){
+  const month=$("funcionarioMesFiltro")?.value||currentMonth();
+  if($("funcionarioMesFiltro")&&!$("funcionarioMesFiltro").value) $("funcionarioMesFiltro").value=month;
+  const term=$("funcionarioSearch")?.value.trim().toLowerCase()||"";
+  const state=$("funcionarioEstadoFiltro")?.value||"";
+  const rows=store.funcionarios.filter(f=>(!state||f.estado===state)&&(!term||[f.nome,f.funcao,f.telefone,f.email,f.nif].some(v=>String(v||"").toLowerCase().includes(term))));
+  const monthHours=hoursForMonth(month);
+  const totalHours=monthHours.reduce((s,r)=>s+Number(r.horas||0),0);
+  const totalCost=monthHours.reduce((s,r)=>s+Number(r.horas||0)*Number(r.funcionarios?.custo_hora||0),0);
+  $("funcionariosResumo").innerHTML=`<article><span>Equipa ativa</span><strong>${store.funcionarios.filter(f=>f.estado==="Ativo").length}</strong></article><article><span>Horas no mês</span><strong>${totalHours.toFixed(1)} h</strong></article><article><span>Custo estimado</span><strong>${money(totalCost)}</strong></article><article><span>Registos no mês</span><strong>${monthHours.length}</strong></article>`;
+  const employeeBody=rows.map(f=>{
+    const employeeHours=monthHours.filter(r=>String(r.funcionario_id)===String(f.id)).reduce((s,r)=>s+Number(r.horas||0),0);
+    return `<tr><td><strong>${esc(f.nome)}</strong><small>${esc(f.funcao||"Sem função definida")}</small></td><td>${esc(f.telefone||"—")}<small>${esc(f.email||"")}</small></td><td>${formatDate(f.data_entrada)}</td><td>${money(f.custo_hora)}</td><td><strong>${employeeHours.toFixed(1)} h</strong><small>${money(employeeHours*Number(f.custo_hora||0))}</small></td><td>${badge(f.estado)}</td><td><div class="row-actions"><button class="btn small primary" data-employee-hours="${f.id}">Horas</button><button class="btn small light" data-edit-employee="${f.id}">Editar</button><button class="btn small danger" data-delete-employee="${f.id}">Apagar</button></div></td></tr>`;
+  }).join("");
+  $("funcionariosTable").innerHTML=rows.length?`<div class="table-scroll"><table><thead><tr><th>Funcionário</th><th>Contacto</th><th>Entrada</th><th>Custo/hora</th><th>Horas no mês</th><th>Estado</th><th>Ações</th></tr></thead><tbody>${employeeBody}</tbody></table></div>`:'<div class="crm-empty">Sem funcionários para apresentar.</div>';
+  const hoursBody=monthHours.map(r=>`<tr><td>${formatDate(r.data)}</td><td>${esc(r.funcionarios?.nome||"")}</td><td>${esc(r.obras?.nome||"Sem obra")}</td><td>${esc([r.hora_entrada,r.hora_saida].filter(Boolean).join("–")||"—")}</td><td>${Number(r.horas||0).toFixed(2)} h</td><td>${money(Number(r.horas||0)*Number(r.funcionarios?.custo_hora||0))}</td><td><button class="btn small danger" data-delete-employee-hours="${r.id}">Apagar</button></td></tr>`).join("");
+  $("funcionarioHorasTable").innerHTML=monthHours.length?`<div class="table-scroll"><table><thead><tr><th>Data</th><th>Funcionário</th><th>Obra</th><th>Horário</th><th>Horas</th><th>Custo</th><th>Ações</th></tr></thead><tbody>${hoursBody}</tbody></table></div>`:'<div class="crm-empty">Sem horas registadas neste mês.</div>';
   fillSelectors();
 }
 

@@ -43,7 +43,7 @@ check(!/sb_secret_/i.test(source), "Foi encontrada uma chave secreta no frontend
 for (const file of sourceFiles.filter((path) => extname(path) === ".js")) {
   const contents = readFileSync(file, "utf8");
   for (const match of contents.matchAll(/(?:import|export)\s+(?:[^"']*?\s+from\s+)?["'](\.[^"']+)["']/g)) {
-    const target = resolve(dirname(file), match[1]);
+    const target = resolve(dirname(file), match[1].split(/[?#]/, 1)[0]);
     check(existsSync(target), `Import inexistente em ${file}: ${match[1]}`);
   }
 }
