@@ -37,6 +37,16 @@ const sourceFiles = [indexPath, ...walk(join(root, "assets", "js"))]
   .filter((path) => [".html", ".js"].includes(extname(path)));
 const source = sourceFiles.map((path) => readFileSync(path, "utf8")).join("\n");
 
+const declaredIds = new Set([...source.matchAll(/id=["']([^"']+)["']/g)].map((match) => match[1]));
+for (const match of source.matchAll(/\$\(["']([^"']+)["']\)/g)) {
+  check(declaredIds.has(match[1]), `O código referencia um ID inexistente: ${match[1]}.`);
+}
+
+check(
+  !/:\s*"<[^>]+class="/.test(source),
+  "Foi encontrada uma string HTML com aspas incompatíveis, que pode impedir a aplicação de iniciar."
+);
+
 check(!/service[_-]?role/i.test(source), "Foi encontrada uma referência a service_role no frontend.");
 check(!/sb_secret_/i.test(source), "Foi encontrada uma chave secreta no frontend.");
 
