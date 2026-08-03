@@ -799,8 +799,18 @@
   <div class="actions"><button type="button" class="btn light" data-close="pagamentoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
 </form></dialog>
 
+<script>
+window.addEventListener("error",event=>{
+  const target=document.getElementById("loginError");
+  if(target&&!document.getElementById("loginView")?.classList.contains("hidden")) target.textContent=`Erro ao iniciar: ${event.message} (${event.filename||"ficheiro desconhecido"}:${event.lineno||0}:${event.colno||0})`;
+});
+window.addEventListener("unhandledrejection",event=>{
+  const target=document.getElementById("loginError");
+  if(target&&!document.getElementById("loginView")?.classList.contains("hidden")) target.textContent=`Erro ao iniciar: ${event.reason?.message||event.reason}`;
+});
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js"></script>
+<script type="module" src="assets/js/app.js?v=20260803-login-fix-2" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>
