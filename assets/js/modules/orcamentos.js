@@ -27,13 +27,6 @@ export function filterOrcamentos(){
   renderOrcamentos(store.orcamentos.filter(o=>(!estado||o.estado===estado)&&(!cliente||String(o.cliente_id)===cliente)&&(!term||[o.numero,o.descricao,o.referencia,o.clientes?.nome,o.obras?.nome].some(v=>String(v||"").toLowerCase().includes(term)))));
 }
 
-/* Implementação anterior preservada temporariamente para referência.
-export function renderOrcamentos(rows=store.orcamentos){
-  fill();
-  const value=rows.reduce((sum,o)=>sum+totals(o).total,0);
-  $("orcamentosTable").innerHTML=rows.length?`<div class="orcamento-list-summary"><span>${rows.length} orçamento(s)</span><strong>${money(value)}</strong></div><div class="table-scroll"><table><thead><tr><th>Número</th><th>Emissão</th><th>Cliente / obra</th><th>Descrição</th><th>Total</th><th>Estado</th><th>Ações</th></tr></thead><tbody>${rows.map(o=>{const t=totals(o);return `<tr><td><strong>${esc(o.numero||"—")}</strong><small>${esc(o.referencia||"")}</small></td><td>${new Date(`${isoDate(o.data_emissao)}T00:00:00`).toLocaleDateString("pt-PT")}<small>${numberValue(o.validade_dias)||15} dias</small></td><td>${esc(o.clientes?.nome||"")}<small>${esc(o.obras?.nome||"Sem obra")}</small></td><td>${esc(o.descricao||"")}<small>${sortedItems(o).length} linha(s)</small></td><td><strong>${money(t.total)}</strong><small>Base ${money(t.base)}</small></td><td><span class="budget-status ${statusClass(o.estado)}">${esc(o.estado||"Rascunho")}</span></td><td><div class="budget-actions"><button class="btn small primary" data-print-orcamento="${o.id}">PDF / imprimir</button><button class="btn small light" data-edit-orcamento="${o.id}">Editar</button><button class="btn small light" data-duplicate-orcamento="${o.id}">Duplicar</button><button class="btn small danger" data-del-orcamento="${o.id}">Apagar</button></div></td></tr>`}).join("")}</tbody></table></div>`:"<div class="obra-placeholder"><strong>Sem orçamentos</strong><p>Crie a primeira proposta comercial.</p></div>";
-}
-*/
 export function renderOrcamentos(rows=store.orcamentos){
   fill();
   const value=rows.reduce((sum,o)=>sum+totals(o).total,0);
