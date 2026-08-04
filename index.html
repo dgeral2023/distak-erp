@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>DISTAK ERP v2.8</title>
+  <title>DISTAK ERP v3.0</title>
 
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
@@ -15,6 +15,7 @@
 
   <!-- DISTAK UI 2026 -->
   <link rel="stylesheet" href="assets/css/distak-ios.css">
+  <link rel="stylesheet" href="assets/css/v3.css">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -36,7 +37,7 @@
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="brand">DISTAK ERP <small>v2.8</small></div>
+    <div class="brand">DISTAK ERP <small>v3.0</small></div>
     <nav id="mainNav">
       <button class="nav active" data-view="dashboard">Dashboard</button>
       <button class="nav admin-only" data-view="empresa">Empresa</button>
@@ -46,6 +47,7 @@
       <button class="nav admin-only" data-view="custos">Custos</button>
       <button class="nav admin-only" data-view="pagamentos">Pagamentos</button>
       <button class="nav admin-only" data-view="funcionarios">Funcionários</button>
+      <button class="nav admin-only" data-view="relatorios">Relatórios</button>
       <button class="nav funcionario-only" data-view="funcionario">Meu painel</button>
     </nav>
     <div class="sidebar-bottom">
@@ -60,7 +62,13 @@
         <h2 id="pageTitle">Dashboard</h2>
         <p id="pageSubtitle">Visão geral comercial e financeira</p>
       </div>
+      <div class="v3-top-actions">
+        <label class="global-search"><span>⌕</span><input id="globalSearch" type="search" placeholder="Pesquisar em todo o ERP" autocomplete="off"></label>
+        <button id="notificationBtn" class="notification-button" type="button" aria-label="Abrir alertas">🔔<span id="notificationCount">0</span></button>
+      </div>
     </header>
+    <div id="globalSearchResults" class="global-search-results hidden"></div>
+    <aside id="notificationPanel" class="notification-panel hidden"><header><div><span>Centro de atenção</span><h3>Alertas e próximos passos</h3></div><button id="notificationClose" type="button" aria-label="Fechar">×</button></header><div id="notificationList"></div></aside>
 
     <section id="view-dashboard" class="view">
       <div class="executive-head">
@@ -177,6 +185,7 @@
         <section class="panel"><div class="panel-title"><div><h3>Pipeline de orçamentos</h3><p>Valor e quantidade por estado comercial</p></div><button class="btn small light" data-dashboard-view="orcamentos">Ver orçamentos</button></div><div id="dashboardBudgetPipeline" class="dashboard-pipeline"></div></section>
         <section class="panel"><div class="panel-title"><div><h3>Equipa neste mês</h3><p>Horas e custo estimado por funcionário</p></div><button class="btn small light" data-dashboard-view="funcionarios">Ver equipa</button></div><div id="dashboardTeam" class="dashboard-team"></div></section>
       </div>
+      <section class="panel v3-activity-panel"><div class="panel-title"><div><h3>Atividade recente</h3><p>Histórico das principais alterações realizadas no ERP</p></div><span class="badge">v3</span></div><div id="activityTimeline"></div></section>
     </section>
 
 
@@ -334,6 +343,16 @@
         <div id="obraAssignments" class="assignment-list"></div>
       </div>
       <div class="panel employee-hours-panel"><h3>Horas registadas</h3><div id="funcionarioHorasTable"></div></div>
+    </section>
+
+    <section id="view-relatorios" class="view hidden">
+      <div class="v3-section-head"><div><span>Centro documental</span><h2>Relatórios e exportações</h2><p>Documentos prontos para acompanhamento, reunião e arquivo.</p></div><button id="printExecutiveReport" class="btn primary" type="button">Imprimir relatório executivo</button></div>
+      <div id="reportKpis" class="report-kpis"></div>
+      <div class="report-grid">
+        <article class="panel"><h3>Rentabilidade por obra</h3><div id="profitabilityReport"></div></article>
+        <article class="panel"><h3>Vencimentos e cobranças</h3><div id="maturityReport"></div></article>
+      </div>
+      <article class="panel report-guide"><h3>Dossiê completo da obra</h3><p>Abra a ficha de uma obra para imprimir o resumo financeiro, consultar o diário, organizar documentos e gerar o relatório fotográfico.</p><button class="btn light" type="button" data-report-open-works>Escolher obra</button></article>
     </section>
   </main>
 </section>
@@ -682,7 +701,7 @@
         <div id="mobileWorkModule" class="mobile-work-module"></div>
         <section class="diario-v28">
           <header class="diario-header">
-            <div><span class="diario-kicker">DISTAK ERP v2.8</span><h3>Diário de obra</h3><p>Registe o trabalho diário e mantenha o histórico completo da obra.</p></div>
+            <div><span class="diario-kicker">DISTAK ERP v3.0</span><h3>Diário de obra</h3><p>Registe o trabalho diário e mantenha o histórico completo da obra.</p></div>
             <button id="diarioNovo" class="btn primary" type="button">Novo registo</button>
           </header>
           <form id="diarioForm" class="diario-form">
@@ -821,6 +840,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260803-audit-1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260804-v3" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>

@@ -22,6 +22,8 @@ const requiredIds = [
   "view-orcamentos", "view-custos", "view-pagamentos", "view-funcionarios",
   "funcionarioForm", "funcionarioHorasForm", "dashboardTeam", "workDocumentList",
   "obraAssignments", "assignmentSummary"
+  ,"globalSearch", "globalSearchResults", "notificationPanel", "notificationList",
+  "view-relatorios", "reportKpis", "profitabilityReport", "maturityReport", "activityTimeline"
 ];
 
 for (const id of requiredIds) {
@@ -80,6 +82,20 @@ for (const required of [
   "drop index if exists public.idx_cliente_contactos_cliente"
 ]) {
   check(securityMigration.includes(required), `Migração de segurança incompleta: ${required}`);
+}
+
+const v3Migration = readFileSync(join(root, "supabase", "202608042000_distak_v3_historico_notificacoes.sql"), "utf8");
+for (const required of ["atividades_sistema", "atividades_sistema_select", "private.can_access_obra"]) {
+  check(v3Migration.includes(required), `Migração v3 incompleta: ${required}`);
+}
+const v3OperationalHistory = readFileSync(join(root, "supabase", "202608042030_distak_v3_historico_operacional.sql"), "utf8");
+for (const required of ["registar_atividade_operacional", "obra_checklists", "obra_fotografias"]) {
+  check(v3OperationalHistory.includes(required), `Histórico operacional v3 incompleto: ${required}`);
+}
+
+const v3Module = readFileSync(join(root, "assets", "js", "modules", "v3.js"), "utf8");
+for (const required of ["renderNotifications", "renderReports", "renderActivity", "globalSearch"]) {
+  check(v3Module.includes(required), `Módulo v3 incompleto: ${required}`);
 }
 
 const operationalMigration = readFileSync(

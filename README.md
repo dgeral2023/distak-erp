@@ -1,4 +1,4 @@
-# DISTAK ERP v2.8
+# DISTAK ERP v3.0
 
 Aplicação web de gestão comercial, financeira e operacional da DISTAK, otimizada para computador e telemóvel.
 
@@ -11,6 +11,9 @@ Aplicação web de gestão comercial, financeira e operacional da DISTAK, otimiz
 - Custos, faturas, pagamentos e anexos ligados automaticamente à obra.
 - Funcionários, horas trabalhadas e custo operacional por obra.
 - Autenticação, dados e ficheiros sincronizados através do Supabase.
+- Pesquisa global, centro de alertas e relatórios executivos imprimíveis.
+- Rentabilidade prevista versus real, vencimentos e cobranças por obra.
+- Histórico central de alterações com identificação do utilizador.
 
 ## Segurança
 
