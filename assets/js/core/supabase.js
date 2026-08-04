@@ -16,6 +16,7 @@ export async function save(table,payload,id){
   const q=id?db.from(table).update(payload).eq("id",id):db.from(table).insert(payload);
   const {error}=await q;
   if(error)throw error;
+  await audit(table,id,id?"atualizou":"criou",payload);
 }
 
 export async function saveReturning(table,payload,id){
@@ -24,12 +25,26 @@ export async function saveReturning(table,payload,id){
     :db.from(table).insert(payload).select().single();
   const {data,error}=await q;
   if(error)throw error;
+  await audit(table,data?.id||id,id?"atualizou":"criou",payload);
   return data;
 }
 
 export async function remove(table,id){
   const {error}=await db.from(table).delete().eq("id",id);
   if(error)throw error;
+  await audit(table,id,"eliminou",{});
+}
+
+async function audit(table,id,acao,payload){
+  if(table==="atividades_sistema")return;
+  const {data:{user}}=await db.auth.getUser();
+  if(!user)return;
+  const labels={clientes:"cliente",obras:"obra",orcamentos:"orçamento",custos:"custo",pagamentos:"pagamento",funcionarios:"funcionário",funcionario_horas:"registo de horas"};
+  const entidade=labels[table]||table;
+  const obraId=table==="obras"?(id||null):(payload?.obra_id||null);
+  const row={utilizador_id:user.id,obra_id:obraId,entidade,entidade_id:id||null,acao,resumo:`${entidade[0].toUpperCase()+entidade.slice(1)} ${acao}`,metadados:{origem:"web-v3"}};
+  const {error}=await db.from("atividades_sistema").insert(row);
+  if(error)console.warn("Histórico não registado:",error.message);
 }
 
 export async function uploadStorage(bucket,path,file){
