@@ -1,1 +1,1 @@
-export const store={profile:null,profiles:[],obraUtilizadores:[],clientes:[],obras:[],orcamentos:[],custos:[],pagamentos:[],fotografias:[],funcionarios:[],funcionarioHoras:[],atividades:[],agendaTarefas:[]};
+export const store={profile:null,profiles:[],obraUtilizadores:[],clientes:[],obras:[],orcamentos:[],custos:[],pagamentos:[],fotografias:[],funcionarios:[],funcionarioHoras:[],atividades:[],agendaTarefas:[],previsoesFinanceiras:[]};
