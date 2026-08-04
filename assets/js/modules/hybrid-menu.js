@@ -1,7 +1,7 @@
 import {$,setView} from "../core/ui.js";
 import {store} from "../core/store.js";
 
-const meta={dashboard:["⌂","Início"],empresa:["⚙","Empresa"],clientes:["♙","Clientes"],obras:["▥","Obras"],orcamentos:["▤","Orçamentos"],custos:["↘","Custos"],pagamentos:["€","Pagamentos"],funcionarios:["♟","Equipa"],relatorios:["▥","Relatórios"],funcionario:["✓","Meu painel"]};
+const meta={dashboard:["⌂","Início"],empresa:["⚙","Empresa"],clientes:["♙","Clientes"],obras:["▥","Obras"],agenda:["◫","Agenda"],orcamentos:["▤","Orçamentos"],custos:["↘","Custos"],pagamentos:["€","Pagamentos"],funcionarios:["♟","Equipa"],relatorios:["▥","Relatórios"],funcionario:["✓","Meu painel"]};
 const adminViews=["clientes","orcamentos","custos","pagamentos","relatorios","funcionarios","empresa"];
 let actions={};
 
@@ -25,7 +25,7 @@ function openSheet(id){closeSheets();$(id)?.classList.remove("hidden");$("mobile
 function navigate(view){setView(view);saveRecent(view);document.querySelectorAll("[data-mobile-view]").forEach(button=>button.classList.toggle("active",button.dataset.mobileView===view));closeSheets()}
 
 function renderMore(){
-  const views=store.profile?.role==="admin"?["clientes","orcamentos","custos","pagamentos","funcionarios","relatorios","empresa"]:["funcionario"];
+  const views=store.profile?.role==="admin"?["agenda","clientes","orcamentos","custos","pagamentos","funcionarios","relatorios","empresa"]:["agenda","funcionario"];
   $("mobileMoreLinks").innerHTML=views.map(view=>`<button data-mobile-view="${view}"><i>${meta[view][0]}</i><strong>${meta[view][1]}</strong></button>`).join("");
 }
 
@@ -74,6 +74,7 @@ export function initHybridMenu(handlers){
     if(quick==="orcamento")actions.openOrcamento?.();
     if(quick==="custo")actions.openCusto?.();
     if(quick==="pagamento")actions.openPagamento?.();
+    if(quick==="tarefa")actions.openAgendaTask?.();
     if(quick==="diario")navigate(store.profile?.role==="admin"?"obras":"funcionario");
   });
   let groupStates={};try{groupStates=JSON.parse(localStorage.getItem("distakMenuGroups")||"{}")}catch{}

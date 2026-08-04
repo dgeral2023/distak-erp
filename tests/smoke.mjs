@@ -30,6 +30,8 @@ const requiredIds = [
   ,"option5ActiveWorks", "option5ExecutionValue", "option5Income", "option5Alerts"
   ,"aiAssistantButton", "aiAssistantPanel", "aiAssistantMessages", "aiAssistantForm", "aiAssistantInput"
   ,"aiPriorityCard", "aiPrioritySummary", "aiPriorityAction"
+  ,"view-agenda", "navTaskCount", "novaTarefaBtn", "agendaWeekGrid", "agendaTaskList",
+  "agendaTaskDialog", "agendaTaskForm", "agendaTaskWork", "agendaTaskDue"
 ];
 
 for (const id of requiredIds) {
@@ -116,8 +118,16 @@ for (const required of ["initAssistant", "renderAssistantInsight", "db.functions
   check(assistantModule.includes(required), `Assistente DISTAK incompleto: ${required}`);
 }
 const assistantFunction = readFileSync(join(root, "supabase", "functions", "assistente-distak", "index.ts"), "utf8");
-for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "auth.getUser"]){
+for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "auth.getUser"]){
   check(assistantFunction.includes(required), `Função segura do assistente incompleta: ${required}`);
+}
+const agendaModule = readFileSync(join(root, "assets", "js", "modules", "agenda.js"), "utf8");
+for (const required of ["renderAgenda", "initAgenda", "agenda_tarefas", "toggleTask", "prazo", "prioridade"]){
+  check(agendaModule.includes(required), `Agenda operacional incompleta: ${required}`);
+}
+const agendaMigration = readFileSync(join(root, "supabase", "202608042110_agenda_tarefas.sql"), "utf8");
+for (const required of ["enable row level security", "private.can_access_obra", "agenda_tarefas_select", "agenda_tarefas_insert", "agenda_tarefas_update", "revoke all on public.agenda_tarefas from anon"]){
+  check(agendaMigration.includes(required), `Migração da agenda incompleta: ${required}`);
 }
 const pwaModule = readFileSync(join(root, "assets", "js", "core", "pwa.js"), "utf8");
 const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
