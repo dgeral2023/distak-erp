@@ -27,6 +27,7 @@ const requiredIds = [
   ,"sidebarToggle", "mobileNav", "mobileRegister", "mobileAlerts", "mobileMore",
   "mobileMoreSheet", "mobileRegisterSheet", "mobileSheetBackdrop", "recentNav"
   ,"favoriteNav", "topUserMenu", "topUserInitial", "accountPanel", "accountLogout"
+  ,"option5ActiveWorks", "option5ExecutionValue", "option5Income", "option5Alerts"
 ];
 
 for (const id of requiredIds) {
@@ -99,6 +100,10 @@ for (const required of ["registar_atividade_operacional", "obra_checklists", "ob
 const v3Module = readFileSync(join(root, "assets", "js", "modules", "v3.js"), "utf8");
 for (const required of ["renderNotifications", "renderReports", "renderActivity", "globalSearch"]) {
   check(v3Module.includes(required), `Módulo v3 incompleto: ${required}`);
+}
+const dashboardModule = readFileSync(join(root, "assets", "js", "modules", "dashboard.js"), "utf8");
+for (const required of ["finance-line-chart", "donut-chart", "work-identity", "store.fotografias"]){
+  check(dashboardModule.includes(required), `Dashboard da opção 5 incompleto: ${required}`);
 }
 const hybridMenu = readFileSync(join(root, "assets", "js", "modules", "hybrid-menu.js"), "utf8");
 for (const required of ["initHybridMenu", "renderHybridMenu", "distakSidebarCollapsed", "event.ctrlKey", "distakFavoriteViews", "distakMenuGroups"]){

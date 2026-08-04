@@ -18,8 +18,10 @@ export function renderObras(rows=store.obras){
     <th>Obra</th><th>Cliente</th><th>Estado</th>${admin?"<th>Valor</th><th>Custos</th><th>Recebido</th>":""}<th>Progresso</th><th>Ações</th>
   </tr></thead><tbody>${rows.map(o=>{
     const custos=totalCustos(o.id),recebido=totalRecebido(o.id);
+    const photo=store.fotografias.find(item=>String(item.obra_id)===String(o.id)&&item.url);
+    const image=photo?`<img src="${esc(photo.url)}" alt="Fotografia de ${esc(o.nome)}" loading="lazy">`:`<span>▥</span>`;
     return `<tr>
-      <td><button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button></td>
+      <td><div class="obra-list-identity">${image}<button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button></div></td>
       <td>${esc(o.clientes?.nome||"")}</td>
       <td><span class="badge">${esc(o.estado||"")}</span></td>
       ${admin?`<td>${money(valorContratado(o))}</td><td>${money(custos)}</td><td>${money(recebido)}</td>`:""}

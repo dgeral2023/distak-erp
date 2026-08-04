@@ -9,7 +9,7 @@
 
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
-  <link rel="stylesheet" href="assets/css/dashboard-executivo.css">
+  <link rel="stylesheet" href="assets/css/dashboard-executivo.css?v=20260804-option5-dashboard">
   <link rel="stylesheet" href="assets/css/fotografias.css">
   <link rel="stylesheet" href="assets/css/diario.css">
 
@@ -82,6 +82,13 @@
     <aside id="accountPanel" class="account-panel hidden"><div id="accountPanelUser"></div><button id="accountLogout" type="button">Sair da conta</button></aside>
 
     <section id="view-dashboard" class="view">
+      <div class="option5-dashboard-head"><div><h1>Dashboard de Obras</h1><p>Visão geral do estado das obras e indicadores principais.</p></div><div class="option5-head-actions"><button class="btn light" type="button">⚙ Personalizar</button><span>Este mês⌄</span></div></div>
+      <div class="option5-kpis">
+        <article><div><span>Obras ativas</span><strong id="option5ActiveWorks">0</strong><small id="option5ActiveTrend">Situação atual</small></div><i class="blue">▥</i></article>
+        <article><div><span>Valor em execução</span><strong id="option5ExecutionValue">0,00 €</strong><small id="option5ExecutionTrend">Valor contratado</small></div><i class="gold">↗</i></article>
+        <article><div><span>Recebimentos</span><strong id="option5Income">0,00 €</strong><small id="option5IncomeTrend">Total recebido</small></div><i class="green">▤</i></article>
+        <article><div><span>Alertas</span><strong id="option5Alerts">0</strong><small id="option5AlertTrend">Pontos de atenção</small></div><i class="red">♢</i></article>
+      </div>
       <div class="executive-head">
         <div>
           <span class="executive-kicker">Centro de controlo</span>
@@ -146,14 +153,14 @@
       <div class="executive-main-grid">
         <section class="panel executive-chart-panel">
           <div class="panel-title">
-            <div><h3>Fluxo financeiro mensal</h3><p>Custos e recebimentos dos últimos 6 meses</p></div>
+            <div><h3>Evolução financeira</h3><p>Planeado e realizado nos últimos 6 meses</p></div>
           </div>
           <div id="dashboardFinanceChart" class="finance-chart"></div>
         </section>
 
         <section class="panel">
           <div class="panel-title">
-            <div><h3>Estado das obras</h3><p>Distribuição operacional atual</p></div>
+            <div><h3>Distribuição por estado</h3><p>Quantidade de obras em cada fase</p></div>
           </div>
           <div id="dashboardStatusChart" class="status-chart"></div>
         </section>
@@ -162,7 +169,7 @@
       <div class="executive-main-grid">
         <section class="panel">
           <div class="panel-title">
-            <div><h3>Obras com maior valor</h3><p>Visão rápida das principais obras</p></div>
+            <div><h3>Obras em destaque</h3><p>Fotografia, progresso e situação financeira</p></div>
             <button class="btn small light" data-dashboard-view="obras">Ver todas</button>
           </div>
           <div id="dashboardObras"></div>
@@ -851,6 +858,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260804-option5" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260804-option5-dashboard" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>

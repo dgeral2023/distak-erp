@@ -88,6 +88,14 @@ export function renderDashboard(){
   $("statCustoEquipaMes").textContent=money(teamCost);
   $("statCustosVencidos").textContent=money(overdueCosts.reduce((sum,c)=>sum+num(c.valor||c.valor_sem_iva),0));
   $("statCustosVencidosQtd").textContent=`${overdueCosts.length} documento(s)`;
+  $("option5ActiveWorks").textContent=obras.filter(isActive).length;
+  $("option5ExecutionValue").textContent=money(contratado);
+  $("option5Income").textContent=money(recebido);
+  $("option5Alerts").textContent=obras.filter(isAlert).length+overdueCosts.length;
+  $("option5ActiveTrend").textContent=`${obras.length} obras registadas`;
+  $("option5ExecutionTrend").textContent=`Margem estimada ${margem.toFixed(1)}%`;
+  $("option5IncomeTrend").textContent=`${contratado?((recebido/contratado)*100).toFixed(1):0}% do contratado`;
+  $("option5AlertTrend").textContent=overdueCosts.length?`${overdueCosts.length} custo(s) vencido(s)`:"Sem custos vencidos";
 
   renderFinanceChart(custos,pagamentos);
   renderStatusChart(obras);
@@ -106,16 +114,13 @@ function renderFinanceChart(custos,pagamentos){
     custos:custos.filter(x=>monthKey(x.data||x.created_at)===m.key).reduce((s,x)=>s+num(x.valor||x.valor_sem_iva),0),
     pagamentos:pagamentos.filter(x=>monthKey(x.data||x.created_at)===m.key).reduce((s,x)=>s+num(x.valor),0)
   }));
-  const max=Math.max(1,...rows.flatMap(x=>[x.custos,x.pagamentos]));
-  $("dashboardFinanceChart").innerHTML=`
-    <div class="chart-legend"><span><i class="legend-received"></i>Recebimentos</span><span><i class="legend-cost"></i>Custos</span></div>
-    <div class="finance-bars">${rows.map(r=>`<div class="finance-month">
-      <div class="finance-columns">
-        <span class="bar-received" style="height:${Math.max(3,r.pagamentos/max*100)}%" title="Recebido: ${money(r.pagamentos)}"></span>
-        <span class="bar-cost" style="height:${Math.max(3,r.custos/max*100)}%" title="Custos: ${money(r.custos)}"></span>
-      </div>
-      <small>${esc(r.label)}</small>
-    </div>`).join("")}</div>`;
+  const host=$("dashboardFinanceChart");
+  host.innerHTML=`<div class="chart-legend"><span><i class="legend-received"></i>Recebimentos</span><span><i class="legend-cost"></i>Custos</span></div><canvas class="finance-line-chart" width="760" height="250" aria-label="Evolução financeira"></canvas><div class="line-chart-labels">${rows.map(r=>`<span>${esc(r.label)}</span>`).join("")}</div>`;
+  const canvas=host.querySelector("canvas"),ctx=canvas.getContext("2d"),max=Math.max(1,...rows.flatMap(row=>[row.custos,row.pagamentos]));
+  ctx.clearRect(0,0,760,250);ctx.strokeStyle="#e2e8f0";ctx.lineWidth=1;
+  for(let y=30;y<=220;y+=47.5){ctx.beginPath();ctx.moveTo(28,y);ctx.lineTo(744,y);ctx.stroke()}
+  const draw=(values,color,dashed=false)=>{ctx.strokeStyle=color;ctx.lineWidth=3;ctx.setLineDash(dashed?[7,6]:[]);ctx.beginPath();values.forEach((value,index)=>{const x=40+index*(690/(values.length-1)),y=218-(value/max)*175;index?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();ctx.setLineDash([]);values.forEach((value,index)=>{const x=40+index*(690/(values.length-1)),y=218-(value/max)*175;ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill()})};
+  draw(rows.map(row=>row.custos),"#233d68",true);draw(rows.map(row=>row.pagamentos),"#dda92f");
 }
 
 function renderStatusChart(obras){
@@ -126,26 +131,27 @@ function renderStatusChart(obras){
     ["Alerta",obras.filter(isAlert).length],
     ["Outras",obras.filter(o=>!isActive(o)&&!isBudget(o)&&!isCompleted(o)&&!isAlert(o)).length]
   ];
-  const max=Math.max(1,...groups.map(x=>x[1]));
-  $("dashboardStatusChart").innerHTML=groups.map(([label,value])=>`<div class="status-row">
-    <div><span>${label}</span><strong>${value}</strong></div>
-    <div class="status-track"><span style="width:${value/max*100}%"></span></div>
-  </div>`).join("");
+  const total=Math.max(1,groups.reduce((sum,row)=>sum+row[1],0)),colors=["#315b91","#59b99d","#93a8c4","#e1ad38","#e5eaf1"];
+  let cursor=0;const stops=groups.map((row,index)=>{const start=cursor;cursor+=row[1]/total*100;return `${colors[index]} ${start}% ${cursor}%`}).join(",");
+  $("dashboardStatusChart").innerHTML=`<div class="donut-chart" style="background:conic-gradient(${stops})"><div><strong>${groups.reduce((sum,row)=>sum+row[1],0)}</strong><span>Total</span></div></div><div class="donut-legend">${groups.map(([label,value],index)=>`<div><i style="background:${colors[index]}"></i><span>${esc(label)}</span><strong>${value} (${(value/total*100).toFixed(0)}%)</strong></div>`).join("")}</div>`;
 }
 
 function renderTopWorks(obras,custos,pagamentos){
   const top=[...obras].sort((a,b)=>obraValor(b)-obraValor(a)).slice(0,6);
-  $("dashboardObras").innerHTML=top.length?`<table class="dashboard-table"><thead><tr><th>Obra</th><th>Estado</th><th>Valor</th><th>Recebido</th><th>Margem</th></tr></thead><tbody>${top.map(o=>{
+  $("dashboardObras").innerHTML=top.length?`<div class="table-scroll"><table class="dashboard-table option5-work-table"><thead><tr><th>Obra</th><th>Estado</th><th>Progresso</th><th>Valor em execução</th><th>Recebido</th><th></th></tr></thead><tbody>${top.map(o=>{
     const c=custos.filter(x=>String(x.obra_id)===String(o.id)).reduce((s,x)=>s+num(x.valor||x.valor_sem_iva),0);
     const p=pagamentos.filter(x=>String(x.obra_id)===String(o.id)).reduce((s,x)=>s+num(x.valor),0);
     const v=obraValor(o);
     const m=v?((v-c)/v*100):0;
+    const photo=store.fotografias.find(item=>String(item.obra_id)===String(o.id)&&item.url);
+    const image=photo?`<img src="${esc(photo.url)}" alt="Fotografia de ${esc(o.nome)}" loading="lazy">`:`<span class="work-photo-fallback">▥</span>`;
     return `<tr>
-      <td><button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button><small>${esc(o.clientes?.nome||"")}</small></td>
+      <td><div class="work-identity">${image}<div><button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button><small>${esc(o.clientes?.nome||o.morada||"")}</small></div></div></td>
       <td><span class="badge">${esc(o.estado||"")}</span></td>
-      <td>${money(v)}</td><td>${money(p)}</td><td>${m.toFixed(1)}%</td>
+      <td><div class="table-progress"><span><i style="width:${Math.min(100,Math.max(0,num(o.progresso)))}%"></i></span><strong>${num(o.progresso).toFixed(0)}%</strong></div></td>
+      <td>${money(v)}<small>Margem ${m.toFixed(1)}%</small></td><td>${money(p)}</td><td><button class="table-more" data-view-obra="${o.id}" aria-label="Abrir obra">⋮</button></td>
     </tr>`;
-  }).join("")}</tbody></table>`:'<div class="dashboard-empty">Ainda não existem obras registadas.</div>';
+  }).join("")}</tbody></table></div>`:'<div class="dashboard-empty">Ainda não existem obras registadas.</div>';
 }
 
 function renderAlerts(obras,orcamentos,pagamentos,overdueCosts=[]){
