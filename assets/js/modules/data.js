@@ -2,6 +2,9 @@ import {query} from "../core/supabase.js";
 import {store} from "../core/store.js";
 
 export async function refreshData(){
+  const isAdmin=store.profile?.role==="admin";
+  store.profiles = isAdmin ? await query("profiles") : [store.profile];
+  store.obraUtilizadores = await query("obra_utilizadores");
   store.clientes = await query("clientes");
   store.obras = await query("obras", "*,clientes(nome)");
 
