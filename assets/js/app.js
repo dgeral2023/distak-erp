@@ -3,7 +3,8 @@ import {initAssistant,renderAssistantInsight} from "./modules/assistant.js";
 import {initPwa} from "./core/pwa.js";
 import {initAgenda,renderAgenda,openAgendaTask} from "./modules/agenda.js";
 import {initPrevisoes,renderPrevisoes,openForecast} from "./modules/previsoes.js";
-async function refresh(){await refreshData();renderClientes();renderObras();renderOrcamentos();renderCustos();renderPagamentos();renderFuncionarios();renderDashboard();renderAgenda();renderPrevisoes();renderV3();renderHybridMenu();renderAssistantInsight();if(store.profile?.role!=="admin")$("funcionarioObras").innerHTML=$("obrasTable").innerHTML}
+import {initDossies,renderDossies} from "./modules/dossies.js";
+async function refresh(){await refreshData();renderClientes();renderObras();renderOrcamentos();renderCustos();renderPagamentos();renderFuncionarios();renderDashboard();renderAgenda();renderPrevisoes();renderDossies();renderV3();renderHybridMenu();renderAssistantInsight();if(store.profile?.role!=="admin")$("funcionarioObras").innerHTML=$("obrasTable").innerHTML}
 function applyRole(){const admin=store.profile.role==="admin";document.querySelectorAll(".admin-only").forEach(x=>x.classList.toggle("hidden",!admin));document.querySelectorAll(".funcionario-only").forEach(x=>x.classList.toggle("hidden",admin))}
 async function enter(s){store.profile=s.profile;$("userInfo").innerHTML=`<strong>${esc(s.profile.nome||s.user.email)}</strong><br><small>${esc(s.profile.role)}</small>`;applyRole();await refresh();$("loginView").classList.add("hidden");$("appView").classList.remove("hidden");setView(s.profile.role==="admin"?"dashboard":"funcionario")}
 $("loginForm").onsubmit=async e=>{e.preventDefault();const button=e.currentTarget.querySelector('button[type="submit"]');$("loginError").textContent="";button.disabled=true;button.textContent="A entrar…";try{await enter(await login($("loginEmail").value.trim(),$("loginPassword").value))}catch(err){$("loginError").textContent=err.message||"Não foi possível entrar. Tente novamente."}finally{button.disabled=false;button.textContent="Entrar"}}
@@ -34,5 +35,5 @@ document.body.onclick=e=>{
   if(delPag)deletePagamento(delPag,refresh);
 }
 $("clienteSearch").oninput=e=>renderClientes(store.clientes.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())));$("obraSearch").oninput=e=>renderObras(store.obras.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())));$("pagamentoSearch").oninput=e=>renderPagamentos(store.pagamentos.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())))
-initCustos(refresh);initOrcamentos();initFuncionarios(refresh);initFotografias();initDocumentos();initDiario();initAgenda(refresh);initPrevisoes(refresh);initV3();initHybridMenu({openCliente,openObra,openOrcamento,openCusto,openPagamento,openAgendaTask,openForecast});initAssistant();initPwa();
+initCustos(refresh);initOrcamentos();initFuncionarios(refresh);initFotografias();initDocumentos();initDiario();initAgenda(refresh);initPrevisoes(refresh);initDossies();initV3();initHybridMenu({openCliente,openObra,openOrcamento,openCusto,openPagamento,openAgendaTask,openForecast});initAssistant();initPwa();
 session().then(s=>s&&enter(s)).catch(err=>{$("loginError").textContent=err.message||"Não foi possível recuperar a sessão."})

@@ -25,4 +25,5 @@ export async function refreshData(){
     console.error("Não foi possível carregar as fotografias:", err);
     store.fotografias = [];
   }
+  try{store.documentosObra=await query("obra_documentos")}catch(err){console.error("Não foi possível carregar o inventário documental:",err);store.documentosObra=[]}
 }
