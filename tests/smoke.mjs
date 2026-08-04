@@ -60,6 +60,7 @@ for (const file of sourceFiles.filter((path) => extname(path) === ".js")) {
 
 const auth = readFileSync(join(root, "assets", "js", "core", "auth.js"), "utf8");
 check(auth.includes("db.auth.getUser()"), "A sessão deve ser validada com auth.getUser().");
+check(auth.includes("if(!sessionData.session)return null"), "A ausência de sessão não deve ser apresentada como erro.");
 check(auth.includes("profile.ativo===false"), "Perfis desativados devem ser bloqueados.");
 
 const securityMigration = readFileSync(

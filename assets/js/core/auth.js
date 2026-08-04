@@ -25,6 +25,9 @@ export async function login(email,password){
 export async function logout(){await db.auth.signOut()}
 
 export async function session(){
+  const {data:sessionData,error:sessionError}=await db.auth.getSession();
+  if(sessionError)throw sessionError;
+  if(!sessionData.session)return null;
   const {data,error}=await db.auth.getUser();
   if(error)throw error;
   return authorizedSession(data.user);
