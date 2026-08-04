@@ -26,6 +26,7 @@ const requiredIds = [
   "view-relatorios", "reportKpis", "profitabilityReport", "maturityReport", "activityTimeline"
   ,"sidebarToggle", "mobileNav", "mobileRegister", "mobileAlerts", "mobileMore",
   "mobileMoreSheet", "mobileRegisterSheet", "mobileSheetBackdrop", "recentNav"
+  ,"favoriteNav", "topUserMenu", "topUserInitial", "accountPanel", "accountLogout"
 ];
 
 for (const id of requiredIds) {
@@ -100,7 +101,7 @@ for (const required of ["renderNotifications", "renderReports", "renderActivity"
   check(v3Module.includes(required), `Módulo v3 incompleto: ${required}`);
 }
 const hybridMenu = readFileSync(join(root, "assets", "js", "modules", "hybrid-menu.js"), "utf8");
-for (const required of ["initHybridMenu", "renderHybridMenu", "distakSidebarCollapsed", "event.ctrlKey"]){
+for (const required of ["initHybridMenu", "renderHybridMenu", "distakSidebarCollapsed", "event.ctrlKey", "distakFavoriteViews", "distakMenuGroups"]){
   check(hybridMenu.includes(required), `Menu híbrido incompleto: ${required}`);
 }
 

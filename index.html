@@ -16,7 +16,7 @@
   <!-- DISTAK UI 2026 -->
   <link rel="stylesheet" href="assets/css/distak-ios.css">
   <link rel="stylesheet" href="assets/css/v3.css">
-  <link rel="stylesheet" href="assets/css/hybrid-menu.css">
+  <link rel="stylesheet" href="assets/css/hybrid-menu.css?v=20260804-option5">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -38,14 +38,15 @@
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="sidebar-brand"><div class="brand-mark">D</div><div class="brand">DISTAK ERP <small>v3.1</small></div><button id="sidebarToggle" type="button" aria-label="Recolher menu" title="Recolher menu">‹</button></div>
+    <div class="sidebar-brand"><button id="sidebarToggle" type="button" aria-label="Recolher menu" title="Recolher menu">☰</button><div class="brand">DISTAK ERP <small>v3.1</small></div><span class="brand-chevron">‹</span></div>
     <nav id="mainNav">
-      <div class="nav-group"><span class="nav-group-title">Visão geral</span><button class="nav active" data-view="dashboard"><i>⌂</i><span>Início</span></button></div>
-      <div class="nav-group admin-only"><span class="nav-group-title">Comercial</span><button class="nav" data-view="clientes"><i>♙</i><span>Clientes</span></button><button class="nav" data-view="orcamentos"><i>▤</i><span>Orçamentos</span></button></div>
-      <div class="nav-group"><span class="nav-group-title">Obras</span><button class="nav" data-view="obras"><i>▥</i><span>Obras</span><b id="navWorkCount">0</b></button><button class="nav funcionario-only" data-view="funcionario"><i>✓</i><span>Meu painel</span></button></div>
-      <div class="nav-group admin-only"><span class="nav-group-title">Financeiro</span><button class="nav" data-view="custos"><i>↘</i><span>Custos</span></button><button class="nav" data-view="pagamentos"><i>€</i><span>Pagamentos</span></button><button class="nav" data-view="relatorios"><i>▥</i><span>Relatórios</span></button></div>
-      <div class="nav-group admin-only"><span class="nav-group-title">Equipa e empresa</span><button class="nav" data-view="funcionarios"><i>♟</i><span>Equipa</span></button><button class="nav" data-view="empresa"><i>⚙</i><span>Empresa</span></button></div>
-      <div id="recentNavGroup" class="nav-group recent-nav-group"><span class="nav-group-title">Recentes</span><div id="recentNav"></div></div>
+      <div class="nav-group"><button class="nav active" data-view="dashboard"><i>⌂</i><span>Dashboard</span></button></div>
+      <div class="nav-group admin-only" data-menu-group="comercial"><button class="nav-group-title" type="button" data-toggle-menu-group="comercial"><span>Comercial</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="clientes"><i>♙</i><span>Clientes</span></button><button class="nav" data-view="orcamentos"><i>▤</i><span>Propostas e orçamentos</span></button></div></div>
+      <div class="nav-group" data-menu-group="obras"><button class="nav-group-title" type="button" data-toggle-menu-group="obras"><span>Obras</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="obras"><i>▥</i><span>Dashboard de obras</span><b id="navWorkCount">0</b></button><button class="nav funcionario-only" data-view="funcionario"><i>✓</i><span>Meu painel</span></button></div></div>
+      <div class="nav-group admin-only" data-menu-group="financeiro"><button class="nav-group-title" type="button" data-toggle-menu-group="financeiro"><span>Financeiro</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="custos"><i>↘</i><span>Custos e fornecedores</span></button><button class="nav" data-view="pagamentos"><i>€</i><span>Pagamentos</span></button><button class="nav" data-view="relatorios"><i>▥</i><span>Relatórios</span></button></div></div>
+      <div class="nav-group admin-only" data-menu-group="equipa"><button class="nav-group-title" type="button" data-toggle-menu-group="equipa"><span>Equipa</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="funcionarios"><i>♟</i><span>Recursos humanos</span></button><button class="nav" data-view="empresa"><i>⚙</i><span>Empresa</span></button></div></div>
+      <div id="favoriteNavGroup" class="nav-group utility-nav-group"><button class="nav-group-title" type="button" data-toggle-menu-group="favoritos"><span>☆ Favoritos</span><i>⌄</i></button><div id="favoriteNav" class="nav-group-items"></div></div>
+      <div id="recentNavGroup" class="nav-group utility-nav-group"><button class="nav-group-title" type="button" data-toggle-menu-group="recentes"><span>◷ Recentes</span><i>⌄</i></button><div id="recentNav" class="nav-group-items"></div></div>
     </nav>
     <div class="sidebar-bottom">
       <div id="userInfo"></div>
@@ -71,12 +72,14 @@
         <p id="pageSubtitle">Visão geral comercial e financeira</p>
       </div>
       <div class="v3-top-actions">
-        <label class="global-search"><span>⌕</span><input id="globalSearch" type="search" placeholder="Pesquisar em todo o ERP" autocomplete="off"></label>
+        <label class="global-search"><span>⌕</span><input id="globalSearch" type="search" placeholder="Pesquisar comandos, obras, clientes..." autocomplete="off"><kbd>Ctrl + K</kbd></label>
         <button id="notificationBtn" class="notification-button" type="button" aria-label="Abrir alertas">🔔<span id="notificationCount">0</span></button>
+        <button id="topUserMenu" class="top-user-menu" type="button" aria-label="Conta do utilizador"><span id="topUserInitial">D</span><i>⌄</i></button>
       </div>
     </header>
     <div id="globalSearchResults" class="global-search-results hidden"></div>
     <aside id="notificationPanel" class="notification-panel hidden"><header><div><span>Centro de atenção</span><h3>Alertas e próximos passos</h3></div><button id="notificationClose" type="button" aria-label="Fechar">×</button></header><div id="notificationList"></div></aside>
+    <aside id="accountPanel" class="account-panel hidden"><div id="accountPanelUser"></div><button id="accountLogout" type="button">Sair da conta</button></aside>
 
     <section id="view-dashboard" class="view">
       <div class="executive-head">
@@ -848,6 +851,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260804-v31-menu" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260804-option5" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>
