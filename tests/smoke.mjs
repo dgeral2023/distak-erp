@@ -20,7 +20,8 @@ function walk(directory) {
 const requiredIds = [
   "loginForm", "mainNav", "view-dashboard", "view-clientes", "view-obras",
   "view-orcamentos", "view-custos", "view-pagamentos", "view-funcionarios",
-  "funcionarioForm", "funcionarioHorasForm", "dashboardTeam", "workDocumentList"
+  "funcionarioForm", "funcionarioHorasForm", "dashboardTeam", "workDocumentList",
+  "obraAssignments", "assignmentSummary"
 ];
 
 for (const id of requiredIds) {
@@ -79,6 +80,20 @@ for (const required of [
   "drop index if exists public.idx_cliente_contactos_cliente"
 ]) {
   check(securityMigration.includes(required), `Migração de segurança incompleta: ${required}`);
+}
+
+const operationalMigration = readFileSync(
+  join(root, "supabase", "202608041820_acesso_operacional_por_obra.sql"),
+  "utf8"
+);
+for (const required of [
+  "private.can_access_obra",
+  "obra_checklists_select",
+  "obra_diarios_select",
+  "obra_documentos_select",
+  "obra_fotografias_select"
+]) {
+  check(operationalMigration.includes(required), `Migração operacional incompleta: ${required}`);
 }
 
 if (failures.length) {

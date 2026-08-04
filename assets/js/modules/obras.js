@@ -13,19 +13,18 @@ export function fillObraSelects(){
 }
 
 export function renderObras(rows=store.obras){
+  const admin=store.profile?.role==="admin";
   $("obrasTable").innerHTML=rows.length?`<table><thead><tr>
-    <th>Obra</th><th>Cliente</th><th>Estado</th><th>Valor</th><th>Custos</th><th>Recebido</th><th>Progresso</th><th>Ações</th>
+    <th>Obra</th><th>Cliente</th><th>Estado</th>${admin?"<th>Valor</th><th>Custos</th><th>Recebido</th>":""}<th>Progresso</th><th>Ações</th>
   </tr></thead><tbody>${rows.map(o=>{
     const custos=totalCustos(o.id),recebido=totalRecebido(o.id);
     return `<tr>
       <td><button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button></td>
       <td>${esc(o.clientes?.nome||"")}</td>
       <td><span class="badge">${esc(o.estado||"")}</span></td>
-      <td>${money(valorContratado(o))}</td>
-      <td>${money(custos)}</td>
-      <td>${money(recebido)}</td>
+      ${admin?`<td>${money(valorContratado(o))}</td><td>${money(custos)}</td><td>${money(recebido)}</td>`:""}
       <td><div class="progress-line"><span style="width:${Math.min(100,Math.max(0,Number(o.progresso||0)))}%"></span></div><small>${o.progresso||0}%</small></td>
-      <td><button class="btn small primary" data-view-obra="${o.id}">Ficha</button> <button class="btn small light" data-edit-obra="${o.id}">Editar</button> <button class="btn small danger" data-del-obra="${o.id}">Apagar</button></td>
+      <td><button class="btn small primary" data-view-obra="${o.id}">Ficha</button>${admin?` <button class="btn small light" data-edit-obra="${o.id}">Editar</button> <button class="btn small danger" data-del-obra="${o.id}">Apagar</button>`:""}</td>
     </tr>`;
   }).join("")}</tbody></table>`:"<p>Sem obras.</p>";
 }
