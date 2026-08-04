@@ -32,13 +32,15 @@ function safeRows(rows: Record<string, unknown>[], keys: string[]) {
   return rows.slice(0, 100).map((row) => Object.fromEntries(keys.filter((key) => row[key] !== undefined).map((key) => [key, row[key]])));
 }
 
-function snapshot(obras: Record<string, unknown>[], custos: Record<string, unknown>[], pagamentos: Record<string, unknown>[], orcamentos: Record<string, unknown>[]) {
+function snapshot(obras: Record<string, unknown>[], custos: Record<string, unknown>[], pagamentos: Record<string, unknown>[], orcamentos: Record<string, unknown>[], tarefas: Record<string, unknown>[]) {
   const now = new Date();
   const contracted = obras.reduce((sum, row) => sum + workValue(row), 0);
   const costs = custos.reduce((sum, row) => sum + costValue(row), 0);
   const received = pagamentos.reduce((sum, row) => sum + number(row.valor), 0);
   const overdue = custos.filter((row) => text(row.estado_pagamento) !== "pago" && row.data_vencimento && new Date(`${row.data_vencimento}T23:59:59`) < now);
   const operationalAlerts = obras.filter((row) => text(row.estado).includes("atras") || text(row.estado).includes("suspens"));
+  const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Lisbon" }).format(now);
+  const openTasks = tarefas.filter((row) => row.estado !== "concluida");
   return {
     updated_at: now.toISOString(),
     indicators: {
@@ -52,11 +54,15 @@ function snapshot(obras: Record<string, unknown>[], custos: Record<string, unkno
       quantidade_custos_vencidos: overdue.length,
       quantidade_alertas_operacionais: operationalAlerts.length,
       total_orcamentos: orcamentos.length,
+      tarefas_abertas: openTasks.length,
+      tarefas_atrasadas: openTasks.filter((row) => String(row.prazo) < today).length,
+      tarefas_hoje: openTasks.filter((row) => String(row.prazo) === today).length,
     },
     obras: safeRows(obras, ["id", "nome", "estado", "progresso", "valor", "valor_total", "valor_contratado", "data_inicio", "data_fim_prevista", "morada"]),
     custos: safeRows(custos, ["obra_id", "descricao", "tipo", "categoria", "valor", "valor_total", "valor_sem_iva", "estado_pagamento", "data", "data_vencimento"]),
     pagamentos: safeRows(pagamentos, ["obra_id", "descricao", "valor", "estado", "data", "metodo"]),
     orcamentos: safeRows(orcamentos, ["obra_id", "numero", "descricao", "estado", "valor", "valor_total", "data", "validade"]),
+    tarefas: safeRows(tarefas, ["id", "obra_id", "titulo", "descricao", "responsavel_id", "funcionario_id", "inicio", "prazo", "hora", "prioridade", "estado"]),
   };
 }
 
@@ -70,6 +76,9 @@ function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role
   const attention = data.obras.filter((row) => text(row.estado).includes("atras") || text(row.estado).includes("suspens"));
   const noIncome = data.obras.filter((work) => workValue(work) > 0 && !data.pagamentos.some((payment) => String(payment.obra_id) === String(work.id)));
   const overdue = data.custos.filter((row) => text(row.estado_pagamento) !== "pago" && row.data_vencimento && new Date(`${row.data_vencimento}T23:59:59`) < new Date());
+  const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Lisbon" }).format(new Date());
+  const lateTasks = data.tarefas.filter((row) => row.estado !== "concluida" && String(row.prazo) < today);
+  const todayTasks = data.tarefas.filter((row) => row.estado !== "concluida" && String(row.prazo) === today);
   const matchedWork = data.obras.find((work) => text(work.nome).length > 2 && query.includes(text(work.nome)));
   const admin = role === "admin";
 
@@ -98,13 +107,25 @@ function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role
     return { intent: "orcamentos", answer: `Existem ${i.total_orcamentos} orçamento(s) no total.${detail ? `\n\n${detail}` : " Ainda não existem propostas registadas."}`, actions: admin ? [{ label: "Abrir orçamentos", view: "orcamentos" }] : [{ label: "Ver minhas obras", view: "funcionario" }] };
   }
 
+  if (["agenda", "tarefa", "prazo", "planeamento", "hoje", "semana"].some((term) => query.includes(term))) {
+    const upcoming = data.tarefas.filter((row) => row.estado !== "concluida" && String(row.prazo) > today).sort((a, b) => String(a.prazo).localeCompare(String(b.prazo))).slice(0, 6);
+    const lines = [
+      ...lateTasks.slice(0, 6).map((row) => `• ATRASADA · ${row.titulo} · ${row.prazo}`),
+      ...todayTasks.slice(0, 6).map((row) => `• HOJE · ${row.titulo}${row.hora ? ` · ${String(row.hora).slice(0, 5)}` : ""}`),
+      ...upcoming.map((row) => `• ${row.prazo} · ${row.titulo}`),
+    ];
+    return { intent: "agenda", answer: `Agenda operacional: ${i.tarefas_abertas} tarefa(s) aberta(s), ${i.tarefas_atrasadas} atrasada(s) e ${i.tarefas_hoje} para hoje.${lines.length ? `\n\nPróximos trabalhos:\n${lines.join("\n")}` : " Não existem tarefas abertas."}`, actions: [{ label: "Abrir agenda", view: "agenda" }] };
+  }
+
   if (["prioridade", "atencao", "alerta", "risco", "atras", "suspens"].some((term) => query.includes(term))) {
     const lines = [];
     if (attention.length) lines.push(`• ${attention.length} obra(s) em atraso ou suspensas: ${attention.slice(0, 5).map((row) => row.nome || `Obra ${row.id}`).join(", ")}.`);
     if (overdue.length) lines.push(`• ${overdue.length} custo(s) vencido(s), total de ${money(i.custos_vencidos)}.`);
     if (noIncome.length) lines.push(`• ${noIncome.length} obra(s) contratadas sem recebimentos: ${noIncome.slice(0, 5).map((row) => row.nome || `Obra ${row.id}`).join(", ")}.`);
+    if (lateTasks.length) lines.push(`• ${lateTasks.length} tarefa(s) em atraso na agenda.`);
+    if (todayTasks.length) lines.push(`• ${todayTasks.length} tarefa(s) com prazo hoje.`);
     if (!lines.length) lines.push("Não existem alertas críticos nos dados atuais.");
-    return { intent: "prioridades", answer: `Prioridades de gestão neste momento:\n\n${lines.join("\n")}`, actions: admin ? [{ label: "Ver dashboard de obras", view: "obras" }, { label: "Abrir relatórios", view: "relatorios" }] : [{ label: "Abrir meu painel", view: "funcionario" }] };
+    return { intent: "prioridades", answer: `Prioridades de gestão neste momento:\n\n${lines.join("\n")}`, actions: admin ? [{ label: "Abrir agenda", view: "agenda" }, { label: "Ver dashboard de obras", view: "obras" }, { label: "Abrir relatórios", view: "relatorios" }] : [{ label: "Abrir agenda", view: "agenda" }, { label: "Abrir meu painel", view: "funcionario" }] };
   }
 
   return { intent: "resumo", answer: `Resumo atual: ${i.total_obras} obra(s), ${money(i.valor_contratado)} contratados e ${money(i.total_recebido)} recebidos.\n\nFalta receber ${money(i.por_receber)}. Os custos registados somam ${money(i.custos_totais)}, com resultado estimado de ${money(i.resultado_estimado)}. Existem ${i.quantidade_alertas_operacionais} alerta(s) operacional(is) e ${i.quantidade_custos_vencidos} custo(s) vencido(s).`, actions: admin ? [{ label: "Abrir relatórios", view: "relatorios" }, { label: "Ver obras", view: "obras" }] : [{ label: "Abrir meu painel", view: "funcionario" }] };
@@ -131,15 +152,16 @@ Deno.serve(async (req: Request) => {
   const { data: profile } = await supabase.from("profiles").select("role,ativo").eq("id", userData.user.id).single();
   if (!profile || profile.ativo === false) return json(req, { error: "Utilizador sem acesso." }, 403);
 
-  const [worksResult, costsResult, paymentsResult, budgetsResult] = await Promise.all([
+  const [worksResult, costsResult, paymentsResult, budgetsResult, tasksResult] = await Promise.all([
     supabase.from("obras").select("*"),
     supabase.from("custos").select("*"),
     supabase.from("pagamentos").select("*"),
     supabase.from("orcamentos").select("*"),
+    supabase.from("agenda_tarefas").select("*"),
   ]);
-  const queryError = [worksResult.error, costsResult.error, paymentsResult.error, budgetsResult.error].find(Boolean);
+  const queryError = [worksResult.error, costsResult.error, paymentsResult.error, budgetsResult.error, tasksResult.error].find(Boolean);
   if (queryError) return json(req, { error: "Não foi possível consultar os dados autorizados." }, 500);
-  const data = snapshot(worksResult.data || [], costsResult.data || [], paymentsResult.data || [], budgetsResult.data || []);
+  const data = snapshot(worksResult.data || [], costsResult.data || [], paymentsResult.data || [], budgetsResult.data || [], tasksResult.data || []);
 
   const analysis = localAnalysis(data, message, profile.role);
   return json(req, { ...analysis, mode: "local", model: null });

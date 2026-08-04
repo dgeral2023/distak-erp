@@ -64,6 +64,8 @@ export function renderDashboard(){
   const totalTeamHours=monthHours.reduce((sum,row)=>sum+num(row.horas),0);
   const teamCost=monthHours.reduce((sum,row)=>sum+num(row.horas)*num(row.funcionarios?.custo_hora),0);
   const overdueCosts=custos.filter(c=>c.estado_pagamento!=="pago"&&c.data_vencimento&&new Date(`${c.data_vencimento}T23:59:59`)<new Date());
+  const todayLocal=new Date();todayLocal.setMinutes(todayLocal.getMinutes()-todayLocal.getTimezoneOffset());const todayKey=todayLocal.toISOString().slice(0,10);
+  const overdueTasks=(store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo<todayKey);
 
   $("statValorContratado").textContent=money(contratado);
   $("statPagamentos").textContent=money(recebido);
@@ -91,11 +93,11 @@ export function renderDashboard(){
   $("option5ActiveWorks").textContent=obras.filter(isActive).length;
   $("option5ExecutionValue").textContent=money(contratado);
   $("option5Income").textContent=money(recebido);
-  $("option5Alerts").textContent=obras.filter(isAlert).length+overdueCosts.length;
+  $("option5Alerts").textContent=obras.filter(isAlert).length+overdueCosts.length+overdueTasks.length;
   $("option5ActiveTrend").textContent=`${obras.length} obras registadas`;
   $("option5ExecutionTrend").textContent=`Margem estimada ${margem.toFixed(1)}%`;
   $("option5IncomeTrend").textContent=`${contratado?((recebido/contratado)*100).toFixed(1):0}% do contratado`;
-  $("option5AlertTrend").textContent=overdueCosts.length?`${overdueCosts.length} custo(s) vencido(s)`:"Sem custos vencidos";
+  $("option5AlertTrend").textContent=overdueTasks.length?`${overdueTasks.length} tarefa(s) atrasada(s)`:overdueCosts.length?`${overdueCosts.length} custo(s) vencido(s)`:"Sem alertas vencidos";
 
   renderFinanceChart(custos,pagamentos);
   renderStatusChart(obras);
@@ -160,6 +162,9 @@ function renderAlerts(obras,orcamentos,pagamentos,overdueCosts=[]){
   obras.filter(o=>obraValor(o)>0&&!pagamentos.some(p=>String(p.obra_id)===String(o.id))).forEach(o=>alerts.push({level:"warning",title:o.nome,text:"Obra com valor contratado e sem pagamentos registados."}));
   obras.filter(o=>num(o.progresso)>=100&&!isCompleted(o)).forEach(o=>alerts.push({level:"warning",title:o.nome,text:"Progresso a 100%, mas o estado ainda não está concluído."}));
   overdueCosts.forEach(c=>alerts.push({level:"danger",title:c.nome_empresa||c.descricao||"Custo vencido",text:`Pagamento vencido em ${fmtDate(c.data_vencimento)} · ${money(c.valor||c.valor_sem_iva)}`}));
+  const today=new Date().toISOString().slice(0,10);
+  (store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo<today).forEach(task=>alerts.push({level:"danger",title:task.titulo,text:`Tarefa em atraso desde ${fmtDate(task.prazo)}`}));
+  (store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo===today).forEach(task=>alerts.push({level:"warning",title:task.titulo,text:"Tarefa com prazo hoje."}));
   if(!orcamentos.length) alerts.push({level:"info",title:"Orçamentos",text:"Ainda não existem orçamentos registados."});
   $("dashboardAlerts").innerHTML=alerts.length?alerts.slice(0,8).map(a=>`<article class="dashboard-alert ${a.level}">
     <span class="alert-dot"></span><div><strong>${esc(a.title)}</strong><p>${esc(a.text)}</p></div>

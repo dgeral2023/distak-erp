@@ -72,10 +72,13 @@ export function renderAssistantInsight(){
   const overdue=(store.custos||[]).filter(cost=>norm(cost.estado_pagamento)!=="pago"&&cost.data_vencimento&&new Date(`${cost.data_vencimento}T23:59:59`)<now);
   const risky=(store.obras||[]).filter(work=>norm(work.estado).includes("atras")||norm(work.estado).includes("suspens"));
   const noIncome=(store.obras||[]).filter(work=>workValue(work)>0&&!(store.pagamentos||[]).some(payment=>String(payment.obra_id)===String(work.id)));
+  const localNow=new Date();localNow.setMinutes(localNow.getMinutes()-localNow.getTimezoneOffset());const today=localNow.toISOString().slice(0,10),lateTasks=(store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo<today),todayTasks=(store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo===today);
   const parts=[];
   if(risky.length)parts.push(`<strong>${risky.length}</strong> obra(s) em atraso ou suspensas`);
   if(overdue.length)parts.push(`<strong>${overdue.length}</strong> custo(s) vencido(s)`);
   if(noIncome.length)parts.push(`<strong>${noIncome.length}</strong> obra(s) sem recebimentos`);
+  if(lateTasks.length)parts.push(`<strong>${lateTasks.length}</strong> tarefa(s) atrasada(s)`);
+  if(todayTasks.length)parts.push(`<strong>${todayTasks.length}</strong> tarefa(s) para hoje`);
   $("aiPrioritySummary").innerHTML=parts.length?`Recomendo atenção a ${parts.join(" · ")}.`:`Sem alertas críticos. Pode concentrar-se no acompanhamento das obras e nas próximas cobranças.`;
   $("aiPriorityCard").classList.toggle("all-clear",!parts.length);
 }
