@@ -58,6 +58,28 @@ for (const file of sourceFiles.filter((path) => extname(path) === ".js")) {
   }
 }
 
+const auth = readFileSync(join(root, "assets", "js", "core", "auth.js"), "utf8");
+check(auth.includes("db.auth.getUser()"), "A sessão deve ser validada com auth.getUser().");
+check(auth.includes("profile.ativo===false"), "Perfis desativados devem ser bloqueados.");
+
+const securityMigration = readFileSync(
+  join(root, "supabase", "202608041730_auditoria_seguranca_desempenho.sql"),
+  "utf8"
+);
+for (const required of [
+  "funcionarios_select_admin",
+  "funcionario_horas_select_admin",
+  "obras_select_admin_ou_atribuido",
+  "custos_select_admin",
+  "Fotografias - eliminar admin",
+  "Obras - eliminar admin",
+  "obra_fotografias_created_by_idx",
+  "drop policy if exists custos_admin",
+  "drop index if exists public.idx_cliente_contactos_cliente"
+]) {
+  check(securityMigration.includes(required), `Migração de segurança incompleta: ${required}`);
+}
+
 if (failures.length) {
   console.error(`Smoke test falhou (${failures.length}):\n- ${failures.join("\n- ")}`);
   process.exit(1);
