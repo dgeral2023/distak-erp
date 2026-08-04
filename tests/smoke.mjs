@@ -29,6 +29,7 @@ const requiredIds = [
   ,"favoriteNav", "topUserMenu", "topUserInitial", "accountPanel", "accountLogout"
   ,"option5ActiveWorks", "option5ExecutionValue", "option5Income", "option5Alerts"
   ,"aiAssistantButton", "aiAssistantPanel", "aiAssistantMessages", "aiAssistantForm", "aiAssistantInput"
+  ,"aiPriorityCard", "aiPrioritySummary", "aiPriorityAction"
 ];
 
 for (const id of requiredIds) {
@@ -111,8 +112,20 @@ for (const required of ["initHybridMenu", "renderHybridMenu", "distakSidebarColl
   check(hybridMenu.includes(required), `Menu híbrido incompleto: ${required}`);
 }
 const assistantModule = readFileSync(join(root, "assets", "js", "modules", "assistant.js"), "utf8");
-for (const required of ["initAssistant", "db.functions.invoke", "assistente-distak", "history.slice"]){
+for (const required of ["initAssistant", "renderAssistantInsight", "db.functions.invoke", "assistente-distak", "history.slice", "data-assistant-action"]){
   check(assistantModule.includes(required), `Assistente DISTAK incompleto: ${required}`);
+}
+const assistantFunction = readFileSync(join(root, "supabase", "functions", "assistente-distak", "index.ts"), "utf8");
+for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "auth.getUser"]){
+  check(assistantFunction.includes(required), `Função segura do assistente incompleta: ${required}`);
+}
+const pwaModule = readFileSync(join(root, "assets", "js", "core", "pwa.js"), "utf8");
+const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
+for (const required of ["serviceWorker.register", "updatefound"]){
+  check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
+}
+for (const required of ["distak-shell-v3.2", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
+  check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
 const operationalMigration = readFileSync(

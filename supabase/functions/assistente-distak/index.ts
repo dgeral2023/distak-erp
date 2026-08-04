@@ -60,19 +60,54 @@ function snapshot(obras: Record<string, unknown>[], custos: Record<string, unkno
   };
 }
 
-function localAnalysis(data: ReturnType<typeof snapshot>) {
+function byWork<T extends Record<string, unknown>>(rows: T[], workId: unknown) {
+  return rows.filter((row) => String(row.obra_id) === String(workId));
+}
+
+function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role: string) {
   const i = data.indicators;
+  const query = text(question);
   const attention = data.obras.filter((row) => text(row.estado).includes("atras") || text(row.estado).includes("suspens"));
   const noIncome = data.obras.filter((work) => workValue(work) > 0 && !data.pagamentos.some((payment) => String(payment.obra_id) === String(work.id)));
-  const lines = [
-    `Resumo atual: ${i.total_obras} obra(s), ${money(i.valor_contratado)} contratados e ${money(i.total_recebido)} recebidos.`,
-    `Falta receber ${money(i.por_receber)}. Os custos registados somam ${money(i.custos_totais)}, com resultado estimado de ${money(i.resultado_estimado)}.`,
-  ];
-  if (i.quantidade_custos_vencidos) lines.push(`Atenção: existem ${i.quantidade_custos_vencidos} custo(s) vencido(s), no total de ${money(i.custos_vencidos)}.`);
-  if (attention.length) lines.push(`Obras em atraso ou suspensas: ${attention.map((row) => row.nome || `Obra ${row.id}`).join(", ")}.`);
-  if (noIncome.length) lines.push(`Obras contratadas sem recebimentos registados: ${noIncome.slice(0, 8).map((row) => row.nome || `Obra ${row.id}`).join(", ")}.`);
-  if (!i.quantidade_custos_vencidos && !attention.length) lines.push("Não foram encontrados custos vencidos nem obras marcadas como atrasadas ou suspensas.");
-  return lines.join("\n\n");
+  const overdue = data.custos.filter((row) => text(row.estado_pagamento) !== "pago" && row.data_vencimento && new Date(`${row.data_vencimento}T23:59:59`) < new Date());
+  const matchedWork = data.obras.find((work) => text(work.nome).length > 2 && query.includes(text(work.nome)));
+  const admin = role === "admin";
+
+  if (matchedWork) {
+    const payments = byWork(data.pagamentos, matchedWork.id).reduce((sum, row) => sum + number(row.valor), 0);
+    const costs = byWork(data.custos, matchedWork.id).reduce((sum, row) => sum + costValue(row), 0);
+    const contracted = workValue(matchedWork);
+    return { intent: "obra", answer: `${matchedWork.nome || `Obra ${matchedWork.id}`} está no estado “${matchedWork.estado || "não definido"}”, com progresso de ${number(matchedWork.progresso).toFixed(0)}%.\n\nContratado: ${money(contracted)} · Recebido: ${money(payments)} · Por receber: ${money(Math.max(0, contracted - payments))} · Custos: ${money(costs)} · Resultado estimado: ${money(contracted - costs)}.`, actions: [{ label: "Abrir ficha da obra", view: "obras", work_id: matchedWork.id }] };
+  }
+
+  if (["receber", "recebimento", "recebido", "cobrar", "cobranca", "pagamento"].some((term) => query.includes(term))) {
+    const balances = data.obras.map((work) => { const received = byWork(data.pagamentos, work.id).reduce((sum, row) => sum + number(row.valor), 0); return { work, balance: Math.max(0, workValue(work) - received) }; }).filter((row) => row.balance > 0).sort((a, b) => b.balance - a.balance);
+    const detail = balances.slice(0, 5).map((row) => `• ${row.work.nome || `Obra ${row.work.id}`}: ${money(row.balance)}`).join("\n");
+    return { intent: "recebimentos", answer: `Falta receber ${money(i.por_receber)} no total. ${balances.length} obra(s) têm saldo pendente.${detail ? `\n\nMaiores valores por receber:\n${detail}` : ""}`, actions: admin ? [{ label: "Abrir pagamentos", view: "pagamentos" }, { label: "Ver obras", view: "obras" }] : [{ label: "Ver minhas obras", view: "funcionario" }] };
+  }
+
+  if (["vencid", "fornecedor", "custo", "despesa", "fatura"].some((term) => query.includes(term))) {
+    const detail = overdue.slice(0, 6).map((row) => `• ${row.descricao || row.categoria || "Custo"}: ${money(costValue(row))} · ${row.data_vencimento}`).join("\n");
+    return { intent: "custos", answer: overdue.length ? `Existem ${overdue.length} custo(s) vencido(s), no total de ${money(i.custos_vencidos)}.\n\n${detail}` : `Não existem custos vencidos nos dados disponíveis. Os custos registados totalizam ${money(i.custos_totais)}.`, actions: admin ? [{ label: "Abrir custos", view: "custos" }, { label: "Ver relatórios", view: "relatorios" }] : [{ label: "Ver minhas obras", view: "funcionario" }] };
+  }
+
+  if (["orcamento", "proposta", "comercial", "pipeline"].some((term) => query.includes(term))) {
+    const groups = new Map<string, { count: number; value: number }>();
+    data.orcamentos.forEach((row) => { const state = String(row.estado || "Sem estado"); const current = groups.get(state) || { count: 0, value: 0 }; current.count += 1; current.value += number(row.valor_total ?? row.valor); groups.set(state, current); });
+    const detail = [...groups].map(([state, row]) => `• ${state}: ${row.count} · ${money(row.value)}`).join("\n");
+    return { intent: "orcamentos", answer: `Existem ${i.total_orcamentos} orçamento(s) no total.${detail ? `\n\n${detail}` : " Ainda não existem propostas registadas."}`, actions: admin ? [{ label: "Abrir orçamentos", view: "orcamentos" }] : [{ label: "Ver minhas obras", view: "funcionario" }] };
+  }
+
+  if (["prioridade", "atencao", "alerta", "risco", "atras", "suspens"].some((term) => query.includes(term))) {
+    const lines = [];
+    if (attention.length) lines.push(`• ${attention.length} obra(s) em atraso ou suspensas: ${attention.slice(0, 5).map((row) => row.nome || `Obra ${row.id}`).join(", ")}.`);
+    if (overdue.length) lines.push(`• ${overdue.length} custo(s) vencido(s), total de ${money(i.custos_vencidos)}.`);
+    if (noIncome.length) lines.push(`• ${noIncome.length} obra(s) contratadas sem recebimentos: ${noIncome.slice(0, 5).map((row) => row.nome || `Obra ${row.id}`).join(", ")}.`);
+    if (!lines.length) lines.push("Não existem alertas críticos nos dados atuais.");
+    return { intent: "prioridades", answer: `Prioridades de gestão neste momento:\n\n${lines.join("\n")}`, actions: admin ? [{ label: "Ver dashboard de obras", view: "obras" }, { label: "Abrir relatórios", view: "relatorios" }] : [{ label: "Abrir meu painel", view: "funcionario" }] };
+  }
+
+  return { intent: "resumo", answer: `Resumo atual: ${i.total_obras} obra(s), ${money(i.valor_contratado)} contratados e ${money(i.total_recebido)} recebidos.\n\nFalta receber ${money(i.por_receber)}. Os custos registados somam ${money(i.custos_totais)}, com resultado estimado de ${money(i.resultado_estimado)}. Existem ${i.quantidade_alertas_operacionais} alerta(s) operacional(is) e ${i.quantidade_custos_vencidos} custo(s) vencido(s).`, actions: admin ? [{ label: "Abrir relatórios", view: "relatorios" }, { label: "Ver obras", view: "obras" }] : [{ label: "Abrir meu painel", view: "funcionario" }] };
 }
 
 Deno.serve(async (req: Request) => {
@@ -106,5 +141,6 @@ Deno.serve(async (req: Request) => {
   if (queryError) return json(req, { error: "Não foi possível consultar os dados autorizados." }, 500);
   const data = snapshot(worksResult.data || [], costsResult.data || [], paymentsResult.data || [], budgetsResult.data || []);
 
-  return json(req, { answer: localAnalysis(data), mode: "local", model: null });
+  const analysis = localAnalysis(data, message, profile.role);
+  return json(req, { ...analysis, mode: "local", model: null });
 });
