@@ -18,6 +18,7 @@ function alerts(){
   const nowLocal=new Date();nowLocal.setMinutes(nowLocal.getMinutes()-nowLocal.getTimezoneOffset());const today=nowLocal.toISOString().slice(0,10);
   store.agendaTarefas.filter(row=>row.estado!=="concluida"&&row.prazo<today).forEach(row=>rows.push({level:"danger",title:row.titulo,text:`Tarefa em atraso · ${row.prazo}`,view:"agenda"}));
   store.agendaTarefas.filter(row=>row.estado!=="concluida"&&row.prazo===today).forEach(row=>rows.push({level:"warning",title:row.titulo,text:"Tarefa com prazo hoje",view:"agenda"}));
+  store.previsoesFinanceiras.filter(row=>!["realizado","cancelado"].includes(row.estado)&&row.data_prevista<today).forEach(row=>rows.push({level:"danger",title:row.descricao,text:`Previsão vencida · ${money(row.valor)}`,view:"previsoes"}));
   return rows;
 }
 
@@ -51,7 +52,8 @@ function search(term){
     ["Custo","custos",store.custos,row=>row.nome_empresa||row.descricao,row=>money(row.valor||row.valor_sem_iva)],
     ["Pagamento","pagamentos",store.pagamentos,row=>row.descricao||"Pagamento",row=>money(row.valor)],
     ["Funcionário","funcionarios",store.funcionarios,row=>row.nome,row=>row.funcao],
-    ["Tarefa","agenda",store.agendaTarefas,row=>row.titulo,row=>`${row.prazo} · ${row.estado}`]
+    ["Tarefa","agenda",store.agendaTarefas,row=>row.titulo,row=>`${row.prazo} · ${row.estado}`],
+    ["Previsão","previsoes",store.previsoesFinanceiras,row=>row.descricao,row=>`${row.data_prevista} · ${money(row.valor)}`]
   ];
   const results=sources.flatMap(([type,view,rows,title,meta])=>rows.filter(row=>norm(JSON.stringify(row)).includes(query)).slice(0,5).map(row=>({type,view,row,title:title(row),meta:meta(row)}))).slice(0,18);
   host.innerHTML=results.length?results.map(result=>`<button data-search-view="${result.view}" ${result.type==="Obra"?`data-search-work="${result.row.id}"`:""}><span>${esc(result.type)}</span><strong>${esc(result.title||"Sem título")}</strong><small>${esc(result.meta||"")}</small></button>`).join(""):'<div class="v3-empty">Nenhum resultado encontrado.</div>';

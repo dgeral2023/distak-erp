@@ -15,6 +15,7 @@ export async function refreshData(){
   store.funcionarios = await query("funcionarios");
   store.funcionarioHoras = await query("funcionario_horas", "*,funcionarios(nome,funcao,custo_hora),obras(nome)");
   store.agendaTarefas = await query("agenda_tarefas");
+  store.previsoesFinanceiras = isAdmin ? await query("financeiro_previsoes") : [];
   try{store.atividades=await query("atividades_sistema","*,profiles(nome)")}catch{store.atividades=[]}
 
   // Uma falha no módulo de fotografias não deve bloquear os restantes dados do ERP.

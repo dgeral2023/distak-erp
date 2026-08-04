@@ -59,7 +59,7 @@ export function initAssistant(){
   $("aiAssistantMessages").onclick=e=>{const button=e.target.closest("[data-assistant-action]");if(!button)return;closeAssistant();if(button.dataset.view)setView(button.dataset.view);if(button.dataset.work)setTimeout(()=>document.querySelector(`[data-view-obra="${button.dataset.work}"]`)?.click(),80)};
   $("aiPriorityAction").onclick=()=>{openAssistant();ask("Quais são as prioridades de gestão neste momento?")};
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("aiAssistantPanel").classList.contains("hidden"))closeAssistant()});
-  addMessage("assistant","Olá! Sou o Assistente DISTAK. Posso resumir obras, recebimentos, custos e alertas usando apenas os dados a que tem acesso.");
+  addMessage("assistant","Olá! Sou o Assistente DISTAK. Posso resumir obras, previsões, cobranças, custos e alertas usando apenas os dados a que tem acesso.");
 }
 
 const num=value=>Number(value||0)||0;
@@ -73,12 +73,14 @@ export function renderAssistantInsight(){
   const risky=(store.obras||[]).filter(work=>norm(work.estado).includes("atras")||norm(work.estado).includes("suspens"));
   const noIncome=(store.obras||[]).filter(work=>workValue(work)>0&&!(store.pagamentos||[]).some(payment=>String(payment.obra_id)===String(work.id)));
   const localNow=new Date();localNow.setMinutes(localNow.getMinutes()-localNow.getTimezoneOffset());const today=localNow.toISOString().slice(0,10),lateTasks=(store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo<today),todayTasks=(store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo===today);
+  const lateForecasts=(store.previsoesFinanceiras||[]).filter(row=>!["realizado","cancelado"].includes(row.estado)&&row.data_prevista<today);
   const parts=[];
   if(risky.length)parts.push(`<strong>${risky.length}</strong> obra(s) em atraso ou suspensas`);
   if(overdue.length)parts.push(`<strong>${overdue.length}</strong> custo(s) vencido(s)`);
   if(noIncome.length)parts.push(`<strong>${noIncome.length}</strong> obra(s) sem recebimentos`);
   if(lateTasks.length)parts.push(`<strong>${lateTasks.length}</strong> tarefa(s) atrasada(s)`);
   if(todayTasks.length)parts.push(`<strong>${todayTasks.length}</strong> tarefa(s) para hoje`);
+  if(lateForecasts.length)parts.push(`<strong>${lateForecasts.length}</strong> previsão(ões) vencida(s)`);
   $("aiPrioritySummary").innerHTML=parts.length?`Recomendo atenção a ${parts.join(" · ")}.`:`Sem alertas críticos. Pode concentrar-se no acompanhamento das obras e nas próximas cobranças.`;
   $("aiPriorityCard").classList.toggle("all-clear",!parts.length);
 }

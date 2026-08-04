@@ -32,6 +32,8 @@ const requiredIds = [
   ,"aiPriorityCard", "aiPrioritySummary", "aiPriorityAction"
   ,"view-agenda", "navTaskCount", "novaTarefaBtn", "agendaWeekGrid", "agendaTaskList",
   "agendaTaskDialog", "agendaTaskForm", "agendaTaskWork", "agendaTaskDue"
+  ,"view-previsoes", "newForecastBtn", "forecastKpis", "forecastChart", "collectionRiskList",
+  "forecastSearch", "forecastList", "forecastDialog", "forecastForm", "forecastProbability"
 ];
 
 for (const id of requiredIds) {
@@ -129,12 +131,20 @@ const agendaMigration = readFileSync(join(root, "supabase", "202608042110_agenda
 for (const required of ["enable row level security", "private.can_access_obra", "agenda_tarefas_select", "agenda_tarefas_insert", "agenda_tarefas_update", "revoke all on public.agenda_tarefas from anon"]){
   check(agendaMigration.includes(required), `Migração da agenda incompleta: ${required}`);
 }
+const forecastModule = readFileSync(join(root, "assets", "js", "modules", "previsoes.js"), "utf8");
+for (const required of ["renderPrevisoes", "initPrevisoes", "financeiro_previsoes", "collectionRisks", "weighted"]){
+  check(forecastModule.includes(required), `Previsões financeiras incompletas: ${required}`);
+}
+const forecastMigration = readFileSync(join(root, "supabase", "202608042200_financeiro_previsoes.sql"), "utf8");
+for (const required of ["enable row level security", "financeiro_previsoes_select_admin", "financeiro_previsoes_insert_admin", "financeiro_previsoes_update_admin", "revoke all on public.financeiro_previsoes from anon", "grant select, insert, update"]){
+  check(forecastMigration.includes(required), `Migração das previsões incompleta: ${required}`);
+}
 const pwaModule = readFileSync(join(root, "assets", "js", "core", "pwa.js"), "utf8");
 const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.2", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
+for (const required of ["distak-shell-v3.3", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 

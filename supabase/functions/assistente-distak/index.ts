@@ -32,7 +32,7 @@ function safeRows(rows: Record<string, unknown>[], keys: string[]) {
   return rows.slice(0, 100).map((row) => Object.fromEntries(keys.filter((key) => row[key] !== undefined).map((key) => [key, row[key]])));
 }
 
-function snapshot(obras: Record<string, unknown>[], custos: Record<string, unknown>[], pagamentos: Record<string, unknown>[], orcamentos: Record<string, unknown>[], tarefas: Record<string, unknown>[]) {
+function snapshot(obras: Record<string, unknown>[], custos: Record<string, unknown>[], pagamentos: Record<string, unknown>[], orcamentos: Record<string, unknown>[], tarefas: Record<string, unknown>[], previsoes: Record<string, unknown>[]) {
   const now = new Date();
   const contracted = obras.reduce((sum, row) => sum + workValue(row), 0);
   const costs = custos.reduce((sum, row) => sum + costValue(row), 0);
@@ -41,6 +41,9 @@ function snapshot(obras: Record<string, unknown>[], custos: Record<string, unkno
   const operationalAlerts = obras.filter((row) => text(row.estado).includes("atras") || text(row.estado).includes("suspens"));
   const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Lisbon" }).format(now);
   const openTasks = tarefas.filter((row) => row.estado !== "concluida");
+  const openForecasts = previsoes.filter((row) => !["realizado", "cancelado"].includes(String(row.estado)));
+  const forecastIncome = openForecasts.filter((row) => row.tipo === "recebimento").reduce((sum, row) => sum + number(row.valor) * number(row.probabilidade) / 100, 0);
+  const forecastExpense = openForecasts.filter((row) => row.tipo === "despesa").reduce((sum, row) => sum + number(row.valor) * number(row.probabilidade) / 100, 0);
   return {
     updated_at: now.toISOString(),
     indicators: {
@@ -57,12 +60,17 @@ function snapshot(obras: Record<string, unknown>[], custos: Record<string, unkno
       tarefas_abertas: openTasks.length,
       tarefas_atrasadas: openTasks.filter((row) => String(row.prazo) < today).length,
       tarefas_hoje: openTasks.filter((row) => String(row.prazo) === today).length,
+      previsoes_abertas: openForecasts.length,
+      previsoes_vencidas: openForecasts.filter((row) => String(row.data_prevista) < today).length,
+      recebimentos_previstos: forecastIncome,
+      despesas_previstas: forecastExpense,
     },
     obras: safeRows(obras, ["id", "nome", "estado", "progresso", "valor", "valor_total", "valor_contratado", "data_inicio", "data_fim_prevista", "morada"]),
     custos: safeRows(custos, ["obra_id", "descricao", "tipo", "categoria", "valor", "valor_total", "valor_sem_iva", "estado_pagamento", "data", "data_vencimento"]),
     pagamentos: safeRows(pagamentos, ["obra_id", "descricao", "valor", "estado", "data", "metodo"]),
     orcamentos: safeRows(orcamentos, ["obra_id", "numero", "descricao", "estado", "valor", "valor_total", "data", "validade"]),
     tarefas: safeRows(tarefas, ["id", "obra_id", "titulo", "descricao", "responsavel_id", "funcionario_id", "inicio", "prazo", "hora", "prioridade", "estado"]),
+    previsoes: safeRows(previsoes, ["id", "obra_id", "tipo", "descricao", "valor", "data_prevista", "probabilidade", "estado"]),
   };
 }
 
@@ -82,6 +90,12 @@ function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role
   const matchedWork = data.obras.find((work) => text(work.nome).length > 2 && query.includes(text(work.nome)));
   const admin = role === "admin";
 
+  if (admin && ["previsao", "previsto", "fluxo de caixa", "futuro", "projecao"].some((term) => query.includes(term))) {
+    const activeForecasts = data.previsoes.filter((row) => !["realizado", "cancelado"].includes(String(row.estado))).sort((a, b) => String(a.data_prevista).localeCompare(String(b.data_prevista)));
+    const detail = activeForecasts.slice(0, 6).map((row) => `• ${row.data_prevista} · ${row.descricao}: ${money(number(row.valor))} (${number(row.probabilidade)}%)`).join("\n");
+    return { intent: "previsoes", answer: `Planeamento atual: ${i.previsoes_abertas} previsão(ões) aberta(s), com ${money(i.recebimentos_previstos)} de recebimentos e ${money(i.despesas_previstas)} de despesas ponderadas. A variação prevista é ${money(i.recebimentos_previstos - i.despesas_previstas)}.${i.previsoes_vencidas ? ` Existem ${i.previsoes_vencidas} previsão(ões) vencida(s).` : ""}${detail ? `\n\nPróximos movimentos:\n${detail}` : ""}\n\nEstes valores são previsões e não representam o saldo bancário nem movimentos realizados.`, actions: [{ label: "Abrir previsões", view: "previsoes" }, { label: "Ver pagamentos", view: "pagamentos" }] };
+  }
+
   if (matchedWork) {
     const payments = byWork(data.pagamentos, matchedWork.id).reduce((sum, row) => sum + number(row.valor), 0);
     const costs = byWork(data.custos, matchedWork.id).reduce((sum, row) => sum + costValue(row), 0);
@@ -92,7 +106,7 @@ function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role
   if (["receber", "recebimento", "recebido", "cobrar", "cobranca", "pagamento"].some((term) => query.includes(term))) {
     const balances = data.obras.map((work) => { const received = byWork(data.pagamentos, work.id).reduce((sum, row) => sum + number(row.valor), 0); return { work, balance: Math.max(0, workValue(work) - received) }; }).filter((row) => row.balance > 0).sort((a, b) => b.balance - a.balance);
     const detail = balances.slice(0, 5).map((row) => `• ${row.work.nome || `Obra ${row.work.id}`}: ${money(row.balance)}`).join("\n");
-    return { intent: "recebimentos", answer: `Falta receber ${money(i.por_receber)} no total. ${balances.length} obra(s) têm saldo pendente.${detail ? `\n\nMaiores valores por receber:\n${detail}` : ""}`, actions: admin ? [{ label: "Abrir pagamentos", view: "pagamentos" }, { label: "Ver obras", view: "obras" }] : [{ label: "Ver minhas obras", view: "funcionario" }] };
+    return { intent: "recebimentos", answer: `Falta receber ${money(i.por_receber)} no total. ${balances.length} obra(s) têm saldo pendente.${detail ? `\n\nMaiores valores por receber:\n${detail}` : ""}`, actions: admin ? [{ label: "Planear cobranças", view: "previsoes" }, { label: "Abrir pagamentos", view: "pagamentos" }, { label: "Ver obras", view: "obras" }] : [{ label: "Ver minhas obras", view: "funcionario" }] };
   }
 
   if (["vencid", "fornecedor", "custo", "despesa", "fatura"].some((term) => query.includes(term))) {
@@ -152,16 +166,17 @@ Deno.serve(async (req: Request) => {
   const { data: profile } = await supabase.from("profiles").select("role,ativo").eq("id", userData.user.id).single();
   if (!profile || profile.ativo === false) return json(req, { error: "Utilizador sem acesso." }, 403);
 
-  const [worksResult, costsResult, paymentsResult, budgetsResult, tasksResult] = await Promise.all([
+  const [worksResult, costsResult, paymentsResult, budgetsResult, tasksResult, forecastsResult] = await Promise.all([
     supabase.from("obras").select("*"),
     supabase.from("custos").select("*"),
     supabase.from("pagamentos").select("*"),
     supabase.from("orcamentos").select("*"),
     supabase.from("agenda_tarefas").select("*"),
+    profile.role === "admin" ? supabase.from("financeiro_previsoes").select("*") : Promise.resolve({ data: [], error: null }),
   ]);
-  const queryError = [worksResult.error, costsResult.error, paymentsResult.error, budgetsResult.error, tasksResult.error].find(Boolean);
+  const queryError = [worksResult.error, costsResult.error, paymentsResult.error, budgetsResult.error, tasksResult.error, forecastsResult.error].find(Boolean);
   if (queryError) return json(req, { error: "Não foi possível consultar os dados autorizados." }, 500);
-  const data = snapshot(worksResult.data || [], costsResult.data || [], paymentsResult.data || [], budgetsResult.data || [], tasksResult.data || []);
+  const data = snapshot(worksResult.data || [], costsResult.data || [], paymentsResult.data || [], budgetsResult.data || [], tasksResult.data || [], forecastsResult.data || []);
 
   const analysis = localAnalysis(data, message, profile.role);
   return json(req, { ...analysis, mode: "local", model: null });

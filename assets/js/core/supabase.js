@@ -40,6 +40,7 @@ async function audit(table,id,acao,payload){
   const {data:{user}}=await db.auth.getUser();
   if(!user)return;
   const labels={clientes:"cliente",obras:"obra",orcamentos:"orçamento",custos:"custo",pagamentos:"pagamento",funcionarios:"funcionário",funcionario_horas:"registo de horas",agenda_tarefas:"tarefa"};
+  if(table==="financeiro_previsoes")labels[table]="previsão financeira";
   const entidade=labels[table]||table;
   const obraId=table==="obras"?(id||null):(payload?.obra_id||null);
   const row={utilizador_id:user.id,obra_id:obraId,entidade,entidade_id:id||null,acao,resumo:`${entidade[0].toUpperCase()+entidade.slice(1)} ${acao}`,metadados:{origem:"web-v3"}};
