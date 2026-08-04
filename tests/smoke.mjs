@@ -24,6 +24,8 @@ const requiredIds = [
   "obraAssignments", "assignmentSummary"
   ,"globalSearch", "globalSearchResults", "notificationPanel", "notificationList",
   "view-relatorios", "reportKpis", "profitabilityReport", "maturityReport", "activityTimeline"
+  ,"sidebarToggle", "mobileNav", "mobileRegister", "mobileAlerts", "mobileMore",
+  "mobileMoreSheet", "mobileRegisterSheet", "mobileSheetBackdrop", "recentNav"
 ];
 
 for (const id of requiredIds) {
@@ -96,6 +98,10 @@ for (const required of ["registar_atividade_operacional", "obra_checklists", "ob
 const v3Module = readFileSync(join(root, "assets", "js", "modules", "v3.js"), "utf8");
 for (const required of ["renderNotifications", "renderReports", "renderActivity", "globalSearch"]) {
   check(v3Module.includes(required), `Módulo v3 incompleto: ${required}`);
+}
+const hybridMenu = readFileSync(join(root, "assets", "js", "modules", "hybrid-menu.js"), "utf8");
+for (const required of ["initHybridMenu", "renderHybridMenu", "distakSidebarCollapsed", "event.ctrlKey"]){
+  check(hybridMenu.includes(required), `Menu híbrido incompleto: ${required}`);
 }
 
 const operationalMigration = readFileSync(

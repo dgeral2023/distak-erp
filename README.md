@@ -1,4 +1,4 @@
-# DISTAK ERP v3.0
+# DISTAK ERP v3.1
 
 Aplicação web de gestão comercial, financeira e operacional da DISTAK, otimizada para computador e telemóvel.
 
@@ -14,6 +14,8 @@ Aplicação web de gestão comercial, financeira e operacional da DISTAK, otimiz
 - Pesquisa global, centro de alertas e relatórios executivos imprimíveis.
 - Rentabilidade prevista versus real, vencimentos e cobranças por obra.
 - Histórico central de alterações com identificação do utilizador.
+- Menu híbrido inteligente: lateral recolhível por áreas no computador e barra inferior no telemóvel.
+- Atalhos recentes, pesquisa por `Ctrl + K` e painel de registo rápido.
 
 ## Segurança
 
