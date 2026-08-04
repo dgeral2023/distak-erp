@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="assets/css/distak-ios.css">
   <link rel="stylesheet" href="assets/css/v3.css">
   <link rel="stylesheet" href="assets/css/hybrid-menu.css?v=20260804-top-right">
+  <link rel="stylesheet" href="assets/css/assistant.css?v=20260804-ai-v1">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -80,6 +81,15 @@
     <div id="globalSearchResults" class="global-search-results hidden"></div>
     <aside id="notificationPanel" class="notification-panel hidden"><header><div><span>Centro de atenção</span><h3>Alertas e próximos passos</h3></div><button id="notificationClose" type="button" aria-label="Fechar">×</button></header><div id="notificationList"></div></aside>
     <aside id="accountPanel" class="account-panel hidden"><div id="accountPanelUser"></div><button id="accountLogout" type="button">Sair da conta</button></aside>
+
+    <button id="aiAssistantButton" class="ai-assistant-button" type="button" aria-label="Abrir Assistente DISTAK" aria-controls="aiAssistantPanel" aria-expanded="false"><span class="ai-button-mark">D</span><span>Assistente</span><b>IA</b></button>
+    <div id="aiAssistantBackdrop" class="ai-assistant-backdrop hidden"></div>
+    <aside id="aiAssistantPanel" class="ai-assistant-panel hidden" aria-label="Assistente DISTAK" aria-hidden="true">
+      <header><div class="ai-assistant-title"><span class="ai-assistant-logo">D</span><div><small>INTELIGÊNCIA DISTAK</small><h3>Assistente de gestão</h3></div></div><button id="aiAssistantClose" type="button" aria-label="Fechar assistente">×</button></header>
+      <div id="aiAssistantMessages" class="ai-assistant-messages" aria-live="polite"></div>
+      <div id="aiAssistantSuggestions" class="ai-assistant-suggestions"><button type="button">Quais obras precisam de atenção?</button><button type="button">Quanto falta receber?</button><button type="button">Resume a situação financeira.</button><button type="button">Existem custos vencidos?</button></div>
+      <form id="aiAssistantForm" class="ai-assistant-form"><label for="aiAssistantInput">Pergunte sobre a gestão da DISTAK</label><div><textarea id="aiAssistantInput" rows="2" maxlength="1500" placeholder="Ex.: Que obras exigem atenção esta semana?" required></textarea><button id="aiAssistantSend" type="submit" aria-label="Enviar pergunta">➜</button></div><small>Consulta segura e somente leitura. Confirme decisões financeiras importantes.</small></form>
+    </aside>
 
     <section id="view-dashboard" class="view">
       <div class="option5-dashboard-head"><div><h1>Dashboard de Obras</h1><p>Visão geral do estado das obras e indicadores principais.</p></div><div class="option5-head-actions"><button class="btn light" type="button">⚙ Personalizar</button><span>Este mês⌄</span></div></div>
@@ -858,6 +868,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260804-option5-dashboard" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260804-assistente-ia" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>

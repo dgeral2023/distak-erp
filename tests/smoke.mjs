@@ -28,6 +28,7 @@ const requiredIds = [
   "mobileMoreSheet", "mobileRegisterSheet", "mobileSheetBackdrop", "recentNav"
   ,"favoriteNav", "topUserMenu", "topUserInitial", "accountPanel", "accountLogout"
   ,"option5ActiveWorks", "option5ExecutionValue", "option5Income", "option5Alerts"
+  ,"aiAssistantButton", "aiAssistantPanel", "aiAssistantMessages", "aiAssistantForm", "aiAssistantInput"
 ];
 
 for (const id of requiredIds) {
@@ -108,6 +109,10 @@ for (const required of ["finance-line-chart", "donut-chart", "work-identity", "s
 const hybridMenu = readFileSync(join(root, "assets", "js", "modules", "hybrid-menu.js"), "utf8");
 for (const required of ["initHybridMenu", "renderHybridMenu", "distakSidebarCollapsed", "event.ctrlKey", "distakFavoriteViews", "distakMenuGroups"]){
   check(hybridMenu.includes(required), `Menu híbrido incompleto: ${required}`);
+}
+const assistantModule = readFileSync(join(root, "assets", "js", "modules", "assistant.js"), "utf8");
+for (const required of ["initAssistant", "db.functions.invoke", "assistente-distak", "history.slice"]){
+  check(assistantModule.includes(required), `Assistente DISTAK incompleto: ${required}`);
 }
 
 const operationalMigration = readFileSync(
