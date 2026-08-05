@@ -32,7 +32,7 @@ function safeRows(rows: Record<string, unknown>[], keys: string[]) {
   return rows.slice(0, 100).map((row) => Object.fromEntries(keys.filter((key) => row[key] !== undefined).map((key) => [key, row[key]])));
 }
 
-function snapshot(obras: Record<string, unknown>[], custos: Record<string, unknown>[], pagamentos: Record<string, unknown>[], orcamentos: Record<string, unknown>[], tarefas: Record<string, unknown>[], previsoes: Record<string, unknown>[], documentos: Record<string, unknown>[], fotografias: Record<string, unknown>[], diarios: Record<string, unknown>[], checklists: Record<string, unknown>[], materiais: Record<string, unknown>[], ocorrencias: Record<string, unknown>[], horas: Record<string, unknown>[], equipa: Record<string, unknown>[], pedidos: Record<string, unknown>[], propostas: Record<string, unknown>[]) {
+function snapshot(obras: Record<string, unknown>[], custos: Record<string, unknown>[], pagamentos: Record<string, unknown>[], orcamentos: Record<string, unknown>[], tarefas: Record<string, unknown>[], previsoes: Record<string, unknown>[], documentos: Record<string, unknown>[], fotografias: Record<string, unknown>[], diarios: Record<string, unknown>[], checklists: Record<string, unknown>[], materiais: Record<string, unknown>[], ocorrencias: Record<string, unknown>[], horas: Record<string, unknown>[], equipa: Record<string, unknown>[], pedidos: Record<string, unknown>[], propostas: Record<string, unknown>[], autos: Record<string, unknown>[], itensMedicao: Record<string, unknown>[]) {
   const now = new Date();
   const contracted = obras.reduce((sum, row) => sum + workValue(row), 0);
   const costs = custos.reduce((sum, row) => sum + costValue(row), 0);
@@ -71,6 +71,8 @@ function snapshot(obras: Record<string, unknown>[], custos: Record<string, unkno
       checklists_hoje: checklists.filter((row) => String(row.data) === today).length,
       pedidos_compra_abertos: pedidos.filter((row) => !["recebido", "cancelado"].includes(String(row.estado))).length,
       entregas_atrasadas: pedidos.filter((row) => ["encomendado", "parcial"].includes(String(row.estado)) && row.entrega_prevista && String(row.entrega_prevista) < today).length,
+      autos_faturados: autos.filter((row) => row.estado === "faturado").length,
+      faturas_autos_vencidas: autos.filter((row) => row.estado === "faturado" && row.vencimento && String(row.vencimento) < today).length,
     },
     obras: safeRows(obras, ["id", "nome", "estado", "progresso", "valor", "valor_total", "valor_contratado", "data_inicio", "data_fim_prevista", "morada"]),
     custos: safeRows(custos, ["obra_id", "descricao", "tipo", "categoria", "valor", "valor_total", "valor_sem_iva", "estado_pagamento", "data", "data_vencimento"]),
@@ -88,6 +90,8 @@ function snapshot(obras: Record<string, unknown>[], custos: Record<string, unkno
     equipa: safeRows(equipa, ["id", "obra_id", "data", "nome", "funcao", "observacoes"]),
     pedidos: safeRows(pedidos, ["id", "obra_id", "numero", "titulo", "categoria", "quantidade", "unidade", "data_necessaria", "estado", "valor_orcamentado", "fornecedor_selecionado", "valor_adjudicado", "entrega_prevista"]),
     propostas: safeRows(propostas, ["id", "pedido_id", "fornecedor", "valor", "prazo_dias", "validade", "selecionada"]),
+    autos: safeRows(autos, ["id", "obra_id", "numero", "periodo_inicio", "periodo_fim", "estado", "subtotal", "retencao_percentagem", "iva_percentagem", "total", "fatura_numero", "fatura_data", "vencimento"]),
+    itens_medicao: safeRows(itensMedicao, ["auto_id", "descricao", "unidade", "quantidade_contratada", "quantidade_anterior", "quantidade_atual", "preco_unitario"]),
   };
 }
 
@@ -107,6 +111,12 @@ function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role
   const blockedStages = data.tarefas.filter((row) => row.estado === "bloqueada");
   const matchedWork = data.obras.find((work) => text(work.nome).length > 2 && query.includes(text(work.nome)));
   const admin = role === "admin";
+
+  if (admin && ["medicao", "medicoes", "auto", "faturacao", "faturado", "fatura de cliente"].some((term) => query.includes(term))) {
+    const approved = data.autos.filter((row) => row.estado === "aprovado"), billed = data.autos.filter((row) => row.estado === "faturado"), late = billed.filter((row) => row.vencimento && String(row.vencimento) < today);
+    const detail = late.slice(0, 6).map((row) => `• ${row.numero}: ${money(number(row.total))} · vencimento ${row.vencimento}`).join("\n");
+    return { intent: "medicoes", answer: `Medições: ${data.autos.length} auto(s), ${approved.length} aprovado(s) por faturar e ${billed.length} marcado(s) como faturado(s). Existem ${late.length} fatura(s) vencida(s) sem confirmação automática de recebimento.${detail ? `\n\nVencidas:\n${detail}` : ""}\n\nFaturado não significa recebido; confirme os recebimentos no módulo Pagamentos.`, actions: [{ label: "Abrir Autos de Medição", view: "medicoes" }, { label: "Ver pagamentos", view: "pagamentos" }] };
+  }
 
   if (admin && ["compra", "fornecedor", "proposta de fornecedor", "entrega", "encomenda", "adjudic"].some((term) => query.includes(term))) {
     const open = data.pedidos.filter((row) => !["recebido", "cancelado"].includes(String(row.estado)));
@@ -209,7 +219,7 @@ Deno.serve(async (req: Request) => {
   const { data: profile } = await supabase.from("profiles").select("role,ativo").eq("id", userData.user.id).single();
   if (!profile || profile.ativo === false) return json(req, { error: "Utilizador sem acesso." }, 403);
 
-  const [worksResult, costsResult, paymentsResult, budgetsResult, tasksResult, forecastsResult, documentsResult, photosResult, diariesResult, checklistsResult, materialsResult, occurrencesResult, hoursResult, teamResult, purchaseResult, quoteResult] = await Promise.all([
+  const [worksResult, costsResult, paymentsResult, budgetsResult, tasksResult, forecastsResult, documentsResult, photosResult, diariesResult, checklistsResult, materialsResult, occurrencesResult, hoursResult, teamResult, purchaseResult, quoteResult, measurementResult, measurementItemsResult] = await Promise.all([
     supabase.from("obras").select("*"),
     supabase.from("custos").select("*"),
     supabase.from("pagamentos").select("*"),
@@ -226,10 +236,12 @@ Deno.serve(async (req: Request) => {
     supabase.from("obra_equipa_registos").select("*"),
     profile.role === "admin" ? supabase.from("compras_pedidos").select("*") : Promise.resolve({ data: [], error: null }),
     profile.role === "admin" ? supabase.from("compras_propostas").select("*") : Promise.resolve({ data: [], error: null }),
+    profile.role === "admin" ? supabase.from("medicoes_autos").select("*") : Promise.resolve({ data: [], error: null }),
+    profile.role === "admin" ? supabase.from("medicoes_itens").select("*") : Promise.resolve({ data: [], error: null }),
   ]);
-  const queryError = [worksResult.error, costsResult.error, paymentsResult.error, budgetsResult.error, tasksResult.error, forecastsResult.error, documentsResult.error, photosResult.error, diariesResult.error, checklistsResult.error, materialsResult.error, occurrencesResult.error, hoursResult.error, teamResult.error, purchaseResult.error, quoteResult.error].find(Boolean);
+  const queryError = [worksResult.error, costsResult.error, paymentsResult.error, budgetsResult.error, tasksResult.error, forecastsResult.error, documentsResult.error, photosResult.error, diariesResult.error, checklistsResult.error, materialsResult.error, occurrencesResult.error, hoursResult.error, teamResult.error, purchaseResult.error, quoteResult.error, measurementResult.error, measurementItemsResult.error].find(Boolean);
   if (queryError) return json(req, { error: "Não foi possível consultar os dados autorizados." }, 500);
-  const data = snapshot(worksResult.data || [], costsResult.data || [], paymentsResult.data || [], budgetsResult.data || [], tasksResult.data || [], forecastsResult.data || [], documentsResult.data || [], photosResult.data || [], diariesResult.data || [], checklistsResult.data || [], materialsResult.data || [], occurrencesResult.data || [], hoursResult.data || [], teamResult.data || [], purchaseResult.data || [], quoteResult.data || []);
+  const data = snapshot(worksResult.data || [], costsResult.data || [], paymentsResult.data || [], budgetsResult.data || [], tasksResult.data || [], forecastsResult.data || [], documentsResult.data || [], photosResult.data || [], diariesResult.data || [], checklistsResult.data || [], materialsResult.data || [], occurrencesResult.data || [], hoursResult.data || [], teamResult.data || [], purchaseResult.data || [], quoteResult.data || [], measurementResult.data || [], measurementItemsResult.data || []);
 
   const analysis = localAnalysis(data, message, profile.role);
   return json(req, { ...analysis, mode: "local", model: null });

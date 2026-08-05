@@ -78,6 +78,7 @@ export function renderAssistantInsight(){
   const incompleteDossiers=(store.obras||[]).filter(work=>num(work.progresso)>=80&&!(store.documentosObra||[]).some(doc=>String(doc.obra_id)===String(work.id)&&norm(doc.categoria)==="contrato"));
   const todayOccurrences=(store.ocorrenciasObra||[]).filter(row=>row.data===today);
   const lateDeliveries=(store.pedidosCompra||[]).filter(row=>["encomendado","parcial"].includes(row.estado)&&row.entrega_prevista&&row.entrega_prevista<today);
+  const overdueInvoices=(store.autosMedicao||[]).filter(row=>row.estado==="faturado"&&row.vencimento&&row.vencimento<today);
   const parts=[];
   if(risky.length)parts.push(`<strong>${risky.length}</strong> obra(s) em atraso ou suspensas`);
   if(overdue.length)parts.push(`<strong>${overdue.length}</strong> custo(s) vencido(s)`);
@@ -89,6 +90,7 @@ export function renderAssistantInsight(){
   if(incompleteDossiers.length)parts.push(`<strong>${incompleteDossiers.length}</strong> dossiê(s) sem contrato`);
   if(todayOccurrences.length)parts.push(`<strong>${todayOccurrences.length}</strong> ocorrência(s) registada(s) hoje`);
   if(lateDeliveries.length)parts.push(`<strong>${lateDeliveries.length}</strong> entrega(s) de fornecedores atrasada(s)`);
+  if(overdueInvoices.length)parts.push(`<strong>${overdueInvoices.length}</strong> fatura(s) de autos vencida(s)`);
   $("aiPrioritySummary").innerHTML=parts.length?`Recomendo atenção a ${parts.join(" · ")}.`:`Sem alertas críticos. Pode concentrar-se no acompanhamento das obras e nas próximas cobranças.`;
   $("aiPriorityCard").classList.toggle("all-clear",!parts.length);
 }

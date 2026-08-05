@@ -44,6 +44,9 @@ const requiredIds = [
   ,"view-compras", "newPurchaseBtn", "purchaseKpis", "purchaseSearch", "purchaseWorkFilter",
   "purchaseStateFilter", "purchaseList", "purchaseDialog", "purchaseForm", "purchaseWork",
   "quoteDialog", "quoteForm", "quotePurchaseId", "quoteComparison"
+  ,"view-medicoes", "newMeasurementBtn", "measurementKpis", "measurementSearch",
+  "measurementWorkFilter", "measurementStateFilter", "measurementList", "measurementDialog",
+  "measurementForm", "measurementWork", "measurementItems", "measurementTotalPreview"
 ];
 
 for (const id of requiredIds) {
@@ -130,7 +133,7 @@ for (const required of ["initAssistant", "renderAssistantInsight", "db.functions
   check(assistantModule.includes(required), `Assistente DISTAK incompleto: ${required}`);
 }
 const assistantFunction = readFileSync(join(root, "supabase", "functions", "assistente-distak", "index.ts"), "utf8");
-for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "intent: \"dossies\"", "intent: \"operacional\"", "intent: \"compras\"", "auth.getUser"]){
+for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "intent: \"dossies\"", "intent: \"operacional\"", "intent: \"compras\"", "intent: \"medicoes\"", "auth.getUser"]){
   check(assistantFunction.includes(required), `Função segura do assistente incompleta: ${required}`);
 }
 const agendaModule = readFileSync(join(root, "assets", "js", "modules", "agenda.js"), "utf8");
@@ -165,7 +168,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.7", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
+for (const required of ["distak-shell-v3.8", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
@@ -180,6 +183,14 @@ for (const required of ["renderCompras", "initCompras", "compras_pedidos", "comp
 const purchasesMigration = readFileSync(join(root, "supabase", "202608051230_compras_fornecedores.sql"), "utf8");
 for (const required of ["enable row level security", "revoke all", "grant select,insert,update", "compras_pedidos_select_admin", "compras_propostas_update_admin"]){
   check(purchasesMigration.includes(required), `Migração de compras incompleta: ${required}`);
+}
+const measurementsModule = readFileSync(join(root, "assets", "js", "modules", "medicoes.js"), "utf8");
+for (const required of ["renderMedicoes", "initMedicoes", "medicoes_autos", "medicoes_itens", "quantidade_anterior", "Nenhum pagamento foi criado"]){
+  check(measurementsModule.includes(required), `Medições incompletas: ${required}`);
+}
+const measurementsMigration = readFileSync(join(root, "supabase", "202608051400_medicoes_faturacao.sql"), "utf8");
+for (const required of ["enable row level security", "revoke all", "grant select,insert,update", "medicoes_autos_select_admin", "medicoes_itens_update_admin"]){
+  check(measurementsMigration.includes(required), `Migração de medições incompleta: ${required}`);
 }
 
 const operationalMigration = readFileSync(
