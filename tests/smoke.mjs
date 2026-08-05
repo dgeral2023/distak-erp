@@ -237,6 +237,14 @@ const accessibilityCss = readFileSync(join(root, "assets", "css", "accessibility
 for (const required of [".skip-link", "prefers-reduced-motion:reduce", ":focus-visible", "@media print"]){
   check(accessibilityCss.includes(required), `Acessibilidade global incompleta: ${required}`);
 }
+const backupModule = readFileSync(join(root, "assets", "js", "modules", "backup.js"), "utf8");
+for (const required of ["createSafetyBackup", "distak-erp-backup", "SHA-256", "crypto.subtle.digest", "Apenas um administrador", "Nenhum dado foi alterado"]){
+  check(backupModule.includes(required), `Cópia de segurança incompleta: ${required}`);
+}
+const recoveryGuide = readFileSync(join(root, "docs", "RECUPERACAO.md"), "utf8");
+for (const required of ["Não existe importação automática", "autorização explícita", "checksum", "Não apagar evidências"]){
+  check(recoveryGuide.includes(required), `Procedimento de recuperação incompleto: ${required}`);
+}
 for (const required of ['href="#mainContent"', 'id="mainContent"', 'aria-labelledby="clientPublishTitle"', 'aria-live="polite"']){
   check(index.includes(required), `Semântica acessível incompleta: ${required}`);
 }

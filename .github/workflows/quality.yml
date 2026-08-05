@@ -34,6 +34,9 @@ jobs:
       - name: Verificar orçamento de desempenho e PWA
         run: node tests/performance.mjs
 
+      - name: Verificar exportação de segurança
+        run: node tests/backup.mjs
+
       - name: Verificar sintaxe JavaScript
         shell: bash
         run: |
