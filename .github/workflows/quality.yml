@@ -31,6 +31,9 @@ jobs:
       - name: Executar smoke test
         run: node tests/smoke.mjs
 
+      - name: Verificar orçamento de desempenho e PWA
+        run: node tests/performance.mjs
+
       - name: Verificar sintaxe JavaScript
         shell: bash
         run: |
