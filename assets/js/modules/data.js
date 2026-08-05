@@ -26,4 +26,11 @@ export async function refreshData(){
     store.fotografias = [];
   }
   try{store.documentosObra=await query("obra_documentos")}catch(err){console.error("Não foi possível carregar o inventário documental:",err);store.documentosObra=[]}
+  try{
+    const operational=await Promise.all([query("obra_diarios"),query("obra_checklists"),query("obra_materiais"),query("obra_ocorrencias"),query("obra_horas"),query("obra_equipa_registos")]);
+    [store.diariosObra,store.checklistsObra,store.materiaisObra,store.ocorrenciasObra,store.horasObra,store.equipaObra]=operational;
+  }catch(err){
+    console.error("Não foi possível carregar o centro operacional:",err);
+    [store.diariosObra,store.checklistsObra,store.materiaisObra,store.ocorrenciasObra,store.horasObra,store.equipaObra]=[[],[],[],[],[],[]];
+  }
 }

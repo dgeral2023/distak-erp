@@ -20,6 +20,7 @@ function alerts(){
   store.agendaTarefas.filter(row=>row.estado!=="concluida"&&row.prazo===today).forEach(row=>rows.push({level:"warning",title:row.titulo,text:"Tarefa com prazo hoje",view:"agenda"}));
   store.previsoesFinanceiras.filter(row=>!["realizado","cancelado"].includes(row.estado)&&row.data_prevista<today).forEach(row=>rows.push({level:"danger",title:row.descricao,text:`Previsão vencida · ${money(row.valor)}`,view:"previsoes"}));
   store.obras.filter(work=>num(work.progresso)>=80&&!store.documentosObra.some(doc=>String(doc.obra_id)===String(work.id)&&norm(doc.categoria)==="contrato")).forEach(work=>rows.push({level:"warning",title:work.nome,text:"Dossiê sem contrato e obra próxima da conclusão",view:"dossies"}));
+  store.ocorrenciasObra.filter(row=>row.data===today).forEach(row=>rows.push({level:"warning",title:row.tipo||"Ocorrência em obra",text:`${workName(row.obra_id)} · ${row.descricao||"Consultar registo"}`,view:"operacional"}));
   return rows;
 }
 
@@ -56,7 +57,11 @@ function search(term){
     ["Tarefa","agenda",store.agendaTarefas,row=>row.titulo,row=>`${row.prazo} · ${row.estado}`],
     ["Previsão","previsoes",store.previsoesFinanceiras,row=>row.descricao,row=>`${row.data_prevista} · ${money(row.valor)}`],
     ["Documento","dossies",store.documentosObra,row=>row.nome,row=>row.categoria||"Documento de obra"],
-    ["Fotografia","dossies",store.fotografias,row=>row.titulo||row.categoria,row=>row.zona||row.categoria]
+    ["Fotografia","dossies",store.fotografias,row=>row.titulo||row.categoria,row=>row.zona||row.categoria],
+    ["Diário","operacional",store.diariosObra,row=>row.titulo,row=>`${workName(row.obra_id)} · ${row.data}`],
+    ["Ocorrência","operacional",store.ocorrenciasObra,row=>row.tipo,row=>`${workName(row.obra_id)} · ${row.data}`],
+    ["Material","operacional",store.materiaisObra,row=>row.material,row=>`${workName(row.obra_id)} · ${row.quantidade||""}`],
+    ["Horas","operacional",store.horasObra,row=>row.funcionario_nome,row=>`${workName(row.obra_id)} · ${row.horario||""}`]
   ];
   const results=sources.flatMap(([type,view,rows,title,meta])=>rows.filter(row=>norm(JSON.stringify(row)).includes(query)).slice(0,5).map(row=>({type,view,row,title:title(row),meta:meta(row)}))).slice(0,18);
   host.innerHTML=results.length?results.map(result=>`<button data-search-view="${result.view}" ${result.type==="Obra"?`data-search-work="${result.row.id}"`:""}><span>${esc(result.type)}</span><strong>${esc(result.title||"Sem título")}</strong><small>${esc(result.meta||"")}</small></button>`).join(""):'<div class="v3-empty">Nenhum resultado encontrado.</div>';

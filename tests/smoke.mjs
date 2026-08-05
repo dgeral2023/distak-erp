@@ -36,6 +36,9 @@ const requiredIds = [
   "forecastSearch", "forecastList", "forecastDialog", "forecastForm", "forecastProbability"
   ,"view-dossies", "dossierPrintAll", "dossierKpis", "dossierSearch", "dossierStatusFilter",
   "dossierResultCount", "dossierGrid"
+  ,"view-operacional", "newOperationalRecord", "operationalKpis", "operationalSearch",
+  "operationalDate", "operationalWorkGrid", "operationalTimeline", "operationalQuickDialog",
+  "operationalQuickForm", "operationalQuickWork", "operationalQuickType"
 ];
 
 for (const id of requiredIds) {
@@ -122,7 +125,7 @@ for (const required of ["initAssistant", "renderAssistantInsight", "db.functions
   check(assistantModule.includes(required), `Assistente DISTAK incompleto: ${required}`);
 }
 const assistantFunction = readFileSync(join(root, "supabase", "functions", "assistente-distak", "index.ts"), "utf8");
-for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "intent: \"dossies\"", "auth.getUser"]){
+for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "intent: \"dossies\"", "intent: \"operacional\"", "auth.getUser"]){
   check(assistantFunction.includes(required), `Função segura do assistente incompleta: ${required}`);
 }
 const agendaModule = readFileSync(join(root, "assets", "js", "modules", "agenda.js"), "utf8");
@@ -150,8 +153,13 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.4", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
+for (const required of ["distak-shell-v3.5", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
+}
+
+const operationalModule = readFileSync(join(root, "assets", "js", "modules", "operacional.js"), "utf8");
+for (const required of ["renderOperacional", "initOperacional", "openOperationalQuick", "obra_ocorrencias", "obra_materiais", "obra_horas"]){
+  check(operationalModule.includes(required), `Centro operacional incompleto: ${required}`);
 }
 
 const operationalMigration = readFileSync(
