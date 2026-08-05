@@ -221,7 +221,7 @@ for (const required of ["enable row level security", "revoke all", "grant select
 }
 
 const clientPortalModule = readFileSync(join(root, "assets", "js", "modules", "cliente-portal.js"), "utf8");
-for (const required of ["renderClientePortal", "renderClientePortalAdmin", "initClientePortal", "clientePortalObras", "clientePortalAtualizacoes", "clientePortalFicheiros", "Progresso comunicado", "data-client-publish-edit", "cliente_portal_obras"]){
+for (const required of ["renderClientePortal", "renderClientePortalAdmin", "initClientePortal", "clientePortalObras", "clientePortalAtualizacoes", "clientePortalFicheiros", "Progresso comunicado", "data-client-publish-edit", "cliente_portal_obras", "url.protocol===\"https:\""]){
   check(clientPortalModule.includes(required), `Portal do cliente incompleto: ${required}`);
 }
 const clientData = readFileSync(join(root, "assets", "js", "modules", "data.js"), "utf8");
@@ -231,6 +231,8 @@ for (const required of ["enable row level security", "revoke all", "grant select
   check(clientMigration.includes(required), `Segurança do portal do cliente incompleta: ${required}`);
 }
 check(!clientMigration.includes("grant delete"), "O portal do cliente não deve conceder eliminação por SQL.");
+const uiModule = readFileSync(join(root, "assets", "js", "core", "ui.js"), "utf8");
+check(uiModule.includes('classList.contains("client-mode")&&v!=="cliente-portal"'), "A navegação deve bloquear módulos internos no modo cliente.");
 
 const operationalMigration = readFileSync(
   join(root, "supabase", "202608041820_acesso_operacional_por_obra.sql"),
