@@ -17,6 +17,6 @@ for(const required of ["Content-Security-Policy","object-src 'none'","base-uri '
 const recentSql=walk(join(root,"supabase")).filter(path=>/20260805\d+_.*\.sql$/.test(path));
 for(const path of recentSql){const sql=readFileSync(path,"utf8");if(/grant\s+[^;]+\s+to\s+anon\b/i.test(sql))failures.push(`${path.slice(root.length+1)} concede privilégios ao papel anon`);if(/grant\s+delete\b/i.test(sql))failures.push(`${path.slice(root.length+1)} concede DELETE sem revisão explícita`)}
 const portalSql=readFileSync(join(root,"supabase","202608052000_portal_cliente.sql"),"utf8");
-for(const table of ["cliente_portal_acessos","cliente_portal_obras","cliente_portal_atualizacoes","cliente_portal_ficheiros"])if(!portalSql.includes(`alter table public.${table} enable row level security`))failures.push(`RLS em falta: ${table}`);
+for(const table of ["cliente_portal_acessos","cliente_portal_obras","cliente_portal_atualizacoes","cliente_portal_ficheiros","cliente_portal_aprovacoes"])if(!portalSql.includes(`alter table public.${table} enable row level security`))failures.push(`RLS em falta: ${table}`);
 if(failures.length){console.error(`Auditoria de segurança falhou:\n- ${failures.join("\n- ")}`);process.exit(1)}
 console.log(`Segurança aprovada: ${frontend.length} ficheiros frontend, ${recentSql.length} migrações recentes, chave publicável, CSP e dependência fixa.`);

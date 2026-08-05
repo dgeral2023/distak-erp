@@ -10,6 +10,7 @@ export async function refreshData(){
     store.clientePortalObras=await query("cliente_portal_obras");
     store.clientePortalAtualizacoes=await query("cliente_portal_atualizacoes");
     store.clientePortalFicheiros=await query("cliente_portal_ficheiros");
+    store.clientePortalAprovacoes=await query("cliente_portal_aprovacoes");
     ["obraUtilizadores","clientes","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra"].forEach(key=>store[key]=[]);
     return;
   }
@@ -48,6 +49,6 @@ export async function refreshData(){
     [store.diariosObra,store.checklistsObra,store.materiaisObra,store.ocorrenciasObra,store.horasObra,store.equipaObra]=[[],[],[],[],[],[]];
   }
   if(isAdmin){
-    try{[store.clientePortalAcessos,store.clientePortalObras,store.clientePortalAtualizacoes,store.clientePortalFicheiros]=await Promise.all([query("cliente_portal_acessos"),query("cliente_portal_obras"),query("cliente_portal_atualizacoes"),query("cliente_portal_ficheiros")])}catch(err){console.error("Não foi possível carregar a gestão do portal do cliente:",err);store.clientePortalAcessos=[];store.clientePortalObras=[];store.clientePortalAtualizacoes=[];store.clientePortalFicheiros=[]}
+    try{[store.clientePortalAcessos,store.clientePortalObras,store.clientePortalAtualizacoes,store.clientePortalFicheiros,store.clientePortalAprovacoes]=await Promise.all([query("cliente_portal_acessos"),query("cliente_portal_obras"),query("cliente_portal_atualizacoes"),query("cliente_portal_ficheiros"),query("cliente_portal_aprovacoes")])}catch(err){console.error("Não foi possível carregar a gestão do portal do cliente:",err);store.clientePortalAcessos=[];store.clientePortalObras=[];store.clientePortalAtualizacoes=[];store.clientePortalFicheiros=[];store.clientePortalAprovacoes=[]}
   }
 }

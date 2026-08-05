@@ -103,3 +103,33 @@ create policy cliente_portal_ficheiros_update_admin on public.cliente_portal_fic
 using ((select public.is_admin())) with check ((select public.is_admin()));
 
 comment on table public.cliente_portal_obras is 'Resumo explicitamente publicado ao cliente; não expõe custos, margens ou dados operacionais internos.';
+
+create table if not exists public.cliente_portal_aprovacoes (
+  id uuid primary key default gen_random_uuid(), portal_obra_id uuid not null references public.cliente_portal_obras(id) on delete cascade,
+  titulo text not null, descricao text, data_limite date,
+  estado text not null default 'pendente' check (estado in ('pendente','aprovado','revisao')),
+  respondido_em timestamptz, respondido_por uuid references auth.users(id),
+  criado_por uuid not null references auth.users(id), criado_em timestamptz not null default now()
+);
+alter table public.cliente_portal_aprovacoes enable row level security;
+revoke all on public.cliente_portal_aprovacoes from anon, authenticated;
+grant select,insert,update on public.cliente_portal_aprovacoes to authenticated;
+create index if not exists cliente_portal_aprovacoes_obra_idx on public.cliente_portal_aprovacoes(portal_obra_id,estado,data_limite);
+create policy cliente_portal_aprovacoes_select on public.cliente_portal_aprovacoes for select to authenticated using ((select public.is_admin()) or exists (select 1 from public.cliente_portal_obras o where o.id=portal_obra_id and o.publicado and (select private.can_access_cliente_portal(o.cliente_id))));
+create policy cliente_portal_aprovacoes_insert_admin on public.cliente_portal_aprovacoes for insert to authenticated with check ((select public.is_admin()) and criado_por=(select auth.uid()));
+create policy cliente_portal_aprovacoes_update_admin on public.cliente_portal_aprovacoes for update to authenticated using ((select public.is_admin())) with check ((select public.is_admin()));
+
+create or replace function public.responder_cliente_portal_aprovacao(p_aprovacao_id uuid,p_decisao text)
+returns public.cliente_portal_aprovacoes language plpgsql security definer set search_path='' as $$
+declare resultado public.cliente_portal_aprovacoes;
+begin
+  if p_decisao not in ('aprovado','revisao') then raise exception 'Decisão inválida'; end if;
+  update public.cliente_portal_aprovacoes a set estado=p_decisao,respondido_em=now(),respondido_por=(select auth.uid())
+  where a.id=p_aprovacao_id and a.estado='pendente' and exists (select 1 from public.cliente_portal_obras o where o.id=a.portal_obra_id and o.publicado and (select private.can_access_cliente_portal(o.cliente_id))) returning a.* into resultado;
+  if resultado.id is null then raise exception 'Pedido indisponível ou já respondido'; end if;
+  return resultado;
+end;
+$$;
+revoke all on function public.responder_cliente_portal_aprovacao(uuid,text) from public, anon;
+grant execute on function public.responder_cliente_portal_aprovacao(uuid,text) to authenticated;
+comment on table public.cliente_portal_aprovacoes is 'Pedidos formais ao cliente; respostas não criam pagamentos, custos ou alterações automáticas na obra.';
