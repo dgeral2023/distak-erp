@@ -142,10 +142,29 @@ function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role
     return { intent: "dossies", answer: `Arquivo digital: ${i.total_documentos_obra} documento(s) e ${i.total_fotografias_obra} fotografia(s) nas obras permitidas. ${attentionRows.length} dossiê(s) têm elementos essenciais por organizar.${detail ? `\n\nPendências principais:\n${detail}` : ""}`, actions: [{ label: "Abrir dossiês", view: "dossies" }, { label: "Ver obras", view: admin ? "obras" : "funcionario" }] };
   }
 
-  if (admin && ["previsao", "previsto", "fluxo de caixa", "futuro", "projecao"].some((term) => query.includes(term))) {
+  if (admin && ["previsao", "previsto", "fluxo de caixa", "futuro", "projecao"].some((term) => query.includes(term)) && !["previsao de atraso", "custo final", "margem prevista", "risco da obra", "cenario de gestao"].some((term) => query.includes(term))) {
     const activeForecasts = data.previsoes.filter((row) => !["realizado", "cancelado"].includes(String(row.estado))).sort((a, b) => String(a.data_prevista).localeCompare(String(b.data_prevista)));
     const detail = activeForecasts.slice(0, 6).map((row) => `• ${row.data_prevista} · ${row.descricao}: ${money(number(row.valor))} (${number(row.probabilidade)}%)`).join("\n");
     return { intent: "previsoes", answer: `Planeamento atual: ${i.previsoes_abertas} previsão(ões) aberta(s), com ${money(i.recebimentos_previstos)} de recebimentos e ${money(i.despesas_previstas)} de despesas ponderadas. A variação prevista é ${money(i.recebimentos_previstos - i.despesas_previstas)}.${i.previsoes_vencidas ? ` Existem ${i.previsoes_vencidas} previsão(ões) vencida(s).` : ""}${detail ? `\n\nPróximos movimentos:\n${detail}` : ""}\n\nEstes valores são previsões e não representam o saldo bancário nem movimentos realizados.`, actions: [{ label: "Abrir previsões", view: "previsoes" }, { label: "Ver pagamentos", view: "pagamentos" }] };
+  }
+
+  if (admin && ["inteligencia", "custo final", "margem prevista", "risco da obra", "previsao de atraso", "cenario de gestao"].some((term) => query.includes(term))) {
+    const rows = data.obras.map((work) => {
+      const progress = Math.max(0, Math.min(100, number(work.progresso)));
+      const contracted = workValue(work);
+      const costs = byWork(data.custos, work.id).reduce((sum, row) => sum + costValue(row), 0);
+      const projected = progress >= 10 ? costs / (progress / 100) * 1.05 : costs * 1.05;
+      const tasks = byWork(data.tarefas, work.id).filter((row) => row.estado !== "concluida");
+      const late = tasks.filter((row) => String(row.prazo) < today).length;
+      const blocked = tasks.filter((row) => row.estado === "bloqueada").length;
+      const margin = contracted - projected;
+      let score = Math.min(50, late * 8 + blocked * 12);
+      if (contracted && margin < 0) score += 30; else if (contracted && margin / contracted < .1) score += 15;
+      if (text(work.estado).includes("atras") || text(work.estado).includes("suspens")) score += 20;
+      return { work, projected, margin, late, blocked, score: Math.min(100, score) };
+    }).sort((a, b) => b.score - a.score);
+    const detail = rows.slice(0, 6).map((row) => `\u2022 ${row.work.nome}: risco ${row.score}/100 \u00b7 custo final ${money(row.projected)} \u00b7 margem ${money(row.margin)} \u00b7 ${row.late} tarefa(s) atrasada(s)`).join("\n");
+    return { intent: "inteligencia", answer: `Análise interna e explicável da carteira, usando uma reserva de 5%: ${rows.filter((row) => row.score >= 50).length} obra(s) apresentam risco alto ou crítico.\n\n${detail || "Não existem obras para analisar."}\n\nEstas projeções apoiam a decisão e não alteram custos, pagamentos ou prazos. Confirme cada cenário no painel antes de agir.`, actions: [{ label: "Abrir Inteligência de Gestão", view: "inteligencia" }, { label: "Ver cronograma", view: "agenda" }] };
   }
 
   if (matchedWork) {
