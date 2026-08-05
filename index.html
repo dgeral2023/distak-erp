@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="assets/css/assistant.css?v=20260804-ai-v2">
   <link rel="stylesheet" href="assets/css/agenda.css?v=20260804-agenda-v1">
   <link rel="stylesheet" href="assets/css/previsoes.css?v=20260804-finance-v1">
+  <link rel="stylesheet" href="assets/css/dossies.css?v=20260804-dossier-v1">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -45,7 +46,7 @@
     <nav id="mainNav">
       <div class="nav-group"><button class="nav active" data-view="dashboard"><i>⌂</i><span>Dashboard</span></button></div>
       <div class="nav-group admin-only" data-menu-group="comercial"><button class="nav-group-title" type="button" data-toggle-menu-group="comercial"><span>Comercial</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="clientes"><i>♙</i><span>Clientes</span></button><button class="nav" data-view="orcamentos"><i>▤</i><span>Propostas e orçamentos</span></button></div></div>
-      <div class="nav-group" data-menu-group="obras"><button class="nav-group-title" type="button" data-toggle-menu-group="obras"><span>Obras</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="obras"><i>▥</i><span>Dashboard de obras</span><b id="navWorkCount">0</b></button><button class="nav" data-view="agenda"><i>◫</i><span>Agenda e tarefas</span><b id="navTaskCount">0</b></button><button class="nav funcionario-only" data-view="funcionario"><i>✓</i><span>Meu painel</span></button></div></div>
+      <div class="nav-group" data-menu-group="obras"><button class="nav-group-title" type="button" data-toggle-menu-group="obras"><span>Obras</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="obras"><i>▥</i><span>Dashboard de obras</span><b id="navWorkCount">0</b></button><button class="nav" data-view="agenda"><i>◫</i><span>Agenda e tarefas</span><b id="navTaskCount">0</b></button><button class="nav" data-view="dossies"><i>▧</i><span>Dossiê digital</span></button><button class="nav funcionario-only" data-view="funcionario"><i>✓</i><span>Meu painel</span></button></div></div>
       <div class="nav-group admin-only" data-menu-group="financeiro"><button class="nav-group-title" type="button" data-toggle-menu-group="financeiro"><span>Financeiro</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="custos"><i>↘</i><span>Custos e fornecedores</span></button><button class="nav" data-view="pagamentos"><i>€</i><span>Pagamentos</span></button><button class="nav" data-view="previsoes"><i>↗</i><span>Previsões e cobranças</span></button><button class="nav" data-view="relatorios"><i>▥</i><span>Relatórios</span></button></div></div>
       <div class="nav-group admin-only" data-menu-group="equipa"><button class="nav-group-title" type="button" data-toggle-menu-group="equipa"><span>Equipa</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="funcionarios"><i>♟</i><span>Recursos humanos</span></button><button class="nav" data-view="empresa"><i>⚙</i><span>Empresa</span></button></div></div>
       <div id="favoriteNavGroup" class="nav-group utility-nav-group"><button class="nav-group-title" type="button" data-toggle-menu-group="favoritos"><span>☆ Favoritos</span><i>⌄</i></button><div id="favoriteNav" class="nav-group-items"></div></div>
@@ -89,7 +90,7 @@
     <aside id="aiAssistantPanel" class="ai-assistant-panel hidden" aria-label="Assistente DISTAK" aria-hidden="true">
       <header><div class="ai-assistant-title"><span class="ai-assistant-logo">D</span><div><small>INTELIGÊNCIA DISTAK</small><h3>Assistente de gestão</h3></div></div><button id="aiAssistantClose" type="button" aria-label="Fechar assistente">×</button></header>
       <div id="aiAssistantMessages" class="ai-assistant-messages" aria-live="polite"></div>
-      <div id="aiAssistantSuggestions" class="ai-assistant-suggestions"><button type="button">Quais obras precisam de atenção?</button><button type="button">Como está o fluxo de caixa previsto?</button><button type="button">Quanto falta receber?</button><button type="button">Resume a situação financeira.</button><button type="button">Existem custos vencidos?</button></div>
+      <div id="aiAssistantSuggestions" class="ai-assistant-suggestions"><button type="button">Quais obras precisam de atenção?</button><button type="button">Que dossiês precisam de documentos ou fotografias?</button><button type="button">Como está o fluxo de caixa previsto?</button><button type="button">Quanto falta receber?</button><button type="button">Resume a situação financeira.</button><button type="button">Existem custos vencidos?</button></div>
       <form id="aiAssistantForm" class="ai-assistant-form"><label for="aiAssistantInput">Pergunte sobre a gestão da DISTAK</label><div><textarea id="aiAssistantInput" rows="2" maxlength="1500" placeholder="Ex.: Que obras exigem atenção esta semana?" required></textarea><button id="aiAssistantSend" type="submit" aria-label="Enviar pergunta">➜</button></div><small>Consulta segura e somente leitura. Confirme decisões financeiras importantes.</small></form>
     </aside>
 
@@ -224,6 +225,13 @@
       <div class="agenda-kpis"><article><span>Para hoje</span><strong id="agendaTodayCount">0</strong><small>Tarefas com prazo hoje</small></article><article><span>Em atraso</span><strong id="agendaOverdueCount">0</strong><small>Precisam de atenção</small></article><article><span>Próximos 7 dias</span><strong id="agendaWeekCount">0</strong><small>Planeamento imediato</small></article><article><span>Concluídas</span><strong id="agendaDoneCount">0</strong><small id="agendaDoneRate">0% do total</small></article></div>
       <section class="panel agenda-calendar-panel"><div class="agenda-toolbar"><div class="agenda-week-nav"><button id="agendaPrevWeek" type="button" aria-label="Semana anterior">‹</button><strong id="agendaWeekLabel">Semana atual</strong><button id="agendaNextWeek" type="button" aria-label="Semana seguinte">›</button><button id="agendaCurrentWeek" type="button">Hoje</button></div><div class="agenda-filters"><input id="agendaSearch" type="search" placeholder="Pesquisar tarefa ou obra…"><select id="agendaStateFilter"><option value="">Todos os estados</option><option value="pendente">Pendente</option><option value="em_curso">Em curso</option><option value="bloqueada">Bloqueada</option><option value="concluida">Concluída</option></select><select id="agendaPriorityFilter"><option value="">Todas as prioridades</option><option value="urgente">Urgente</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div></div><div id="agendaWeekGrid" class="agenda-week-grid"></div></section>
       <section class="panel"><div class="panel-title"><div><h3>Lista de tarefas</h3><p>Ordenada por prazo e prioridade</p></div><span id="agendaResultCount" class="badge">0 tarefas</span></div><div id="agendaTaskList" class="agenda-task-list"></div></section>
+    </section>
+
+    <section id="view-dossies" class="view hidden">
+      <div class="dossier-head"><div><span>ARQUIVO CENTRAL DAS OBRAS</span><h1>Dossiê digital</h1><p>Documentos, fotografias e pendências organizados por obra.</p></div><button id="dossierPrintAll" class="btn light" type="button">Imprimir resumo</button></div>
+      <div id="dossierKpis" class="dossier-kpis"></div>
+      <div class="dossier-toolbar"><input id="dossierSearch" type="search" placeholder="Pesquisar obra, cliente ou morada…"><select id="dossierStatusFilter"><option value="">Todos os níveis</option><option value="attention">Precisa de atenção</option><option value="progress">Em organização</option><option value="complete">Completo</option></select><span id="dossierResultCount" class="badge">0 obras</span></div>
+      <div id="dossierGrid" class="dossier-grid"></div>
     </section>
 
 
@@ -911,6 +919,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260804-finance-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260804-dossier-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>

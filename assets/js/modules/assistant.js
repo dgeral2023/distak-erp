@@ -74,6 +74,7 @@ export function renderAssistantInsight(){
   const noIncome=(store.obras||[]).filter(work=>workValue(work)>0&&!(store.pagamentos||[]).some(payment=>String(payment.obra_id)===String(work.id)));
   const localNow=new Date();localNow.setMinutes(localNow.getMinutes()-localNow.getTimezoneOffset());const today=localNow.toISOString().slice(0,10),lateTasks=(store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo<today),todayTasks=(store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo===today);
   const lateForecasts=(store.previsoesFinanceiras||[]).filter(row=>!["realizado","cancelado"].includes(row.estado)&&row.data_prevista<today);
+  const incompleteDossiers=(store.obras||[]).filter(work=>num(work.progresso)>=80&&!(store.documentosObra||[]).some(doc=>String(doc.obra_id)===String(work.id)&&norm(doc.categoria)==="contrato"));
   const parts=[];
   if(risky.length)parts.push(`<strong>${risky.length}</strong> obra(s) em atraso ou suspensas`);
   if(overdue.length)parts.push(`<strong>${overdue.length}</strong> custo(s) vencido(s)`);
@@ -81,6 +82,7 @@ export function renderAssistantInsight(){
   if(lateTasks.length)parts.push(`<strong>${lateTasks.length}</strong> tarefa(s) atrasada(s)`);
   if(todayTasks.length)parts.push(`<strong>${todayTasks.length}</strong> tarefa(s) para hoje`);
   if(lateForecasts.length)parts.push(`<strong>${lateForecasts.length}</strong> previsão(ões) vencida(s)`);
+  if(incompleteDossiers.length)parts.push(`<strong>${incompleteDossiers.length}</strong> dossiê(s) sem contrato`);
   $("aiPrioritySummary").innerHTML=parts.length?`Recomendo atenção a ${parts.join(" · ")}.`:`Sem alertas críticos. Pode concentrar-se no acompanhamento das obras e nas próximas cobranças.`;
   $("aiPriorityCard").classList.toggle("all-clear",!parts.length);
 }

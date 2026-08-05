@@ -34,6 +34,8 @@ const requiredIds = [
   "agendaTaskDialog", "agendaTaskForm", "agendaTaskWork", "agendaTaskDue"
   ,"view-previsoes", "newForecastBtn", "forecastKpis", "forecastChart", "collectionRiskList",
   "forecastSearch", "forecastList", "forecastDialog", "forecastForm", "forecastProbability"
+  ,"view-dossies", "dossierPrintAll", "dossierKpis", "dossierSearch", "dossierStatusFilter",
+  "dossierResultCount", "dossierGrid"
 ];
 
 for (const id of requiredIds) {
@@ -120,7 +122,7 @@ for (const required of ["initAssistant", "renderAssistantInsight", "db.functions
   check(assistantModule.includes(required), `Assistente DISTAK incompleto: ${required}`);
 }
 const assistantFunction = readFileSync(join(root, "supabase", "functions", "assistente-distak", "index.ts"), "utf8");
-for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "auth.getUser"]){
+for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "intent: \"dossies\"", "auth.getUser"]){
   check(assistantFunction.includes(required), `Função segura do assistente incompleta: ${required}`);
 }
 const agendaModule = readFileSync(join(root, "assets", "js", "modules", "agenda.js"), "utf8");
@@ -139,12 +141,16 @@ const forecastMigration = readFileSync(join(root, "supabase", "202608042200_fina
 for (const required of ["enable row level security", "financeiro_previsoes_select_admin", "financeiro_previsoes_insert_admin", "financeiro_previsoes_update_admin", "revoke all on public.financeiro_previsoes from anon", "grant select, insert, update"]){
   check(forecastMigration.includes(required), `Migração das previsões incompleta: ${required}`);
 }
+const dossierModule = readFileSync(join(root, "assets", "js", "modules", "dossies.js"), "utf8");
+for (const required of ["renderDossies", "initDossies", "printReport", "documentosObra", "Fotos depois"]){
+  check(dossierModule.includes(required), `Dossiê digital incompleto: ${required}`);
+}
 const pwaModule = readFileSync(join(root, "assets", "js", "core", "pwa.js"), "utf8");
 const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.3", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
+for (const required of ["distak-shell-v3.4", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
