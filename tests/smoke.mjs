@@ -221,7 +221,7 @@ for (const required of ["enable row level security", "revoke all", "grant select
 }
 
 const clientPortalModule = readFileSync(join(root, "assets", "js", "modules", "cliente-portal.js"), "utf8");
-for (const required of ["renderClientePortal", "clientePortalObras", "clientePortalAtualizacoes", "clientePortalFicheiros", "Progresso comunicado"]){
+for (const required of ["renderClientePortal", "renderClientePortalAdmin", "initClientePortal", "clientePortalObras", "clientePortalAtualizacoes", "clientePortalFicheiros", "Progresso comunicado", "data-client-publish-edit", "cliente_portal_obras"]){
   check(clientPortalModule.includes(required), `Portal do cliente incompleto: ${required}`);
 }
 const clientData = readFileSync(join(root, "assets", "js", "modules", "data.js"), "utf8");
