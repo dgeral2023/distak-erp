@@ -13,16 +13,16 @@ Este documento mantém o plano de produção contínua do DISTAK ERP. Cada fase 
 - Dossiê digital por obra com fotografias e documentos.
 - Assistente DISTAK interno, limitado aos dados autorizados do utilizador.
 - Centro Operacional para diários, checklists, equipa, materiais, horas e ocorrências.
+- Planeamento avançado com cronograma visual, fases, progresso, marcos e dependências.
 
 ## Próximas fases
 
-1. Planeamento avançado de obras: etapas, prazos, dependências e calendário visual.
-2. Compras e fornecedores: pedidos, comparação de propostas, entregas e controlo de desvios.
-3. Medições e faturação: autos de medição, marcos contratuais e reconciliação de recebimentos.
-4. Portal de equipa em campo: experiência móvel simplificada, trabalho offline e sincronização segura.
-5. Inteligência de gestão: previsões de atraso, custo final e risco de cobrança, sempre com confirmação humana.
-6. Portal do cliente: progresso autorizado, fotografias, documentos e aprovações.
-7. Qualidade e escala: acessibilidade, desempenho, testes automatizados, auditoria e recuperação.
+1. Compras e fornecedores: pedidos, comparação de propostas, entregas e controlo de desvios.
+2. Medições e faturação: autos de medição, marcos contratuais e reconciliação de recebimentos.
+3. Portal de equipa em campo: experiência móvel simplificada, trabalho offline e sincronização segura.
+4. Inteligência de gestão: previsões de atraso, custo final e risco de cobrança, sempre com confirmação humana.
+5. Portal do cliente: progresso autorizado, fotografias, documentos e aprovações.
+6. Qualidade e escala: acessibilidade, desempenho, testes automatizados, auditoria e recuperação.
 
 ## Regras permanentes
 

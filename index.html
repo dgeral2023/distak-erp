@@ -222,8 +222,9 @@
     </section>
 
     <section id="view-agenda" class="view hidden">
-      <div class="agenda-head"><div><span class="agenda-kicker">PLANEAMENTO OPERACIONAL</span><h1>Agenda e tarefas</h1><p>Prazos, responsáveis e prioridades de todas as obras.</p></div><button id="novaTarefaBtn" class="btn primary" type="button">＋ Nova tarefa</button></div>
+      <div class="agenda-head"><div><span class="agenda-kicker">PLANEAMENTO AVANÇADO</span><h1>Agenda e cronograma</h1><p>Etapas, dependências, responsáveis e prazos de todas as obras.</p></div><button id="novaTarefaBtn" class="btn primary" type="button">＋ Nova etapa</button></div>
       <div class="agenda-kpis"><article><span>Para hoje</span><strong id="agendaTodayCount">0</strong><small>Tarefas com prazo hoje</small></article><article><span>Em atraso</span><strong id="agendaOverdueCount">0</strong><small>Precisam de atenção</small></article><article><span>Próximos 7 dias</span><strong id="agendaWeekCount">0</strong><small>Planeamento imediato</small></article><article><span>Concluídas</span><strong id="agendaDoneCount">0</strong><small id="agendaDoneRate">0% do total</small></article></div>
+      <section class="panel planning-panel"><div class="panel-title"><div><h3>Cronograma das obras</h3><p>Visão temporal das etapas e dependências</p></div><div class="planning-controls"><select id="planningWorkFilter" aria-label="Filtrar cronograma por obra"><option value="">Todas as obras</option></select><button id="planningToday" class="btn small light" type="button">Hoje</button></div></div><div id="planningHealth" class="planning-health"></div><div id="planningTimeline" class="planning-timeline"></div></section>
       <section class="panel agenda-calendar-panel"><div class="agenda-toolbar"><div class="agenda-week-nav"><button id="agendaPrevWeek" type="button" aria-label="Semana anterior">‹</button><strong id="agendaWeekLabel">Semana atual</strong><button id="agendaNextWeek" type="button" aria-label="Semana seguinte">›</button><button id="agendaCurrentWeek" type="button">Hoje</button></div><div class="agenda-filters"><input id="agendaSearch" type="search" placeholder="Pesquisar tarefa ou obra…"><select id="agendaStateFilter"><option value="">Todos os estados</option><option value="pendente">Pendente</option><option value="em_curso">Em curso</option><option value="bloqueada">Bloqueada</option><option value="concluida">Concluída</option></select><select id="agendaPriorityFilter"><option value="">Todas as prioridades</option><option value="urgente">Urgente</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div></div><div id="agendaWeekGrid" class="agenda-week-grid"></div></section>
       <section class="panel"><div class="panel-title"><div><h3>Lista de tarefas</h3><p>Ordenada por prazo e prioridade</p></div><span id="agendaResultCount" class="badge">0 tarefas</span></div><div id="agendaTaskList" class="agenda-task-list"></div></section>
     </section>
@@ -895,11 +896,13 @@
 </form></dialog>
 
 <dialog id="agendaTaskDialog"><form id="agendaTaskForm" class="modal-form agenda-task-form">
-  <h3 id="agendaTaskDialogTitle">Nova tarefa</h3><input type="hidden" id="agendaTaskId">
+  <h3 id="agendaTaskDialogTitle">Nova etapa</h3><input type="hidden" id="agendaTaskId">
   <label class="full">Título<input id="agendaTaskTitle" maxlength="180" required placeholder="Ex.: Confirmar entrega de materiais"></label>
   <label>Obra<select id="agendaTaskWork" required></select></label><label>Prioridade<select id="agendaTaskPriority"><option value="baixa">Baixa</option><option value="media" selected>Média</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></label>
   <label>Início<input id="agendaTaskStart" type="date" required></label><label>Prazo<input id="agendaTaskDue" type="date" required></label>
   <label>Hora<input id="agendaTaskTime" type="time"></label><label>Estado<select id="agendaTaskState"><option value="pendente">Pendente</option><option value="em_curso">Em curso</option><option value="bloqueada">Bloqueada</option><option value="concluida">Concluída</option></select></label>
+  <label>Fase<select id="agendaTaskPhase"><option value="preparacao">Preparação</option><option value="demolicao">Demolição</option><option value="estrutura">Estrutura</option><option value="instalacoes">Instalações</option><option value="acabamentos">Acabamentos</option><option value="entrega">Entrega</option><option value="execucao">Execução geral</option></select></label><label>Progresso<input id="agendaTaskProgress" type="number" min="0" max="100" step="5" value="0"></label>
+  <label>Depende de<select id="agendaTaskDependency"><option value="">Sem dependência</option></select></label><label class="agenda-milestone"><input id="agendaTaskMilestone" type="checkbox"> É um marco da obra</label>
   <label>Responsável no ERP<select id="agendaTaskResponsible"></select></label><label class="admin-only">Funcionário associado<select id="agendaTaskEmployee"></select></label>
   <label class="full">Descrição<textarea id="agendaTaskDescription" rows="3" placeholder="Informações necessárias para executar a tarefa"></textarea></label>
   <div class="actions"><button type="button" class="btn light" data-close="agendaTaskDialog">Cancelar</button><button id="agendaTaskSave" class="btn primary">Guardar tarefa</button></div>
@@ -936,6 +939,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260805-operational-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260805-planning-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>

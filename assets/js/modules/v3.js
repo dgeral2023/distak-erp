@@ -18,6 +18,7 @@ function alerts(){
   const nowLocal=new Date();nowLocal.setMinutes(nowLocal.getMinutes()-nowLocal.getTimezoneOffset());const today=nowLocal.toISOString().slice(0,10);
   store.agendaTarefas.filter(row=>row.estado!=="concluida"&&row.prazo<today).forEach(row=>rows.push({level:"danger",title:row.titulo,text:`Tarefa em atraso · ${row.prazo}`,view:"agenda"}));
   store.agendaTarefas.filter(row=>row.estado!=="concluida"&&row.prazo===today).forEach(row=>rows.push({level:"warning",title:row.titulo,text:"Tarefa com prazo hoje",view:"agenda"}));
+  store.agendaTarefas.filter(row=>row.estado==="bloqueada").forEach(row=>rows.push({level:"danger",title:row.titulo,text:`Etapa bloqueada · ${workName(row.obra_id)}`,view:"agenda"}));
   store.previsoesFinanceiras.filter(row=>!["realizado","cancelado"].includes(row.estado)&&row.data_prevista<today).forEach(row=>rows.push({level:"danger",title:row.descricao,text:`Previsão vencida · ${money(row.valor)}`,view:"previsoes"}));
   store.obras.filter(work=>num(work.progresso)>=80&&!store.documentosObra.some(doc=>String(doc.obra_id)===String(work.id)&&norm(doc.categoria)==="contrato")).forEach(work=>rows.push({level:"warning",title:work.nome,text:"Dossiê sem contrato e obra próxima da conclusão",view:"dossies"}));
   store.ocorrenciasObra.filter(row=>row.data===today).forEach(row=>rows.push({level:"warning",title:row.tipo||"Ocorrência em obra",text:`${workName(row.obra_id)} · ${row.descricao||"Consultar registo"}`,view:"operacional"}));

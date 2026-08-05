@@ -16,6 +16,7 @@ function employeeName(id){return (store.funcionarios||[]).find(item=>String(item
 function workName(id){return (store.obras||[]).find(item=>String(item.id)===String(id))?.nome||"Obra"}
 function stateLabel(value){return {pendente:"Pendente",em_curso:"Em curso",bloqueada:"Bloqueada",concluida:"Concluída"}[value]||value}
 function priorityLabel(value){return {baixa:"Baixa",media:"Média",alta:"Alta",urgente:"Urgente"}[value]||value}
+function phaseLabel(value){return {preparacao:"Preparação",demolicao:"Demolição",estrutura:"Estrutura",instalacoes:"Instalações",acabamentos:"Acabamentos",entrega:"Entrega",execucao:"Execução geral"}[value]||value}
 function canEdit(task){return store.profile?.role==="admin"||String(task.criado_por)===String(store.profile?.id)||String(task.responsavel_id)===String(store.profile?.id)}
 
 function filteredTasks(){
@@ -30,7 +31,18 @@ export function renderAgenda(){
   $("agendaTodayCount").textContent=dueToday.length;$("agendaOverdueCount").textContent=overdue.length;$("agendaWeekCount").textContent=next.length;
   const done=tasks.filter(task=>task.estado==="concluida").length;$("agendaDoneCount").textContent=done;$("agendaDoneRate").textContent=`${tasks.length?Math.round(done/tasks.length*100):0}% do total`;
   $("navTaskCount").textContent=overdue.length+dueToday.length;$("navTaskCount").classList.toggle("hidden",!overdue.length&&!dueToday.length);
-  renderWeek(filteredTasks());renderTaskList(filteredTasks());
+  renderPlanning();renderWeek(filteredTasks());renderTaskList(filteredTasks());
+}
+
+function renderPlanning(){
+  const filter=$("planningWorkFilter"),currentFilter=filter.value;filter.innerHTML=`<option value="">Todas as obras</option>${(store.obras||[]).map(work=>`<option value="${work.id}">${esc(work.nome)}</option>`).join("")}`;filter.value=currentFilter;
+  const workFilter=filter.value,tasks=(store.agendaTarefas||[]).filter(task=>!workFilter||String(task.obra_id)===String(workFilter));
+  const open=tasks.filter(task=>task.estado!=="concluida"),blocked=open.filter(task=>task.estado==="bloqueada"),late=open.filter(task=>task.prazo<today()),dependencies=open.filter(task=>task.depende_de&&store.agendaTarefas.find(row=>String(row.id)===String(task.depende_de))?.estado!=="concluida");
+  $("planningHealth").innerHTML=`<article class="${late.length?"risk":""}"><strong>${late.length}</strong><span>etapas atrasadas</span></article><article class="${blocked.length?"risk":""}"><strong>${blocked.length}</strong><span>bloqueadas</span></article><article class="${dependencies.length?"warning":""}"><strong>${dependencies.length}</strong><span>aguardam dependência</span></article><article><strong>${tasks.length?Math.round(tasks.reduce((sum,row)=>sum+Number(row.progresso||0),0)/tasks.length):0}%</strong><span>avanço planeado</span></article>`;
+  if(!tasks.length){$("planningTimeline").innerHTML='<div class="agenda-empty">Adicione etapas para construir o cronograma das obras.</div>';return}
+  const starts=tasks.map(row=>parseDate(row.inicio).getTime()),ends=tasks.map(row=>parseDate(row.prazo).getTime()),minimum=Math.min(...starts),maximum=Math.max(...ends,minimum+86400000),span=Math.max(1,Math.round((maximum-minimum)/86400000)+1);
+  const grouped=[...new Set(tasks.map(row=>row.obra_id))].map(id=>({id,name:workName(id),rows:tasks.filter(row=>String(row.obra_id)===String(id)).sort((a,b)=>String(a.inicio).localeCompare(String(b.inicio)))}));
+  $("planningTimeline").innerHTML=`<div class="planning-scale"><span>${new Date(minimum).toLocaleDateString("pt-PT")}</span><span>${span} dias planeados</span><span>${new Date(maximum).toLocaleDateString("pt-PT")}</span></div>${grouped.map(group=>`<section><header><strong>${esc(group.name)}</strong><small>${group.rows.length} etapa(s)</small></header>${group.rows.map(task=>{const start=Math.max(0,Math.round((parseDate(task.inicio).getTime()-minimum)/86400000)),duration=Math.max(1,Math.round((parseDate(task.prazo).getTime()-parseDate(task.inicio).getTime())/86400000)+1),left=start/span*100,width=Math.max(task.marco?1.8:4,duration/span*100),dependency=task.depende_de?store.agendaTarefas.find(row=>String(row.id)===String(task.depende_de)):null;return `<button type="button" class="planning-row ${esc(task.estado)} ${task.marco?"milestone":""}" data-edit-task="${task.id}"><span class="planning-row-label"><b>${esc(task.titulo)}</b><small>${esc(phaseLabel(task.fase))}${dependency?` · após ${esc(dependency.titulo)}`:""}</small></span><span class="planning-track"><i style="left:${left}%;width:${width}%"><em style="width:${Number(task.progresso||0)}%"></em></i></span><strong>${Number(task.progresso||0)}%</strong></button>`}).join("")}</section>`).join("")}`;
 }
 
 function renderWeek(tasks){
@@ -54,10 +66,11 @@ function fillOptions(){
   $("agendaTaskResponsible").innerHTML=`<option value="">Sem responsável no ERP</option>${(store.profiles||[]).filter(profile=>profile.ativo!==false).map(profile=>`<option value="${profile.id}">${esc(profile.nome||profile.email)}</option>`).join("")}`;
   $("agendaTaskEmployee").innerHTML=`<option value="">Sem funcionário associado</option>${(store.funcionarios||[]).filter(employee=>norm(employee.estado)!=="inativo").map(employee=>`<option value="${employee.id}">${esc(employee.nome)}</option>`).join("")}`;
 }
+function fillDependencies(selected=""){const currentId=$("agendaTaskId").value,workId=$("agendaTaskWork").value;$("agendaTaskDependency").innerHTML=`<option value="">Sem dependência</option>${(store.agendaTarefas||[]).filter(task=>String(task.id)!==String(currentId)&&String(task.obra_id)===String(workId)).map(task=>`<option value="${task.id}">${esc(task.titulo)}</option>`).join("")}`;$("agendaTaskDependency").value=selected||""}
 
 function openTask(task={}){
-  fillOptions();const current=today();
-  $("agendaTaskDialogTitle").textContent=task.id?"Editar tarefa":"Nova tarefa";$("agendaTaskId").value=task.id||"";$("agendaTaskTitle").value=task.titulo||"";$("agendaTaskWork").value=task.obra_id||"";$("agendaTaskPriority").value=task.prioridade||"media";$("agendaTaskStart").value=task.inicio||current;$("agendaTaskDue").value=task.prazo||current;$("agendaTaskTime").value=task.hora?.slice(0,5)||"";$("agendaTaskState").value=task.estado||"pendente";$("agendaTaskResponsible").value=task.responsavel_id||store.profile?.id||"";$("agendaTaskEmployee").value=task.funcionario_id||"";$("agendaTaskDescription").value=task.descricao||"";
+  $("agendaTaskId").value=task.id||"";fillOptions();const current=today();
+  $("agendaTaskDialogTitle").textContent=task.id?"Editar etapa":"Nova etapa";$("agendaTaskTitle").value=task.titulo||"";$("agendaTaskWork").value=task.obra_id||"";fillDependencies(task.depende_de);$("agendaTaskPriority").value=task.prioridade||"media";$("agendaTaskStart").value=task.inicio||current;$("agendaTaskDue").value=task.prazo||current;$("agendaTaskTime").value=task.hora?.slice(0,5)||"";$("agendaTaskState").value=task.estado||"pendente";$("agendaTaskPhase").value=task.fase||"execucao";$("agendaTaskProgress").value=Number(task.progresso||0);$("agendaTaskMilestone").checked=Boolean(task.marco);$("agendaTaskResponsible").value=task.responsavel_id||store.profile?.id||"";$("agendaTaskEmployee").value=task.funcionario_id||"";$("agendaTaskDescription").value=task.descricao||"";
   $("agendaTaskDialog").showModal();
 }
 
@@ -65,7 +78,7 @@ export function openAgendaTask(task={}){openTask(task)}
 
 async function submitTask(event){
   event.preventDefault();const id=$("agendaTaskId").value,state=$("agendaTaskState").value;
-  const payload={obra_id:$("agendaTaskWork").value,titulo:$("agendaTaskTitle").value.trim(),descricao:$("agendaTaskDescription").value.trim()||null,responsavel_id:$("agendaTaskResponsible").value||null,funcionario_id:$("agendaTaskEmployee").value||null,inicio:$("agendaTaskStart").value,prazo:$("agendaTaskDue").value,hora:$("agendaTaskTime").value||null,prioridade:$("agendaTaskPriority").value,estado:state,atualizado_em:new Date().toISOString(),concluida_em:state==="concluida"?new Date().toISOString():null};
+  const payload={obra_id:$("agendaTaskWork").value,titulo:$("agendaTaskTitle").value.trim(),descricao:$("agendaTaskDescription").value.trim()||null,responsavel_id:$("agendaTaskResponsible").value||null,funcionario_id:$("agendaTaskEmployee").value||null,inicio:$("agendaTaskStart").value,prazo:$("agendaTaskDue").value,hora:$("agendaTaskTime").value||null,prioridade:$("agendaTaskPriority").value,estado:state,fase:$("agendaTaskPhase").value,progresso:state==="concluida"?100:Number($("agendaTaskProgress").value||0),marco:$("agendaTaskMilestone").checked,depende_de:$("agendaTaskDependency").value||null,atualizado_em:new Date().toISOString(),concluida_em:state==="concluida"?new Date().toISOString():null};
   if(payload.prazo<payload.inicio){toast("O prazo não pode ser anterior ao início.","error");return}
   const button=$("agendaTaskSave");button.disabled=true;
   try{await save("agenda_tarefas",payload,id||null);$("agendaTaskDialog").close();await refreshApp();toast(id?"Tarefa atualizada.":"Tarefa criada.")}catch(error){toast(error.message||"Não foi possível guardar a tarefa.","error")}finally{button.disabled=false}
@@ -73,11 +86,13 @@ async function submitTask(event){
 
 async function toggleTask(task){
   const done=task.estado==="concluida";
-  try{await save("agenda_tarefas",{estado:done?"pendente":"concluida",concluida_em:done?null:new Date().toISOString(),atualizado_em:new Date().toISOString()},task.id);await refreshApp();toast(done?"Tarefa reaberta.":"Tarefa concluída.")}catch(error){toast(error.message||"Não foi possível atualizar a tarefa.","error")}
+  try{await save("agenda_tarefas",{estado:done?"pendente":"concluida",progresso:done?0:100,concluida_em:done?null:new Date().toISOString(),atualizado_em:new Date().toISOString()},task.id);await refreshApp();toast(done?"Etapa reaberta.":"Etapa concluída.")}catch(error){toast(error.message||"Não foi possível atualizar a etapa.","error")}
 }
 
 export function initAgenda(refresh){
   refreshApp=refresh;$("novaTarefaBtn").onclick=()=>openTask();$("agendaTaskForm").onsubmit=submitTask;
+  $("agendaTaskWork").onchange=()=>fillDependencies();
+  $("planningWorkFilter").onchange=renderPlanning;$("planningToday").onclick=()=>{weekStart=startOfWeek(new Date());renderAgenda()};
   $("agendaPrevWeek").onclick=()=>{weekStart=addDays(weekStart,-7);renderAgenda()};$("agendaNextWeek").onclick=()=>{weekStart=addDays(weekStart,7);renderAgenda()};$("agendaCurrentWeek").onclick=()=>{weekStart=startOfWeek(new Date());renderAgenda()};
   ["agendaSearch","agendaStateFilter","agendaPriorityFilter"].forEach(id=>$(id).addEventListener(id==="agendaSearch"?"input":"change",renderAgenda));
   document.body.addEventListener("click",event=>{const edit=event.target.closest("[data-edit-task]")?.dataset.editTask,toggle=event.target.closest("[data-task-toggle]")?.dataset.taskToggle;if(edit){const task=(store.agendaTarefas||[]).find(item=>String(item.id)===String(edit));if(task&&canEdit(task))openTask(task)}if(toggle){const task=(store.agendaTarefas||[]).find(item=>String(item.id)===String(toggle));if(task&&canEdit(task))toggleTask(task)}});

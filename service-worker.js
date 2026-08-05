@@ -1,4 +1,4 @@
-const CACHE='distak-shell-v3.5';
+const CACHE='distak-shell-v3.6';
 const SHELL=['./','./index.html','./manifest.json','./icon.svg','./assets/css/style.css','./assets/css/dashboard-executivo.css','./assets/css/hybrid-menu.css','./assets/css/assistant.css','./assets/css/agenda.css','./assets/css/previsoes.css','./assets/css/dossies.css','./assets/css/operacional.css'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));

@@ -73,6 +73,7 @@ export function renderAssistantInsight(){
   const risky=(store.obras||[]).filter(work=>norm(work.estado).includes("atras")||norm(work.estado).includes("suspens"));
   const noIncome=(store.obras||[]).filter(work=>workValue(work)>0&&!(store.pagamentos||[]).some(payment=>String(payment.obra_id)===String(work.id)));
   const localNow=new Date();localNow.setMinutes(localNow.getMinutes()-localNow.getTimezoneOffset());const today=localNow.toISOString().slice(0,10),lateTasks=(store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo<today),todayTasks=(store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo===today);
+  const blockedStages=(store.agendaTarefas||[]).filter(task=>task.estado==="bloqueada");
   const lateForecasts=(store.previsoesFinanceiras||[]).filter(row=>!["realizado","cancelado"].includes(row.estado)&&row.data_prevista<today);
   const incompleteDossiers=(store.obras||[]).filter(work=>num(work.progresso)>=80&&!(store.documentosObra||[]).some(doc=>String(doc.obra_id)===String(work.id)&&norm(doc.categoria)==="contrato"));
   const todayOccurrences=(store.ocorrenciasObra||[]).filter(row=>row.data===today);
@@ -82,6 +83,7 @@ export function renderAssistantInsight(){
   if(noIncome.length)parts.push(`<strong>${noIncome.length}</strong> obra(s) sem recebimentos`);
   if(lateTasks.length)parts.push(`<strong>${lateTasks.length}</strong> tarefa(s) atrasada(s)`);
   if(todayTasks.length)parts.push(`<strong>${todayTasks.length}</strong> tarefa(s) para hoje`);
+  if(blockedStages.length)parts.push(`<strong>${blockedStages.length}</strong> etapa(s) bloqueada(s)`);
   if(lateForecasts.length)parts.push(`<strong>${lateForecasts.length}</strong> previsão(ões) vencida(s)`);
   if(incompleteDossiers.length)parts.push(`<strong>${incompleteDossiers.length}</strong> dossiê(s) sem contrato`);
   if(todayOccurrences.length)parts.push(`<strong>${todayOccurrences.length}</strong> ocorrência(s) registada(s) hoje`);
