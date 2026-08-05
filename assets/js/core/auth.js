@@ -1,6 +1,6 @@
 import {db,getProfile} from "./supabase.js";
 
-const ALLOWED_ROLES=new Set(["admin","escritorio","encarregado","funcionario"]);
+const ALLOWED_ROLES=new Set(["admin","escritorio","encarregado","funcionario","cliente"]);
 
 async function authorizedSession(user){
   if(!user)return null;

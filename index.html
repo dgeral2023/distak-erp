@@ -26,6 +26,8 @@
   <link rel="stylesheet" href="assets/css/medicoes.css?v=20260805-measurements-v1">
   <link rel="stylesheet" href="assets/css/campo.css?v=20260805-field-v1">
   <link rel="stylesheet" href="assets/css/inteligencia.css?v=20260805-intelligence-v1">
+  <link rel="stylesheet" href="assets/css/cliente-portal.css?v=20260805-client-v1">
+  <link rel="stylesheet" href="assets/css/cliente-role.css?v=20260805-client-v1">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -49,7 +51,8 @@
   <aside class="sidebar">
     <div class="sidebar-brand"><button id="sidebarToggle" type="button" aria-label="Recolher menu" title="Recolher menu">☰</button><div class="brand">DISTAK ERP <small>v3.3</small></div><span class="brand-chevron">‹</span></div>
     <nav id="mainNav">
-      <div class="nav-group"><button class="nav active" data-view="dashboard"><i>⌂</i><span>Dashboard</span></button></div>
+      <div class="nav-group client-only hidden"><button class="nav" data-view="cliente-portal"><i>◎</i><span>Minhas obras</span></button></div>
+      <div class="nav-group non-client-only"><button class="nav active" data-view="dashboard"><i>⌂</i><span>Dashboard</span></button></div>
       <div class="nav-group admin-only" data-menu-group="comercial"><button class="nav-group-title" type="button" data-toggle-menu-group="comercial"><span>Comercial</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="clientes"><i>♙</i><span>Clientes</span></button><button class="nav" data-view="orcamentos"><i>▤</i><span>Propostas e orçamentos</span></button></div></div>
       <div class="nav-group" data-menu-group="obras"><button class="nav-group-title" type="button" data-toggle-menu-group="obras"><span>Obras</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="obras"><i>▥</i><span>Dashboard de obras</span><b id="navWorkCount">0</b></button><button class="nav" data-view="operacional"><i>◉</i><span>Centro Operacional</span></button><button class="nav" data-view="agenda"><i>◫</i><span>Agenda e tarefas</span><b id="navTaskCount">0</b></button><button class="nav" data-view="dossies"><i>▧</i><span>Dossiê digital</span></button><button class="nav" data-view="funcionario"><i>✓</i><span>Portal de campo</span></button></div></div>
       <div class="nav-group admin-only" data-menu-group="financeiro"><button class="nav-group-title" type="button" data-toggle-menu-group="financeiro"><span>Financeiro</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="inteligencia"><i>◆</i><span>Inteligência de gestão</span></button><button class="nav" data-view="compras"><i>▦</i><span>Compras e fornecedores</span></button><button class="nav" data-view="medicoes"><i>％</i><span>Medições e faturação</span></button><button class="nav" data-view="custos"><i>↘</i><span>Custos e faturas</span></button><button class="nav" data-view="pagamentos"><i>€</i><span>Pagamentos</span></button><button class="nav" data-view="previsoes"><i>↗</i><span>Previsões e cobranças</span></button><button class="nav" data-view="relatorios"><i>▥</i><span>Relatórios</span></button></div></div>
@@ -99,7 +102,7 @@
       <form id="aiAssistantForm" class="ai-assistant-form"><label for="aiAssistantInput">Pergunte sobre a gestão da DISTAK</label><div><textarea id="aiAssistantInput" rows="2" maxlength="1500" placeholder="Ex.: Que obras exigem atenção esta semana?" required></textarea><button id="aiAssistantSend" type="submit" aria-label="Enviar pergunta">➜</button></div><small>Consulta segura e somente leitura. Confirme decisões financeiras importantes.</small></form>
     </aside>
 
-    <section id="view-dashboard" class="view">
+    <section id="view-dashboard" class="view non-client-only">
       <div class="option5-dashboard-head"><div><h1>Dashboard de Obras</h1><p>Visão geral do estado das obras e indicadores principais.</p></div><div class="option5-head-actions"><button class="btn light" type="button">⚙ Personalizar</button><span>Este mês⌄</span></div></div>
       <section id="aiPriorityCard" class="ai-priority-card" aria-label="Prioridades inteligentes do dia"><div class="ai-priority-heading"><span class="ai-priority-icon">D</span><div><small>ASSISTENTE DISTAK</small><h2>Prioridades de hoje</h2></div></div><div id="aiPrioritySummary" class="ai-priority-summary">A preparar a análise dos dados atuais…</div><button id="aiPriorityAction" type="button">Analisar comigo <span>→</span></button></section>
       <div class="option5-kpis">
@@ -452,6 +455,10 @@
         <article class="panel"><h3>Vencimentos e cobranças</h3><div id="maturityReport"></div></article>
       </div>
       <article class="panel report-guide"><h3>Dossiê completo da obra</h3><p>Abra a ficha de uma obra para imprimir o resumo financeiro, consultar o diário, organizar documentos e gerar o relatório fotográfico.</p><button class="btn light" type="button" data-report-open-works>Escolher obra</button></article>
+    </section>
+    <section id="view-cliente-portal" class="view hidden client-only">
+      <div class="client-portal-hero"><div><small>ÁREA RESERVADA</small><h1>Acompanhe as suas obras</h1><p>Informação selecionada e publicada pela equipa DISTAK.</p></div><div class="client-portal-stats"><span><strong id="clientPortalWorkCount">0</strong><small>Obras</small></span><span><strong id="clientPortalProgress">0%</strong><small>Progresso médio</small></span><span><strong id="clientPortalUpdateCount">0</strong><small>Atualizações</small></span></div></div>
+      <div id="clientPortalContent" class="client-portal-content"></div>
     </section>
   </main>
 </section>
@@ -998,6 +1005,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260805-intelligence-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260805-client-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>

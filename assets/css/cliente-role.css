@@ -1,0 +1,3 @@
+.client-mode .sidebar nav>.nav-group:not(.client-only),.client-mode #favoriteNavGroup,.client-mode #recentNavGroup,.client-mode #aiAssistantButton,.client-mode #mobileRegister,.client-mode #mobileAlerts{display:none!important}
+.client-mode #mobileNav>[data-mobile-view="obras"]{display:none}
+.client-mode .sidebar .client-only{display:block!important}

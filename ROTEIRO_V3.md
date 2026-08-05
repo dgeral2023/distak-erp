@@ -21,7 +21,7 @@ Este documento mantém o plano de produção contínua do DISTAK ERP. Cada fase 
 
 ## Próximas fases
 
-1. Portal do cliente: progresso autorizado, fotografias, documentos e aprovações.
+1. Portal do cliente: base responsiva e camada isolada concluídas localmente; falta autorização para ativar o perfil, configurar acessos, publicar conteúdos e acrescentar aprovações.
 2. Qualidade e escala: acessibilidade, desempenho, testes automatizados, auditoria e recuperação.
 
 ## Regras permanentes

@@ -173,7 +173,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v4.0", "request.mode==='navigate'", "url.origin!==self.location.origin", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js"]){
+for (const required of ["distak-shell-v4.1-client", "request.mode==='navigate'", "url.origin!==self.location.origin", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
@@ -219,6 +219,18 @@ const intelligenceMigration = readFileSync(join(root, "supabase", "202608051800_
 for (const required of ["enable row level security", "revoke all", "grant select,insert,update", "inteligencia_avaliacoes_select_admin", "inteligencia_avaliacoes_insert_admin", "inteligencia_avaliacoes_update_admin", "fundamentos jsonb", "estado='analisada'"]){
   check(intelligenceMigration.includes(required), `Migração de inteligência incompleta: ${required}`);
 }
+
+const clientPortalModule = readFileSync(join(root, "assets", "js", "modules", "cliente-portal.js"), "utf8");
+for (const required of ["renderClientePortal", "clientePortalObras", "clientePortalAtualizacoes", "clientePortalFicheiros", "Progresso comunicado"]){
+  check(clientPortalModule.includes(required), `Portal do cliente incompleto: ${required}`);
+}
+const clientData = readFileSync(join(root, "assets", "js", "modules", "data.js"), "utf8");
+check(clientData.indexOf('if(isClient)') < clientData.indexOf('query("clientes")'), "O cliente deve sair do carregamento antes das tabelas internas.");
+const clientMigration = readFileSync(join(root, "supabase", "202608052000_portal_cliente.sql"), "utf8");
+for (const required of ["enable row level security", "revoke all", "grant select,insert,update", "private.can_access_cliente_portal", "cliente_portal_obras_select", "publicado and", "from anon, authenticated"]){
+  check(clientMigration.includes(required), `Segurança do portal do cliente incompleta: ${required}`);
+}
+check(!clientMigration.includes("grant delete"), "O portal do cliente não deve conceder eliminação por SQL.");
 
 const operationalMigration = readFileSync(
   join(root, "supabase", "202608041820_acesso_operacional_por_obra.sql"),
