@@ -37,6 +37,9 @@ jobs:
       - name: Verificar exportação de segurança
         run: node tests/backup.mjs
 
+      - name: Auditar segurança estática
+        run: node tests/security.mjs
+
       - name: Verificar sintaxe JavaScript
         shell: bash
         run: |
