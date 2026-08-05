@@ -47,6 +47,9 @@ const requiredIds = [
   ,"view-medicoes", "newMeasurementBtn", "measurementKpis", "measurementSearch",
   "measurementWorkFilter", "measurementStateFilter", "measurementList", "measurementDialog",
   "measurementForm", "measurementWork", "measurementItems", "measurementTotalPreview"
+  ,"view-funcionario", "fieldPortalTitle", "fieldOfflineState", "fieldSyncNow", "fieldNewRecord",
+  "fieldSummary", "fieldTasks", "fieldRecordCount", "fieldRecords", "fieldRecordDialog",
+  "fieldRecordForm", "fieldWork", "fieldType", "fieldPhoto", "fieldRecordSave"
 ];
 
 for (const id of requiredIds) {
@@ -168,7 +171,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.8", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
+for (const required of ["distak-shell-v3.9", "request.mode==='navigate'", "url.origin!==self.location.origin", "assets/js/core/field-queue.js", "assets/js/modules/campo.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
@@ -191,6 +194,19 @@ for (const required of ["renderMedicoes", "initMedicoes", "medicoes_autos", "med
 const measurementsMigration = readFileSync(join(root, "supabase", "202608051400_medicoes_faturacao.sql"), "utf8");
 for (const required of ["enable row level security", "revoke all", "grant select,insert,update", "medicoes_autos_select_admin", "medicoes_itens_update_admin"]){
   check(measurementsMigration.includes(required), `Migração de medições incompleta: ${required}`);
+}
+
+const fieldModule = readFileSync(join(root, "assets", "js", "modules", "campo.js"), "utf8");
+for (const required of ["renderCampo", "initCampo", "queueFieldRecord", "syncQueue", "campo_registos", "referencia_local", "data-field-review"]){
+  check(fieldModule.includes(required), `Portal de campo incompleto: ${required}`);
+}
+const fieldQueue = readFileSync(join(root, "assets", "js", "core", "field-queue.js"), "utf8");
+for (const required of ["indexedDB.open", "pending-records", "listQueuedFieldRecords", "removeQueuedFieldRecord"]){
+  check(fieldQueue.includes(required), `Fila offline de campo incompleta: ${required}`);
+}
+const fieldMigration = readFileSync(join(root, "supabase", "202608051600_portal_equipa_campo.sql"), "utf8");
+for (const required of ["enable row level security", "revoke all", "grant select,insert,update", "campo_registos_select", "campo_registos_insert", "campo_registos_update", "private.can_access_obra", "referencia_local", "Obras - upload por obra atribuida"]){
+  check(fieldMigration.includes(required), `Migração do portal de campo incompleta: ${required}`);
 }
 
 const operationalMigration = readFileSync(

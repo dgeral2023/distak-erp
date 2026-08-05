@@ -24,6 +24,7 @@ function alerts(){
   store.ocorrenciasObra.filter(row=>row.data===today).forEach(row=>rows.push({level:"warning",title:row.tipo||"Ocorrência em obra",text:`${workName(row.obra_id)} · ${row.descricao||"Consultar registo"}`,view:"operacional"}));
   store.pedidosCompra.filter(row=>["encomendado","parcial"].includes(row.estado)&&row.entrega_prevista&&row.entrega_prevista<today).forEach(row=>rows.push({level:"danger",title:row.titulo,text:`Entrega atrasada · ${row.fornecedor_selecionado||workName(row.obra_id)}`,view:"compras"}));
   store.autosMedicao.filter(row=>row.estado==="faturado"&&row.vencimento&&row.vencimento<today).forEach(row=>rows.push({level:"danger",title:`Auto ${row.numero}`,text:`Fatura vencida, recebimento não confirmado · ${money(row.total)}`,view:"medicoes"}));
+  store.campoRegistos.filter(row=>row.estado==="pendente").forEach(row=>rows.push({level:"warning",title:row.titulo,text:`Registo de campo por rever · ${workName(row.obra_id)}`,view:"funcionario"}));
   return rows;
 }
 
@@ -68,6 +69,7 @@ function search(term){
     ,["Pedido de compra","compras",store.pedidosCompra,row=>row.titulo,row=>`${row.numero} · ${row.fornecedor_selecionado||row.estado}`]
     ,["Proposta de fornecedor","compras",store.propostasCompra,row=>row.fornecedor,row=>money(row.valor)]
     ,["Auto de medição","medicoes",store.autosMedicao,row=>row.numero,row=>`${workName(row.obra_id)} · ${money(row.total)}`]
+    ,["Registo de campo","funcionario",store.campoRegistos,row=>row.titulo,row=>`${workName(row.obra_id)} · ${row.tipo}`]
   ];
   const results=sources.flatMap(([type,view,rows,title,meta])=>rows.filter(row=>norm(JSON.stringify(row)).includes(query)).slice(0,5).map(row=>({type,view,row,title:title(row),meta:meta(row)}))).slice(0,18);
   host.innerHTML=results.length?results.map(result=>`<button data-search-view="${result.view}" ${result.type==="Obra"?`data-search-work="${result.row.id}"`:""}><span>${esc(result.type)}</span><strong>${esc(result.title||"Sem título")}</strong><small>${esc(result.meta||"")}</small></button>`).join(""):'<div class="v3-empty">Nenhum resultado encontrado.</div>';

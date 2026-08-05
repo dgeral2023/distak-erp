@@ -15,6 +15,7 @@ export async function refreshData(){
   store.funcionarios = await query("funcionarios");
   store.funcionarioHoras = await query("funcionario_horas", "*,funcionarios(nome,funcao,custo_hora),obras(nome)");
   store.agendaTarefas = await query("agenda_tarefas");
+  try{store.campoRegistos=await query("campo_registos")}catch(err){console.error("Não foi possível carregar os registos de campo:",err);store.campoRegistos=[]}
   store.previsoesFinanceiras = isAdmin ? await query("financeiro_previsoes") : [];
   if(isAdmin){try{[store.pedidosCompra,store.propostasCompra]=await Promise.all([query("compras_pedidos"),query("compras_propostas")])}catch(err){console.error("Não foi possível carregar as compras:",err);store.pedidosCompra=[];store.propostasCompra=[]}}else{store.pedidosCompra=[];store.propostasCompra=[]}
   if(isAdmin){try{[store.autosMedicao,store.itensMedicao]=await Promise.all([query("medicoes_autos"),query("medicoes_itens")])}catch(err){console.error("Não foi possível carregar as medições:",err);store.autosMedicao=[];store.itensMedicao=[]}}else{store.autosMedicao=[];store.itensMedicao=[]}

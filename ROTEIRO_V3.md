@@ -16,13 +16,13 @@ Este documento mantém o plano de produção contínua do DISTAK ERP. Cada fase 
 - Planeamento avançado com cronograma visual, fases, progresso, marcos e dependências.
 - Central de compras com pedidos, propostas de fornecedores, adjudicações, entregas e desvios.
 - Autos de medição com linhas executadas, retenções, IVA, aprovações e referências de faturação.
+- Portal da equipa em campo com tarefas, registos móveis, fotografias, fila offline, sincronização segura e revisão administrativa.
 
 ## Próximas fases
 
-1. Portal de equipa em campo: experiência móvel simplificada, trabalho offline e sincronização segura.
-2. Inteligência de gestão: previsões de atraso, custo final e risco de cobrança, sempre com confirmação humana.
-3. Portal do cliente: progresso autorizado, fotografias, documentos e aprovações.
-4. Qualidade e escala: acessibilidade, desempenho, testes automatizados, auditoria e recuperação.
+1. Inteligência de gestão: previsões de atraso, custo final e risco de cobrança, sempre com confirmação humana.
+2. Portal do cliente: progresso autorizado, fotografias, documentos e aprovações.
+3. Qualidade e escala: acessibilidade, desempenho, testes automatizados, auditoria e recuperação.
 
 ## Regras permanentes
 
