@@ -4,7 +4,7 @@
 create table if not exists public.cliente_portal_acessos (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  cliente_id bigint not null references public.clientes(id) on delete cascade,
+  cliente_id uuid not null references public.clientes(id) on delete cascade,
   ativo boolean not null default true,
   criado_por uuid not null references auth.users(id),
   criado_em timestamptz not null default now(),
@@ -13,8 +13,8 @@ create table if not exists public.cliente_portal_acessos (
 
 create table if not exists public.cliente_portal_obras (
   id uuid primary key default gen_random_uuid(),
-  cliente_id bigint not null references public.clientes(id) on delete cascade,
-  obra_id bigint not null references public.obras(id) on delete cascade,
+  cliente_id uuid not null references public.clientes(id) on delete cascade,
+  obra_id uuid not null references public.obras(id) on delete cascade,
   nome text not null,
   localidade text,
   estado text not null default 'Em acompanhamento',
@@ -64,15 +64,15 @@ create index if not exists cliente_portal_obras_cliente_idx on public.cliente_po
 create index if not exists cliente_portal_atualizacoes_obra_idx on public.cliente_portal_atualizacoes(portal_obra_id,data_publicacao desc) where publicado;
 create index if not exists cliente_portal_ficheiros_obra_idx on public.cliente_portal_ficheiros(portal_obra_id) where publicado;
 
-create or replace function private.can_access_cliente_portal(p_cliente_id bigint)
+create or replace function private.can_access_cliente_portal(p_cliente_id uuid)
 returns boolean language sql stable security definer set search_path='' as $$
   select (select public.is_admin()) or exists (
     select 1 from public.cliente_portal_acessos a
     where a.cliente_id=p_cliente_id and a.user_id=(select auth.uid()) and a.ativo
   );
 $$;
-revoke all on function private.can_access_cliente_portal(bigint) from public, anon;
-grant execute on function private.can_access_cliente_portal(bigint) to authenticated;
+revoke all on function private.can_access_cliente_portal(uuid) from public, anon;
+grant execute on function private.can_access_cliente_portal(uuid) to authenticated;
 
 create policy cliente_portal_acessos_select on public.cliente_portal_acessos for select to authenticated
 using ((select public.is_admin()) or (user_id=(select auth.uid()) and ativo));

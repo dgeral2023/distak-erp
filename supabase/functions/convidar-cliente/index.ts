@@ -20,8 +20,8 @@ Deno.serve(async request=>{
   const {data:profile}=await admin.from("profiles").select("role,ativo").eq("id",user.id).single();
   if(profile?.role!=="admin"||profile.ativo===false)return response(origin,{error:"Acesso reservado ao administrador"},403);
   let body:{email?:unknown;nome?:unknown;cliente_id?:unknown};try{body=await request.json()}catch{return response(origin,{error:"Pedido inválido"},400)}
-  const email=String(body.email||"").trim().toLowerCase(),nome=String(body.nome||"").trim(),clienteId=Number(body.cliente_id);
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||nome.length<2||nome.length>120||!Number.isSafeInteger(clienteId)||clienteId<=0)return response(origin,{error:"Dados do convite inválidos"},400);
+  const email=String(body.email||"").trim().toLowerCase(),nome=String(body.nome||"").trim(),clienteId=String(body.cliente_id||"").trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||nome.length<2||nome.length>120||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clienteId))return response(origin,{error:"Dados do convite inválidos"},400);
   const {data:client}=await admin.from("clientes").select("id").eq("id",clienteId).single();
   if(!client)return response(origin,{error:"Cliente não encontrado"},404);
   const redirectTo=origin==="https://app.distaklda.com"?"https://app.distaklda.com/":"https://dgeral2023.github.io/distak-erp/";
