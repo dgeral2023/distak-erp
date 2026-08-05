@@ -43,6 +43,9 @@ jobs:
       - name: Verificar convite seguro de clientes
         run: node tests/client-invite.mjs
 
+      - name: Confirmar pré-publicação completa
+        run: node tests/preflight.mjs
+
       - name: Verificar sintaxe JavaScript
         shell: bash
         run: |
