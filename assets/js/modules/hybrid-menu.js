@@ -25,6 +25,7 @@ function openSheet(id){closeSheets();$(id)?.classList.remove("hidden");$("mobile
 function navigate(view){setView(view);saveRecent(view);document.querySelectorAll("[data-mobile-view]").forEach(button=>button.classList.toggle("active",button.dataset.mobileView===view));closeSheets()}
 
 function renderMore(){
+  if(store.profile?.role==="cliente"){$("mobileMoreLinks").innerHTML=`<button data-mobile-view="cliente-portal"><i>◎</i><strong>Minhas obras</strong></button>`;return}
   const views=store.profile?.role==="admin"?["inteligencia","funcionario","operacional","agenda","dossies","clientes","orcamentos","compras","medicoes","custos","pagamentos","previsoes","funcionarios","relatorios","empresa"]:["operacional","agenda","dossies","funcionario"];
   $("mobileMoreLinks").innerHTML=views.map(view=>`<button data-mobile-view="${view}"><i>${meta[view][0]}</i><strong>${meta[view][1]}</strong></button>`).join("");
 }

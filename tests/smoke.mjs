@@ -10,6 +10,8 @@ function check(condition, message) {
   if (!condition) failures.push(message);
 }
 
+check(index.includes("DISTAK ERP v3.4"), "A versão candidata visível deve ser v3.4.");
+
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = join(directory, entry.name);
@@ -173,7 +175,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v4.0", "request.mode==='navigate'", "url.origin!==self.location.origin", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js"]){
+for (const required of ["distak-shell-v3.4-rc1", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
@@ -218,6 +220,35 @@ for (const required of ["calculateWorkIntelligence", "renderInteligencia", "init
 const intelligenceMigration = readFileSync(join(root, "supabase", "202608051800_inteligencia_gestao.sql"), "utf8");
 for (const required of ["enable row level security", "revoke all", "grant select,insert,update", "inteligencia_avaliacoes_select_admin", "inteligencia_avaliacoes_insert_admin", "inteligencia_avaliacoes_update_admin", "fundamentos jsonb", "estado='analisada'"]){
   check(intelligenceMigration.includes(required), `Migração de inteligência incompleta: ${required}`);
+}
+
+const clientPortalModule = readFileSync(join(root, "assets", "js", "modules", "cliente-portal.js"), "utf8");
+for (const required of ["renderClientePortal", "renderClientePortalAdmin", "initClientePortal", "clientePortalObras", "clientePortalAtualizacoes", "clientePortalFicheiros", "clientePortalAprovacoes", "Progresso comunicado", "data-client-publish-edit", "data-client-approval", "responder_cliente_portal_aprovacao", "Nenhuma alteração automática", "url.protocol===\"https:\""]){
+  check(clientPortalModule.includes(required), `Portal do cliente incompleto: ${required}`);
+}
+const clientData = readFileSync(join(root, "assets", "js", "modules", "data.js"), "utf8");
+check(clientData.indexOf('if(isClient)') < clientData.indexOf('query("clientes")'), "O cliente deve sair do carregamento antes das tabelas internas.");
+const clientMigration = readFileSync(join(root, "supabase", "202608052000_portal_cliente.sql"), "utf8");
+for (const required of ["enable row level security", "revoke all", "grant select,insert,update", "private.can_access_cliente_portal", "cliente_portal_obras_select", "cliente_portal_aprovacoes_select", "responder_cliente_portal_aprovacao", "p_decisao not in ('aprovado','revisao')", "a.estado='pendente'", "não criam pagamentos", "publicado and", "from anon, authenticated"]){
+  check(clientMigration.includes(required), `Segurança do portal do cliente incompleta: ${required}`);
+}
+check(!clientMigration.includes("grant delete"), "O portal do cliente não deve conceder eliminação por SQL.");
+const uiModule = readFileSync(join(root, "assets", "js", "core", "ui.js"), "utf8");
+check(uiModule.includes('classList.contains("client-mode")&&v!=="cliente-portal"'), "A navegação deve bloquear módulos internos no modo cliente.");
+const accessibilityCss = readFileSync(join(root, "assets", "css", "accessibility.css"), "utf8");
+for (const required of [".skip-link", "prefers-reduced-motion:reduce", ":focus-visible", "@media print"]){
+  check(accessibilityCss.includes(required), `Acessibilidade global incompleta: ${required}`);
+}
+const backupModule = readFileSync(join(root, "assets", "js", "modules", "backup.js"), "utf8");
+for (const required of ["createSafetyBackup", "distak-erp-backup", "SHA-256", "crypto.subtle.digest", "Apenas um administrador", "Nenhum dado foi alterado"]){
+  check(backupModule.includes(required), `Cópia de segurança incompleta: ${required}`);
+}
+const recoveryGuide = readFileSync(join(root, "docs", "RECUPERACAO.md"), "utf8");
+for (const required of ["Não existe importação automática", "autorização explícita", "checksum", "Não apagar evidências"]){
+  check(recoveryGuide.includes(required), `Procedimento de recuperação incompleto: ${required}`);
+}
+for (const required of ['href="#mainContent"', 'id="mainContent"', 'aria-labelledby="clientPublishTitle"', 'aria-live="polite"']){
+  check(index.includes(required), `Semântica acessível incompleta: ${required}`);
 }
 
 const operationalMigration = readFileSync(

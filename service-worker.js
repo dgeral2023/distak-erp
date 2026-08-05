@@ -1,5 +1,5 @@
-const CACHE='distak-shell-v4.0';
-const SHELL=['./','./index.html','./manifest.json','./icon.svg','./assets/css/style.css','./assets/css/dashboard-executivo.css','./assets/css/hybrid-menu.css','./assets/css/assistant.css','./assets/css/agenda.css','./assets/css/previsoes.css','./assets/css/dossies.css','./assets/css/operacional.css','./assets/css/compras.css','./assets/css/medicoes.css','./assets/css/campo.css','./assets/css/inteligencia.css','./assets/js/core/field-queue.js','./assets/js/modules/campo.js','./assets/js/modules/inteligencia.js'];
+const CACHE='distak-shell-v3.4-rc1';
+const SHELL=['./','./index.html','./manifest.json','./icon.svg','./assets/css/style.css','./assets/css/obra-ficha.css','./assets/css/dashboard-executivo.css','./assets/css/fotografias.css','./assets/css/diario.css','./assets/css/distak-ios.css','./assets/css/v3.css','./assets/css/hybrid-menu.css','./assets/css/assistant.css','./assets/css/agenda.css','./assets/css/previsoes.css','./assets/css/dossies.css','./assets/css/operacional.css','./assets/css/compras.css','./assets/css/medicoes.css','./assets/css/campo.css','./assets/css/inteligencia.css','./assets/css/cliente-portal.css','./assets/css/cliente-role.css','./assets/css/cliente-approvals.css','./assets/css/accessibility.css','./assets/js/config.js','./assets/js/app.js','./assets/js/core/field-queue.js','./assets/js/modules/campo.js','./assets/js/modules/inteligencia.js','./assets/js/modules/cliente-portal.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
@@ -10,5 +10,5 @@ self.addEventListener('fetch',event=>{
     return;
   }
   if(!['style','script','image','font','manifest'].includes(request.destination))return;
-  event.respondWith(caches.match(request).then(cached=>cached||fetch(request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(request,response.clone()));return response})));
+  event.respondWith(caches.match(request,{ignoreSearch:true}).then(cached=>cached||fetch(request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(request,response.clone()));return response})));
 });
