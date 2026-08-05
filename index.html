@@ -28,11 +28,13 @@
   <link rel="stylesheet" href="assets/css/inteligencia.css?v=20260805-intelligence-v1">
   <link rel="stylesheet" href="assets/css/cliente-portal.css?v=20260805-client-v1">
   <link rel="stylesheet" href="assets/css/cliente-role.css?v=20260805-client-v1">
+  <link rel="stylesheet" href="assets/css/accessibility.css?v=20260805-a11y-v1">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
 </head>
 <body>
+<a class="skip-link" href="#mainContent">Saltar para o conteúdo principal</a>
 <div id="toast" class="toast" aria-live="polite"></div>
 
 <section id="loginView" class="login-shell">
@@ -78,7 +80,7 @@
   <section id="mobileMoreSheet" class="mobile-sheet hidden" aria-label="Mais opções"><header><div><span>Navegação</span><h3>Mais opções</h3></div><button data-close-mobile-sheet type="button">×</button></header><div id="mobileMoreLinks" class="mobile-sheet-grid"></div></section>
   <section id="mobileRegisterSheet" class="mobile-sheet hidden" aria-label="Registo rápido"><header><div><span>Ação rápida</span><h3>O que deseja registar?</h3></div><button data-close-mobile-sheet type="button">×</button></header><div class="mobile-register-grid"><button data-quick-action="operacional"><i>◉</i><strong>Registo de obra</strong><small>Diário, material ou ocorrência</small></button><button data-quick-action="tarefa"><i>◫</i><strong>Tarefa</strong><small>Novo prazo</small></button><button class="admin-only" data-quick-action="cliente"><i>♙</i><strong>Cliente</strong><small>Novo contacto</small></button><button class="admin-only" data-quick-action="obra"><i>▥</i><strong>Obra</strong><small>Novo projeto</small></button><button class="admin-only" data-quick-action="orcamento"><i>▤</i><strong>Orçamento</strong><small>Nova proposta</small></button><button class="admin-only" data-quick-action="custo"><i>↘</i><strong>Custo</strong><small>Nova despesa</small></button><button class="admin-only" data-quick-action="pagamento"><i>€</i><strong>Pagamento</strong><small>Novo recebimento</small></button><button class="admin-only" data-quick-action="previsao"><i>↗</i><strong>Previsão</strong><small>Fluxo futuro</small></button><button data-quick-action="diario"><i>✓</i><strong>Diário de obra</strong><small>Abrir minhas obras</small></button></div></section>
 
-  <main class="content">
+  <main id="mainContent" class="content" tabindex="-1">
     <header class="topbar">
       <div>
         <h2 id="pageTitle">Dashboard</h2>
@@ -459,10 +461,10 @@
     </section>
     <section id="view-portal-admin" class="view hidden admin-only">
       <div class="client-admin-head"><div><small>PUBLICAÇÃO CONTROLADA</small><h1>Portal do Cliente</h1><p>Escolha exatamente o que cada cliente poderá consultar.</p></div><button id="clientPublishNew" class="btn primary" type="button">Preparar obra</button></div>
-      <div class="client-admin-grid"><section class="panel"><h2>Obras preparadas</h2><div id="clientAdminWorks"></div></section><section class="panel"><h2>Acessos autorizados</h2><div id="clientAdminAccess"></div><p class="client-admin-note">A criação e associação de contas será ativada apenas depois da autorização das novas permissões.</p></section></div>
+      <div class="client-admin-grid"><section class="panel" aria-labelledby="clientAdminWorksTitle"><h2 id="clientAdminWorksTitle">Obras preparadas</h2><div id="clientAdminWorks" aria-live="polite"></div></section><section class="panel" aria-labelledby="clientAdminAccessTitle"><h2 id="clientAdminAccessTitle">Acessos autorizados</h2><div id="clientAdminAccess" aria-live="polite"></div><p class="client-admin-note">A criação e associação de contas será ativada apenas depois da autorização das novas permissões.</p></section></div>
     </section>
 
-    <dialog id="clientPublishDialog"><form id="clientPublishForm"><header><h3>Publicar obra no portal</h3><button type="button" data-close="clientPublishDialog">×</button></header><input id="clientPublishId" type="hidden"><label>Obra<select id="clientPublishWork" required></select></label><label>Nome apresentado<input id="clientPublishName" required maxlength="120"></label><label>Localidade<input id="clientPublishLocation" maxlength="120"></label><div class="grid-2"><label>Estado<input id="clientPublishState" value="Em acompanhamento" maxlength="80"></label><label>Progresso (%)<input id="clientPublishProgress" type="number" min="0" max="100" step="1" value="0"></label></div><label>Resumo<textarea id="clientPublishSummary" rows="3" maxlength="1000"></textarea></label><label>Próxima etapa<input id="clientPublishNext" maxlength="180"></label><label>Data prevista<input id="clientPublishDate" type="date"></label><label>URL da fotografia<input id="clientPublishPhoto" type="url" placeholder="https://..."></label><label class="check"><input id="clientPublishVisible" type="checkbox"> Visível para o cliente</label><footer><button type="button" class="btn light" data-close="clientPublishDialog">Cancelar</button><button class="btn primary" type="submit">Guardar publicação</button></footer></form></dialog>
+    <dialog id="clientPublishDialog" aria-labelledby="clientPublishTitle"><form id="clientPublishForm" class="modal-form"><header class="full"><h3 id="clientPublishTitle">Publicar obra no portal</h3><button type="button" data-close="clientPublishDialog" aria-label="Fechar">×</button></header><input id="clientPublishId" type="hidden"><label>Obra<select id="clientPublishWork" required></select></label><label>Nome apresentado<input id="clientPublishName" required maxlength="120"></label><label>Localidade<input id="clientPublishLocation" maxlength="120"></label><div class="grid-2 full"><label>Estado<input id="clientPublishState" value="Em acompanhamento" maxlength="80"></label><label>Progresso (%)<input id="clientPublishProgress" type="number" min="0" max="100" step="1" value="0"></label></div><label class="full">Resumo<textarea id="clientPublishSummary" rows="3" maxlength="1000"></textarea></label><label>Próxima etapa<input id="clientPublishNext" maxlength="180"></label><label>Data prevista<input id="clientPublishDate" type="date"></label><label class="full">URL da fotografia<input id="clientPublishPhoto" type="url" inputmode="url" placeholder="https://..."></label><label class="check full"><input id="clientPublishVisible" type="checkbox"> Visível para o cliente</label><footer class="actions"><button type="button" class="btn light" data-close="clientPublishDialog">Cancelar</button><button class="btn primary" type="submit">Guardar publicação</button></footer></form></dialog>
 
     <section id="view-cliente-portal" class="view hidden client-only">
       <div class="client-portal-hero"><div><small>ÁREA RESERVADA</small><h1>Acompanhe as suas obras</h1><p>Informação selecionada e publicada pela equipa DISTAK.</p></div><div class="client-portal-stats"><span><strong id="clientPortalWorkCount">0</strong><small>Obras</small></span><span><strong id="clientPortalProgress">0%</strong><small>Progresso médio</small></span><span><strong id="clientPortalUpdateCount">0</strong><small>Atualizações</small></span></div></div>

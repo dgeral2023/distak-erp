@@ -173,7 +173,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v4.1-client", "request.mode==='navigate'", "url.origin!==self.location.origin", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v4.2-a11y", "request.mode==='navigate'", "url.origin!==self.location.origin", "assets/css/accessibility.css", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
@@ -233,6 +233,13 @@ for (const required of ["enable row level security", "revoke all", "grant select
 check(!clientMigration.includes("grant delete"), "O portal do cliente não deve conceder eliminação por SQL.");
 const uiModule = readFileSync(join(root, "assets", "js", "core", "ui.js"), "utf8");
 check(uiModule.includes('classList.contains("client-mode")&&v!=="cliente-portal"'), "A navegação deve bloquear módulos internos no modo cliente.");
+const accessibilityCss = readFileSync(join(root, "assets", "css", "accessibility.css"), "utf8");
+for (const required of [".skip-link", "prefers-reduced-motion:reduce", ":focus-visible", "@media print"]){
+  check(accessibilityCss.includes(required), `Acessibilidade global incompleta: ${required}`);
+}
+for (const required of ['href="#mainContent"', 'id="mainContent"', 'aria-labelledby="clientPublishTitle"', 'aria-live="polite"']){
+  check(index.includes(required), `Semântica acessível incompleta: ${required}`);
+}
 
 const operationalMigration = readFileSync(
   join(root, "supabase", "202608041820_acesso_operacional_por_obra.sql"),
