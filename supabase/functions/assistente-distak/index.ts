@@ -32,7 +32,7 @@ function safeRows(rows: Record<string, unknown>[], keys: string[]) {
   return rows.slice(0, 100).map((row) => Object.fromEntries(keys.filter((key) => row[key] !== undefined).map((key) => [key, row[key]])));
 }
 
-function snapshot(obras: Record<string, unknown>[], custos: Record<string, unknown>[], pagamentos: Record<string, unknown>[], orcamentos: Record<string, unknown>[], tarefas: Record<string, unknown>[], previsoes: Record<string, unknown>[], documentos: Record<string, unknown>[], fotografias: Record<string, unknown>[]) {
+function snapshot(obras: Record<string, unknown>[], custos: Record<string, unknown>[], pagamentos: Record<string, unknown>[], orcamentos: Record<string, unknown>[], tarefas: Record<string, unknown>[], previsoes: Record<string, unknown>[], documentos: Record<string, unknown>[], fotografias: Record<string, unknown>[], diarios: Record<string, unknown>[], checklists: Record<string, unknown>[], materiais: Record<string, unknown>[], ocorrencias: Record<string, unknown>[], horas: Record<string, unknown>[], equipa: Record<string, unknown>[]) {
   const now = new Date();
   const contracted = obras.reduce((sum, row) => sum + workValue(row), 0);
   const costs = custos.reduce((sum, row) => sum + costValue(row), 0);
@@ -66,6 +66,9 @@ function snapshot(obras: Record<string, unknown>[], custos: Record<string, unkno
       despesas_previstas: forecastExpense,
       total_documentos_obra: documentos.length,
       total_fotografias_obra: fotografias.length,
+      diarios_hoje: diarios.filter((row) => String(row.data) === today).length,
+      ocorrencias_hoje: ocorrencias.filter((row) => String(row.data) === today).length,
+      checklists_hoje: checklists.filter((row) => String(row.data) === today).length,
     },
     obras: safeRows(obras, ["id", "nome", "estado", "progresso", "valor", "valor_total", "valor_contratado", "data_inicio", "data_fim_prevista", "morada"]),
     custos: safeRows(custos, ["obra_id", "descricao", "tipo", "categoria", "valor", "valor_total", "valor_sem_iva", "estado_pagamento", "data", "data_vencimento"]),
@@ -75,6 +78,12 @@ function snapshot(obras: Record<string, unknown>[], custos: Record<string, unkno
     previsoes: safeRows(previsoes, ["id", "obra_id", "tipo", "descricao", "valor", "data_prevista", "probabilidade", "estado"]),
     documentos: safeRows(documentos, ["id", "obra_id", "nome", "categoria", "mime_type", "tamanho_bytes", "criado_em"]),
     fotografias: safeRows(fotografias, ["id", "obra_id", "categoria", "titulo", "descricao", "zona", "data_foto"]),
+    diarios: safeRows(diarios, ["id", "obra_id", "data", "titulo", "descricao", "clima", "equipa", "horas", "materiais", "ocorrencias"]),
+    checklists: safeRows(checklists, ["id", "obra_id", "data", "itens", "observacoes"]),
+    materiais: safeRows(materiais, ["id", "obra_id", "data", "material", "quantidade", "observacoes"]),
+    ocorrencias: safeRows(ocorrencias, ["id", "obra_id", "data", "tipo", "descricao", "observacoes"]),
+    horas: safeRows(horas, ["id", "obra_id", "data", "funcionario_nome", "horario", "observacoes"]),
+    equipa: safeRows(equipa, ["id", "obra_id", "data", "nome", "funcao", "observacoes"]),
   };
 }
 
@@ -93,6 +102,15 @@ function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role
   const todayTasks = data.tarefas.filter((row) => row.estado !== "concluida" && String(row.prazo) === today);
   const matchedWork = data.obras.find((work) => text(work.nome).length > 2 && query.includes(text(work.nome)));
   const admin = role === "admin";
+
+  if (["operacional", "diario", "ocorrencia", "material", "horas", "equipa", "checklist", "atividade de hoje"].some((term) => query.includes(term))) {
+    const todayDiaries = data.diarios.filter((row) => String(row.data) === today);
+    const todayOccurrences = data.ocorrencias.filter((row) => String(row.data) === today);
+    const todayMaterials = data.materiais.filter((row) => String(row.data) === today);
+    const todayHours = data.horas.filter((row) => String(row.data) === today);
+    const lines = todayOccurrences.slice(0, 6).map((row) => `• ${data.obras.find((work) => String(work.id) === String(row.obra_id))?.nome || "Obra"}: ${row.tipo || "Ocorrência"} · ${row.descricao || "Sem descrição"}`);
+    return { intent: "operacional", answer: `Atividade operacional de hoje: ${todayDiaries.length} diário(s), ${i.checklists_hoje} checklist(s), ${todayMaterials.length} registo(s) de materiais, ${todayHours.length} registo(s) de horas e ${todayOccurrences.length} ocorrência(s).${lines.length ? `\n\nOcorrências:\n${lines.join("\n")}` : " Não existem ocorrências registadas hoje."}`, actions: [{ label: "Abrir Centro Operacional", view: "operacional" }, { label: "Ver obras", view: admin ? "obras" : "funcionario" }] };
+  }
 
   if (["dossie", "documento", "fotografia", "fotografias", "arquivo", "relatorio fotografico"].some((term) => query.includes(term))) {
     const summaries = data.obras.map((work) => { const docs = byWork(data.documentos, work.id); const photos = byWork(data.fotografias, work.id); const contract = docs.some((row) => text(row.categoria) === "contrato"); const before = photos.some((row) => text(row.categoria) === "antes"); const during = photos.some((row) => text(row.categoria) === "durante"); return { work, docs: docs.length, photos: photos.length, missing: [!contract && "contrato", !before && "fotos antes", !during && "fotos durante"].filter(Boolean) }; });
@@ -177,7 +195,7 @@ Deno.serve(async (req: Request) => {
   const { data: profile } = await supabase.from("profiles").select("role,ativo").eq("id", userData.user.id).single();
   if (!profile || profile.ativo === false) return json(req, { error: "Utilizador sem acesso." }, 403);
 
-  const [worksResult, costsResult, paymentsResult, budgetsResult, tasksResult, forecastsResult, documentsResult, photosResult] = await Promise.all([
+  const [worksResult, costsResult, paymentsResult, budgetsResult, tasksResult, forecastsResult, documentsResult, photosResult, diariesResult, checklistsResult, materialsResult, occurrencesResult, hoursResult, teamResult] = await Promise.all([
     supabase.from("obras").select("*"),
     supabase.from("custos").select("*"),
     supabase.from("pagamentos").select("*"),
@@ -186,10 +204,16 @@ Deno.serve(async (req: Request) => {
     profile.role === "admin" ? supabase.from("financeiro_previsoes").select("*") : Promise.resolve({ data: [], error: null }),
     supabase.from("obra_documentos").select("*"),
     supabase.from("obra_fotografias").select("*"),
+    supabase.from("obra_diarios").select("*"),
+    supabase.from("obra_checklists").select("*"),
+    supabase.from("obra_materiais").select("*"),
+    supabase.from("obra_ocorrencias").select("*"),
+    supabase.from("obra_horas").select("*"),
+    supabase.from("obra_equipa_registos").select("*"),
   ]);
-  const queryError = [worksResult.error, costsResult.error, paymentsResult.error, budgetsResult.error, tasksResult.error, forecastsResult.error, documentsResult.error, photosResult.error].find(Boolean);
+  const queryError = [worksResult.error, costsResult.error, paymentsResult.error, budgetsResult.error, tasksResult.error, forecastsResult.error, documentsResult.error, photosResult.error, diariesResult.error, checklistsResult.error, materialsResult.error, occurrencesResult.error, hoursResult.error, teamResult.error].find(Boolean);
   if (queryError) return json(req, { error: "Não foi possível consultar os dados autorizados." }, 500);
-  const data = snapshot(worksResult.data || [], costsResult.data || [], paymentsResult.data || [], budgetsResult.data || [], tasksResult.data || [], forecastsResult.data || [], documentsResult.data || [], photosResult.data || []);
+  const data = snapshot(worksResult.data || [], costsResult.data || [], paymentsResult.data || [], budgetsResult.data || [], tasksResult.data || [], forecastsResult.data || [], documentsResult.data || [], photosResult.data || [], diariesResult.data || [], checklistsResult.data || [], materialsResult.data || [], occurrencesResult.data || [], hoursResult.data || [], teamResult.data || []);
 
   const analysis = localAnalysis(data, message, profile.role);
   return json(req, { ...analysis, mode: "local", model: null });
