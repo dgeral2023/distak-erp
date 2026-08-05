@@ -43,6 +43,8 @@ async function audit(table,id,acao,payload){
   if(table==="financeiro_previsoes")labels[table]="previsão financeira";
   if(table==="compras_pedidos")labels[table]="pedido de compra";
   if(table==="compras_propostas")labels[table]="proposta de fornecedor";
+  if(table==="medicoes_autos")labels[table]="auto de medição";
+  if(table==="medicoes_itens")labels[table]="linha de medição";
   const entidade=labels[table]||table;
   const obraId=table==="obras"?(id||null):(payload?.obra_id||null);
   const row={utilizador_id:user.id,obra_id:obraId,entidade,entidade_id:id||null,acao,resumo:`${entidade[0].toUpperCase()+entidade.slice(1)} ${acao}`,metadados:{origem:"web-v3"}};

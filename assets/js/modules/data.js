@@ -17,6 +17,7 @@ export async function refreshData(){
   store.agendaTarefas = await query("agenda_tarefas");
   store.previsoesFinanceiras = isAdmin ? await query("financeiro_previsoes") : [];
   if(isAdmin){try{[store.pedidosCompra,store.propostasCompra]=await Promise.all([query("compras_pedidos"),query("compras_propostas")])}catch(err){console.error("Não foi possível carregar as compras:",err);store.pedidosCompra=[];store.propostasCompra=[]}}else{store.pedidosCompra=[];store.propostasCompra=[]}
+  if(isAdmin){try{[store.autosMedicao,store.itensMedicao]=await Promise.all([query("medicoes_autos"),query("medicoes_itens")])}catch(err){console.error("Não foi possível carregar as medições:",err);store.autosMedicao=[];store.itensMedicao=[]}}else{store.autosMedicao=[];store.itensMedicao=[]}
   try{store.atividades=await query("atividades_sistema","*,profiles(nome)")}catch{store.atividades=[]}
 
   // Uma falha no módulo de fotografias não deve bloquear os restantes dados do ERP.
