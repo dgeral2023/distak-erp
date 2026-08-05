@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>DISTAK ERP v3.2</title>
+  <title>DISTAK ERP v3.3</title>
 
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="assets/css/compras.css?v=20260805-purchases-v1">
   <link rel="stylesheet" href="assets/css/medicoes.css?v=20260805-measurements-v1">
   <link rel="stylesheet" href="assets/css/campo.css?v=20260805-field-v1">
+  <link rel="stylesheet" href="assets/css/inteligencia.css?v=20260805-intelligence-v1">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -46,12 +47,12 @@
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="sidebar-brand"><button id="sidebarToggle" type="button" aria-label="Recolher menu" title="Recolher menu">☰</button><div class="brand">DISTAK ERP <small>v3.2</small></div><span class="brand-chevron">‹</span></div>
+    <div class="sidebar-brand"><button id="sidebarToggle" type="button" aria-label="Recolher menu" title="Recolher menu">☰</button><div class="brand">DISTAK ERP <small>v3.3</small></div><span class="brand-chevron">‹</span></div>
     <nav id="mainNav">
       <div class="nav-group"><button class="nav active" data-view="dashboard"><i>⌂</i><span>Dashboard</span></button></div>
       <div class="nav-group admin-only" data-menu-group="comercial"><button class="nav-group-title" type="button" data-toggle-menu-group="comercial"><span>Comercial</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="clientes"><i>♙</i><span>Clientes</span></button><button class="nav" data-view="orcamentos"><i>▤</i><span>Propostas e orçamentos</span></button></div></div>
       <div class="nav-group" data-menu-group="obras"><button class="nav-group-title" type="button" data-toggle-menu-group="obras"><span>Obras</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="obras"><i>▥</i><span>Dashboard de obras</span><b id="navWorkCount">0</b></button><button class="nav" data-view="operacional"><i>◉</i><span>Centro Operacional</span></button><button class="nav" data-view="agenda"><i>◫</i><span>Agenda e tarefas</span><b id="navTaskCount">0</b></button><button class="nav" data-view="dossies"><i>▧</i><span>Dossiê digital</span></button><button class="nav" data-view="funcionario"><i>✓</i><span>Portal de campo</span></button></div></div>
-      <div class="nav-group admin-only" data-menu-group="financeiro"><button class="nav-group-title" type="button" data-toggle-menu-group="financeiro"><span>Financeiro</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="compras"><i>▦</i><span>Compras e fornecedores</span></button><button class="nav" data-view="medicoes"><i>％</i><span>Medições e faturação</span></button><button class="nav" data-view="custos"><i>↘</i><span>Custos e faturas</span></button><button class="nav" data-view="pagamentos"><i>€</i><span>Pagamentos</span></button><button class="nav" data-view="previsoes"><i>↗</i><span>Previsões e cobranças</span></button><button class="nav" data-view="relatorios"><i>▥</i><span>Relatórios</span></button></div></div>
+      <div class="nav-group admin-only" data-menu-group="financeiro"><button class="nav-group-title" type="button" data-toggle-menu-group="financeiro"><span>Financeiro</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="inteligencia"><i>◆</i><span>Inteligência de gestão</span></button><button class="nav" data-view="compras"><i>▦</i><span>Compras e fornecedores</span></button><button class="nav" data-view="medicoes"><i>％</i><span>Medições e faturação</span></button><button class="nav" data-view="custos"><i>↘</i><span>Custos e faturas</span></button><button class="nav" data-view="pagamentos"><i>€</i><span>Pagamentos</span></button><button class="nav" data-view="previsoes"><i>↗</i><span>Previsões e cobranças</span></button><button class="nav" data-view="relatorios"><i>▥</i><span>Relatórios</span></button></div></div>
       <div class="nav-group admin-only" data-menu-group="equipa"><button class="nav-group-title" type="button" data-toggle-menu-group="equipa"><span>Equipa</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="funcionarios"><i>♟</i><span>Recursos humanos</span></button><button class="nav" data-view="empresa"><i>⚙</i><span>Empresa</span></button></div></div>
       <div id="favoriteNavGroup" class="nav-group utility-nav-group"><button class="nav-group-title" type="button" data-toggle-menu-group="favoritos"><span>☆ Favoritos</span><i>⌄</i></button><div id="favoriteNav" class="nav-group-items"></div></div>
       <div id="recentNavGroup" class="nav-group utility-nav-group"><button class="nav-group-title" type="button" data-toggle-menu-group="recentes"><span>◷ Recentes</span><i>⌄</i></button><div id="recentNav" class="nav-group-items"></div></div>
@@ -401,6 +402,13 @@
     <section id="view-pagamentos" class="view hidden">
       <div class="toolbar"><input id="pagamentoSearch" placeholder="Pesquisar pagamento"><button id="novoPagamentoBtn" class="btn primary">Novo pagamento</button></div>
       <div class="panel"><div id="pagamentosTable"></div></div>
+    </section>
+
+    <section id="view-inteligencia" class="view hidden admin-only">
+      <div class="intelligence-hero"><div><span>INTELIGÊNCIA INTERNA E EXPLICÁVEL</span><h1>Previsões de gestão</h1><p>Antecipe atrasos, custo final, margem e cobranças sem alterar os movimentos reais.</p></div><div class="intelligence-controls"><label>Obra<select id="intelligenceWork"><option value="">Todas as obras</option></select></label><label>Reserva de risco<input id="intelligenceReserve" type="range" min="0" max="20" step="1" value="5"></label><output id="intelligenceReserveValue">5%</output></div></div>
+      <div id="intelligenceKpis" class="intelligence-kpis"></div>
+      <div class="intelligence-grid"><section class="panel"><h3>Mapa de risco da carteira</h3><div id="intelligencePortfolio" class="intelligence-portfolio"></div><div class="intelligence-disclaimer"><strong>Apoio à decisão:</strong> estas previsões são cálculos internos baseados nos dados registados. Não criam custos, pagamentos, cobranças ou alterações de prazo.</div></section><section><div id="intelligenceCards" class="intelligence-cards"></div></section></div>
+      <section class="panel intelligence-history-panel"><div class="panel-title"><div><h3>Histórico de análises</h3><p>Cada cenário guardado exige confirmação ou descarte humano</p></div></div><div id="intelligenceHistory" class="intelligence-history"></div></section>
     </section>
 
     <section id="view-previsoes" class="view hidden admin-only">
@@ -990,6 +998,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260805-field-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260805-intelligence-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>

@@ -50,6 +50,8 @@ const requiredIds = [
   ,"view-funcionario", "fieldPortalTitle", "fieldOfflineState", "fieldSyncNow", "fieldNewRecord",
   "fieldSummary", "fieldTasks", "fieldRecordCount", "fieldRecords", "fieldRecordDialog",
   "fieldRecordForm", "fieldWork", "fieldType", "fieldPhoto", "fieldRecordSave"
+  ,"view-inteligencia", "intelligenceWork", "intelligenceReserve", "intelligenceReserveValue",
+  "intelligenceKpis", "intelligencePortfolio", "intelligenceCards", "intelligenceHistory"
 ];
 
 for (const id of requiredIds) {
@@ -136,7 +138,7 @@ for (const required of ["initAssistant", "renderAssistantInsight", "db.functions
   check(assistantModule.includes(required), `Assistente DISTAK incompleto: ${required}`);
 }
 const assistantFunction = readFileSync(join(root, "supabase", "functions", "assistente-distak", "index.ts"), "utf8");
-for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "intent: \"dossies\"", "intent: \"operacional\"", "intent: \"compras\"", "intent: \"medicoes\"", "auth.getUser"]){
+for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "intent: \"dossies\"", "intent: \"operacional\"", "intent: \"compras\"", "intent: \"medicoes\"", "intent: \"inteligencia\"", "auth.getUser"]){
   check(assistantFunction.includes(required), `Função segura do assistente incompleta: ${required}`);
 }
 const agendaModule = readFileSync(join(root, "assets", "js", "modules", "agenda.js"), "utf8");
@@ -171,7 +173,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.9", "request.mode==='navigate'", "url.origin!==self.location.origin", "assets/js/core/field-queue.js", "assets/js/modules/campo.js"]){
+for (const required of ["distak-shell-v4.0", "request.mode==='navigate'", "url.origin!==self.location.origin", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
@@ -209,6 +211,15 @@ for (const required of ["enable row level security", "revoke all", "grant select
   check(fieldMigration.includes(required), `Migração do portal de campo incompleta: ${required}`);
 }
 
+const intelligenceModule = readFileSync(join(root, "assets", "js", "modules", "inteligencia.js"), "utf8");
+for (const required of ["calculateWorkIntelligence", "renderInteligencia", "initInteligencia", "projectedCost", "scheduleGap", "confidence", "Guardar análise", "confirmada", "descartada"]){
+  check(intelligenceModule.includes(required), `Inteligência de gestão incompleta: ${required}`);
+}
+const intelligenceMigration = readFileSync(join(root, "supabase", "202608051800_inteligencia_gestao.sql"), "utf8");
+for (const required of ["enable row level security", "revoke all", "grant select,insert,update", "inteligencia_avaliacoes_select_admin", "inteligencia_avaliacoes_insert_admin", "inteligencia_avaliacoes_update_admin", "fundamentos jsonb", "estado='analisada'"]){
+  check(intelligenceMigration.includes(required), `Migração de inteligência incompleta: ${required}`);
+}
+
 const operationalMigration = readFileSync(
   join(root, "supabase", "202608041820_acesso_operacional_por_obra.sql"),
   "utf8"
@@ -222,6 +233,20 @@ for (const required of [
 ]) {
   check(operationalMigration.includes(required), `Migração operacional incompleta: ${required}`);
 }
+
+globalThis.window = { DISTAK_CONFIG:{SUPABASE_URL:"https://example.invalid",SUPABASE_KEY:"test"}, supabase: { createClient: () => ({}) } };
+const { store: calculationStore } = await import("../assets/js/core/store.js");
+const { calculateWorkIntelligence } = await import("../assets/js/modules/inteligencia.js");
+calculationStore.custos = [{ obra_id:"work-test", valor:20000 }];
+calculationStore.pagamentos = [];
+calculationStore.agendaTarefas = [{ obra_id:"work-test", estado:"pendente", prazo:"2000-01-01" }];
+calculationStore.pedidosCompra = [];
+calculationStore.propostasCompra = [];
+calculationStore.autosMedicao = [];
+const calculation = calculateWorkIntelligence({ id:"work-test", nome:"Teste", valor_contratado:100000, progresso:50 }, 5);
+check(Math.round(calculation.projectedCost)===42000, "O cenário de custo final deve aplicar progresso e reserva sem alterar movimentos reais.");
+check(Math.round(calculation.projectedMargin)===58000, "A margem prevista deve resultar do contratado menos o custo final previsto.");
+check(calculation.late===1 && calculation.confidence==="media", "A inteligência deve considerar atraso e indicar confiança dos dados.");
 
 if (failures.length) {
   console.error(`Smoke test falhou (${failures.length}):\n- ${failures.join("\n- ")}`);
