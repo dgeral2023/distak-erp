@@ -41,6 +41,9 @@ const requiredIds = [
   ,"view-operacional", "newOperationalRecord", "operationalKpis", "operationalSearch",
   "operationalDate", "operationalWorkGrid", "operationalTimeline", "operationalQuickDialog",
   "operationalQuickForm", "operationalQuickWork", "operationalQuickType"
+  ,"view-compras", "newPurchaseBtn", "purchaseKpis", "purchaseSearch", "purchaseWorkFilter",
+  "purchaseStateFilter", "purchaseList", "purchaseDialog", "purchaseForm", "purchaseWork",
+  "quoteDialog", "quoteForm", "quotePurchaseId", "quoteComparison"
 ];
 
 for (const id of requiredIds) {
@@ -127,7 +130,7 @@ for (const required of ["initAssistant", "renderAssistantInsight", "db.functions
   check(assistantModule.includes(required), `Assistente DISTAK incompleto: ${required}`);
 }
 const assistantFunction = readFileSync(join(root, "supabase", "functions", "assistente-distak", "index.ts"), "utf8");
-for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "intent: \"dossies\"", "intent: \"operacional\"", "auth.getUser"]){
+for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "intent: \"dossies\"", "intent: \"operacional\"", "intent: \"compras\"", "auth.getUser"]){
   check(assistantFunction.includes(required), `Função segura do assistente incompleta: ${required}`);
 }
 const agendaModule = readFileSync(join(root, "assets", "js", "modules", "agenda.js"), "utf8");
@@ -162,13 +165,21 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.6", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
+for (const required of ["distak-shell-v3.7", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
 const operationalModule = readFileSync(join(root, "assets", "js", "modules", "operacional.js"), "utf8");
 for (const required of ["renderOperacional", "initOperacional", "openOperationalQuick", "obra_ocorrencias", "obra_materiais", "obra_horas"]){
   check(operationalModule.includes(required), `Centro operacional incompleto: ${required}`);
+}
+const purchasesModule = readFileSync(join(root, "assets", "js", "modules", "compras.js"), "utf8");
+for (const required of ["renderCompras", "initCompras", "compras_pedidos", "compras_propostas", "selectQuote", "Nenhum custo ou pagamento foi criado"]){
+  check(purchasesModule.includes(required), `Central de compras incompleta: ${required}`);
+}
+const purchasesMigration = readFileSync(join(root, "supabase", "202608051230_compras_fornecedores.sql"), "utf8");
+for (const required of ["enable row level security", "revoke all", "grant select,insert,update", "compras_pedidos_select_admin", "compras_propostas_update_admin"]){
+  check(purchasesMigration.includes(required), `Migração de compras incompleta: ${required}`);
 }
 
 const operationalMigration = readFileSync(

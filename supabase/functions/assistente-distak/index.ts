@@ -32,7 +32,7 @@ function safeRows(rows: Record<string, unknown>[], keys: string[]) {
   return rows.slice(0, 100).map((row) => Object.fromEntries(keys.filter((key) => row[key] !== undefined).map((key) => [key, row[key]])));
 }
 
-function snapshot(obras: Record<string, unknown>[], custos: Record<string, unknown>[], pagamentos: Record<string, unknown>[], orcamentos: Record<string, unknown>[], tarefas: Record<string, unknown>[], previsoes: Record<string, unknown>[], documentos: Record<string, unknown>[], fotografias: Record<string, unknown>[], diarios: Record<string, unknown>[], checklists: Record<string, unknown>[], materiais: Record<string, unknown>[], ocorrencias: Record<string, unknown>[], horas: Record<string, unknown>[], equipa: Record<string, unknown>[]) {
+function snapshot(obras: Record<string, unknown>[], custos: Record<string, unknown>[], pagamentos: Record<string, unknown>[], orcamentos: Record<string, unknown>[], tarefas: Record<string, unknown>[], previsoes: Record<string, unknown>[], documentos: Record<string, unknown>[], fotografias: Record<string, unknown>[], diarios: Record<string, unknown>[], checklists: Record<string, unknown>[], materiais: Record<string, unknown>[], ocorrencias: Record<string, unknown>[], horas: Record<string, unknown>[], equipa: Record<string, unknown>[], pedidos: Record<string, unknown>[], propostas: Record<string, unknown>[]) {
   const now = new Date();
   const contracted = obras.reduce((sum, row) => sum + workValue(row), 0);
   const costs = custos.reduce((sum, row) => sum + costValue(row), 0);
@@ -69,6 +69,8 @@ function snapshot(obras: Record<string, unknown>[], custos: Record<string, unkno
       diarios_hoje: diarios.filter((row) => String(row.data) === today).length,
       ocorrencias_hoje: ocorrencias.filter((row) => String(row.data) === today).length,
       checklists_hoje: checklists.filter((row) => String(row.data) === today).length,
+      pedidos_compra_abertos: pedidos.filter((row) => !["recebido", "cancelado"].includes(String(row.estado))).length,
+      entregas_atrasadas: pedidos.filter((row) => ["encomendado", "parcial"].includes(String(row.estado)) && row.entrega_prevista && String(row.entrega_prevista) < today).length,
     },
     obras: safeRows(obras, ["id", "nome", "estado", "progresso", "valor", "valor_total", "valor_contratado", "data_inicio", "data_fim_prevista", "morada"]),
     custos: safeRows(custos, ["obra_id", "descricao", "tipo", "categoria", "valor", "valor_total", "valor_sem_iva", "estado_pagamento", "data", "data_vencimento"]),
@@ -84,6 +86,8 @@ function snapshot(obras: Record<string, unknown>[], custos: Record<string, unkno
     ocorrencias: safeRows(ocorrencias, ["id", "obra_id", "data", "tipo", "descricao", "observacoes"]),
     horas: safeRows(horas, ["id", "obra_id", "data", "funcionario_nome", "horario", "observacoes"]),
     equipa: safeRows(equipa, ["id", "obra_id", "data", "nome", "funcao", "observacoes"]),
+    pedidos: safeRows(pedidos, ["id", "obra_id", "numero", "titulo", "categoria", "quantidade", "unidade", "data_necessaria", "estado", "valor_orcamentado", "fornecedor_selecionado", "valor_adjudicado", "entrega_prevista"]),
+    propostas: safeRows(propostas, ["id", "pedido_id", "fornecedor", "valor", "prazo_dias", "validade", "selecionada"]),
   };
 }
 
@@ -103,6 +107,14 @@ function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role
   const blockedStages = data.tarefas.filter((row) => row.estado === "bloqueada");
   const matchedWork = data.obras.find((work) => text(work.nome).length > 2 && query.includes(text(work.nome)));
   const admin = role === "admin";
+
+  if (admin && ["compra", "fornecedor", "proposta de fornecedor", "entrega", "encomenda", "adjudic"].some((term) => query.includes(term))) {
+    const open = data.pedidos.filter((row) => !["recebido", "cancelado"].includes(String(row.estado)));
+    const late = open.filter((row) => ["encomendado", "parcial"].includes(String(row.estado)) && row.entrega_prevista && String(row.entrega_prevista) < today);
+    const overBudget = open.filter((row) => number(row.valor_adjudicado) > number(row.valor_orcamentado) && number(row.valor_orcamentado) > 0);
+    const detail = late.slice(0, 6).map((row) => `• ${row.numero} · ${row.titulo}: entrega prevista ${row.entrega_prevista} · ${row.fornecedor_selecionado || "fornecedor por confirmar"}`).join("\n");
+    return { intent: "compras", answer: `Compras: ${open.length} pedido(s) aberto(s), ${late.length} entrega(s) atrasada(s), ${overBudget.length} adjudicação(ões) acima do orçamento e ${data.propostas.length} proposta(s) registada(s).${detail ? `\n\nEntregas atrasadas:\n${detail}` : " Não existem entregas atrasadas."}\n\nSelecionar uma proposta não cria custos nem pagamentos.`, actions: [{ label: "Abrir Central de Compras", view: "compras" }, { label: "Ver custos e faturas", view: "custos" }] };
+  }
 
   if (["operacional", "diario", "ocorrencia", "material", "horas", "equipa", "checklist", "atividade de hoje"].some((term) => query.includes(term))) {
     const todayDiaries = data.diarios.filter((row) => String(row.data) === today);
@@ -197,7 +209,7 @@ Deno.serve(async (req: Request) => {
   const { data: profile } = await supabase.from("profiles").select("role,ativo").eq("id", userData.user.id).single();
   if (!profile || profile.ativo === false) return json(req, { error: "Utilizador sem acesso." }, 403);
 
-  const [worksResult, costsResult, paymentsResult, budgetsResult, tasksResult, forecastsResult, documentsResult, photosResult, diariesResult, checklistsResult, materialsResult, occurrencesResult, hoursResult, teamResult] = await Promise.all([
+  const [worksResult, costsResult, paymentsResult, budgetsResult, tasksResult, forecastsResult, documentsResult, photosResult, diariesResult, checklistsResult, materialsResult, occurrencesResult, hoursResult, teamResult, purchaseResult, quoteResult] = await Promise.all([
     supabase.from("obras").select("*"),
     supabase.from("custos").select("*"),
     supabase.from("pagamentos").select("*"),
@@ -212,10 +224,12 @@ Deno.serve(async (req: Request) => {
     supabase.from("obra_ocorrencias").select("*"),
     supabase.from("obra_horas").select("*"),
     supabase.from("obra_equipa_registos").select("*"),
+    profile.role === "admin" ? supabase.from("compras_pedidos").select("*") : Promise.resolve({ data: [], error: null }),
+    profile.role === "admin" ? supabase.from("compras_propostas").select("*") : Promise.resolve({ data: [], error: null }),
   ]);
-  const queryError = [worksResult.error, costsResult.error, paymentsResult.error, budgetsResult.error, tasksResult.error, forecastsResult.error, documentsResult.error, photosResult.error, diariesResult.error, checklistsResult.error, materialsResult.error, occurrencesResult.error, hoursResult.error, teamResult.error].find(Boolean);
+  const queryError = [worksResult.error, costsResult.error, paymentsResult.error, budgetsResult.error, tasksResult.error, forecastsResult.error, documentsResult.error, photosResult.error, diariesResult.error, checklistsResult.error, materialsResult.error, occurrencesResult.error, hoursResult.error, teamResult.error, purchaseResult.error, quoteResult.error].find(Boolean);
   if (queryError) return json(req, { error: "Não foi possível consultar os dados autorizados." }, 500);
-  const data = snapshot(worksResult.data || [], costsResult.data || [], paymentsResult.data || [], budgetsResult.data || [], tasksResult.data || [], forecastsResult.data || [], documentsResult.data || [], photosResult.data || [], diariesResult.data || [], checklistsResult.data || [], materialsResult.data || [], occurrencesResult.data || [], hoursResult.data || [], teamResult.data || []);
+  const data = snapshot(worksResult.data || [], costsResult.data || [], paymentsResult.data || [], budgetsResult.data || [], tasksResult.data || [], forecastsResult.data || [], documentsResult.data || [], photosResult.data || [], diariesResult.data || [], checklistsResult.data || [], materialsResult.data || [], occurrencesResult.data || [], hoursResult.data || [], teamResult.data || [], purchaseResult.data || [], quoteResult.data || []);
 
   const analysis = localAnalysis(data, message, profile.role);
   return json(req, { ...analysis, mode: "local", model: null });

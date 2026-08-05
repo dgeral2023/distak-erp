@@ -1,8 +1,8 @@
 import {$,setView} from "../core/ui.js";
 import {store} from "../core/store.js";
 
-const meta={dashboard:["⌂","Início"],empresa:["⚙","Empresa"],clientes:["♙","Clientes"],obras:["▥","Obras"],operacional:["◉","Operacional"],agenda:["◫","Agenda"],dossies:["▧","Dossiês"],orcamentos:["▤","Orçamentos"],custos:["↘","Custos"],pagamentos:["€","Pagamentos"],previsoes:["↗","Previsões"],funcionarios:["♟","Equipa"],relatorios:["▥","Relatórios"],funcionario:["✓","Meu painel"]};
-const adminViews=["clientes","orcamentos","custos","pagamentos","previsoes","relatorios","funcionarios","empresa"];
+const meta={dashboard:["⌂","Início"],empresa:["⚙","Empresa"],clientes:["♙","Clientes"],obras:["▥","Obras"],operacional:["◉","Operacional"],agenda:["◫","Agenda"],dossies:["▧","Dossiês"],orcamentos:["▤","Orçamentos"],compras:["▦","Compras"],custos:["↘","Custos"],pagamentos:["€","Pagamentos"],previsoes:["↗","Previsões"],funcionarios:["♟","Equipa"],relatorios:["▥","Relatórios"],funcionario:["✓","Meu painel"]};
+const adminViews=["clientes","orcamentos","compras","custos","pagamentos","previsoes","relatorios","funcionarios","empresa"];
 let actions={};
 
 function recentViews(){try{return JSON.parse(localStorage.getItem("distakRecentViews")||"[]")}catch{return []}}
@@ -25,7 +25,7 @@ function openSheet(id){closeSheets();$(id)?.classList.remove("hidden");$("mobile
 function navigate(view){setView(view);saveRecent(view);document.querySelectorAll("[data-mobile-view]").forEach(button=>button.classList.toggle("active",button.dataset.mobileView===view));closeSheets()}
 
 function renderMore(){
-  const views=store.profile?.role==="admin"?["operacional","agenda","dossies","clientes","orcamentos","custos","pagamentos","previsoes","funcionarios","relatorios","empresa"]:["operacional","agenda","dossies","funcionario"];
+  const views=store.profile?.role==="admin"?["operacional","agenda","dossies","clientes","orcamentos","compras","custos","pagamentos","previsoes","funcionarios","relatorios","empresa"]:["operacional","agenda","dossies","funcionario"];
   $("mobileMoreLinks").innerHTML=views.map(view=>`<button data-mobile-view="${view}"><i>${meta[view][0]}</i><strong>${meta[view][1]}</strong></button>`).join("");
 }
 
