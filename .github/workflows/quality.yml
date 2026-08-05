@@ -40,6 +40,9 @@ jobs:
       - name: Auditar segurança estática
         run: node tests/security.mjs
 
+      - name: Verificar convite seguro de clientes
+        run: node tests/client-invite.mjs
+
       - name: Verificar sintaxe JavaScript
         shell: bash
         run: |
