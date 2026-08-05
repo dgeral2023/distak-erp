@@ -32,6 +32,8 @@ const requiredIds = [
   ,"aiPriorityCard", "aiPrioritySummary", "aiPriorityAction"
   ,"view-agenda", "navTaskCount", "novaTarefaBtn", "agendaWeekGrid", "agendaTaskList",
   "agendaTaskDialog", "agendaTaskForm", "agendaTaskWork", "agendaTaskDue"
+  ,"planningWorkFilter", "planningToday", "planningHealth", "planningTimeline",
+  "agendaTaskPhase", "agendaTaskProgress", "agendaTaskDependency", "agendaTaskMilestone"
   ,"view-previsoes", "newForecastBtn", "forecastKpis", "forecastChart", "collectionRiskList",
   "forecastSearch", "forecastList", "forecastDialog", "forecastForm", "forecastProbability"
   ,"view-dossies", "dossierPrintAll", "dossierKpis", "dossierSearch", "dossierStatusFilter",
@@ -132,6 +134,13 @@ const agendaModule = readFileSync(join(root, "assets", "js", "modules", "agenda.
 for (const required of ["renderAgenda", "initAgenda", "agenda_tarefas", "toggleTask", "prazo", "prioridade"]){
   check(agendaModule.includes(required), `Agenda operacional incompleta: ${required}`);
 }
+for (const required of ["renderPlanning", "planningTimeline", "depende_de", "progresso", "marco", "phaseLabel"]){
+  check(agendaModule.includes(required), `Planeamento avançado incompleto: ${required}`);
+}
+const planningMigration = readFileSync(join(root, "supabase", "202608051100_planeamento_avancado_obras.sql"), "utf8");
+for (const required of ["fase text", "progresso smallint", "marco boolean", "depende_de uuid", "agenda_tarefas_depende_de_idx"]){
+  check(planningMigration.includes(required), `Migração do planeamento incompleta: ${required}`);
+}
 const agendaMigration = readFileSync(join(root, "supabase", "202608042110_agenda_tarefas.sql"), "utf8");
 for (const required of ["enable row level security", "private.can_access_obra", "agenda_tarefas_select", "agenda_tarefas_insert", "agenda_tarefas_update", "revoke all on public.agenda_tarefas from anon"]){
   check(agendaMigration.includes(required), `Migração da agenda incompleta: ${required}`);
@@ -153,7 +162,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.5", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
+for (const required of ["distak-shell-v3.6", "request.mode==='navigate'", "url.origin!==self.location.origin"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 

@@ -74,7 +74,7 @@ function snapshot(obras: Record<string, unknown>[], custos: Record<string, unkno
     custos: safeRows(custos, ["obra_id", "descricao", "tipo", "categoria", "valor", "valor_total", "valor_sem_iva", "estado_pagamento", "data", "data_vencimento"]),
     pagamentos: safeRows(pagamentos, ["obra_id", "descricao", "valor", "estado", "data", "metodo"]),
     orcamentos: safeRows(orcamentos, ["obra_id", "numero", "descricao", "estado", "valor", "valor_total", "data", "validade"]),
-    tarefas: safeRows(tarefas, ["id", "obra_id", "titulo", "descricao", "responsavel_id", "funcionario_id", "inicio", "prazo", "hora", "prioridade", "estado"]),
+    tarefas: safeRows(tarefas, ["id", "obra_id", "titulo", "descricao", "responsavel_id", "funcionario_id", "inicio", "prazo", "hora", "prioridade", "estado", "fase", "progresso", "marco", "depende_de"]),
     previsoes: safeRows(previsoes, ["id", "obra_id", "tipo", "descricao", "valor", "data_prevista", "probabilidade", "estado"]),
     documentos: safeRows(documentos, ["id", "obra_id", "nome", "categoria", "mime_type", "tamanho_bytes", "criado_em"]),
     fotografias: safeRows(fotografias, ["id", "obra_id", "categoria", "titulo", "descricao", "zona", "data_foto"]),
@@ -100,6 +100,7 @@ function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role
   const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Lisbon" }).format(new Date());
   const lateTasks = data.tarefas.filter((row) => row.estado !== "concluida" && String(row.prazo) < today);
   const todayTasks = data.tarefas.filter((row) => row.estado !== "concluida" && String(row.prazo) === today);
+  const blockedStages = data.tarefas.filter((row) => row.estado === "bloqueada");
   const matchedWork = data.obras.find((work) => text(work.nome).length > 2 && query.includes(text(work.nome)));
   const admin = role === "admin";
 
@@ -157,7 +158,7 @@ function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role
       ...todayTasks.slice(0, 6).map((row) => `• HOJE · ${row.titulo}${row.hora ? ` · ${String(row.hora).slice(0, 5)}` : ""}`),
       ...upcoming.map((row) => `• ${row.prazo} · ${row.titulo}`),
     ];
-    return { intent: "agenda", answer: `Agenda operacional: ${i.tarefas_abertas} tarefa(s) aberta(s), ${i.tarefas_atrasadas} atrasada(s) e ${i.tarefas_hoje} para hoje.${lines.length ? `\n\nPróximos trabalhos:\n${lines.join("\n")}` : " Não existem tarefas abertas."}`, actions: [{ label: "Abrir agenda", view: "agenda" }] };
+    return { intent: "agenda", answer: `Planeamento das obras: ${i.tarefas_abertas} etapa(s) aberta(s), ${i.tarefas_atrasadas} atrasada(s), ${blockedStages.length} bloqueada(s) e ${i.tarefas_hoje} para hoje.${lines.length ? `\n\nPróximos trabalhos:\n${lines.join("\n")}` : " Não existem etapas abertas."}`, actions: [{ label: "Abrir cronograma", view: "agenda" }] };
   }
 
   if (["prioridade", "atencao", "alerta", "risco", "atras", "suspens"].some((term) => query.includes(term))) {
@@ -167,6 +168,7 @@ function localAnalysis(data: ReturnType<typeof snapshot>, question: string, role
     if (noIncome.length) lines.push(`• ${noIncome.length} obra(s) contratadas sem recebimentos: ${noIncome.slice(0, 5).map((row) => row.nome || `Obra ${row.id}`).join(", ")}.`);
     if (lateTasks.length) lines.push(`• ${lateTasks.length} tarefa(s) em atraso na agenda.`);
     if (todayTasks.length) lines.push(`• ${todayTasks.length} tarefa(s) com prazo hoje.`);
+    if (blockedStages.length) lines.push(`• ${blockedStages.length} etapa(s) bloqueada(s) no cronograma.`);
     if (!lines.length) lines.push("Não existem alertas críticos nos dados atuais.");
     return { intent: "prioridades", answer: `Prioridades de gestão neste momento:\n\n${lines.join("\n")}`, actions: admin ? [{ label: "Abrir agenda", view: "agenda" }, { label: "Ver dashboard de obras", view: "obras" }, { label: "Abrir relatórios", view: "relatorios" }] : [{ label: "Abrir agenda", view: "agenda" }, { label: "Abrir meu painel", view: "funcionario" }] };
   }
