@@ -4,36 +4,35 @@ import {$,esc,money,setView} from "../core/ui.js";
 const num=value=>Number(value||0);
 const norm=value=>String(value||"").trim().toLowerCase();
 const date=value=>value?new Date(value).toLocaleDateString("pt-PT"):"—";
+const workName=id=>store.obras.find(row=>String(row.id)===String(id))?.nome||"Sem obra";
 const workValue=work=>num(work.valor_contratado||work.valor);
 const workCosts=id=>store.custos.filter(row=>String(row.obra_id)===String(id)).reduce((sum,row)=>sum+num(row.valor||row.valor_sem_iva),0);
 const workIncome=id=>store.pagamentos.filter(row=>String(row.obra_id)===String(id)&&norm(row.estado)!=="pendente").reduce((sum,row)=>sum+num(row.valor),0);
 
-function alerts(){
+export function buildAlerts(){
   const now=new Date();
   const rows=[];
   store.custos.filter(row=>row.estado_pagamento!=="pago"&&row.data_vencimento&&new Date(`${row.data_vencimento}T23:59:59`)<now).forEach(row=>rows.push({level:"danger",title:"Custo vencido",text:`${row.nome_empresa||row.descricao||"Fornecedor"} · ${money(row.valor||row.valor_sem_iva)}`,view:"custos"}));
-  store.obras.filter(row=>norm(row.estado).includes("atras")||norm(row.estado).includes("suspens")).forEach(row=>rows.push({level:"danger",title:row.nome,text:`Obra em ${row.estado}`,view:"obras"}));
-  store.obras.filter(row=>num(row.progresso)>=100&&!norm(row.estado).includes("conclu")).forEach(row=>rows.push({level:"warning",title:row.nome,text:"Progresso completo; falta encerrar a obra.",view:"obras"}));
+  store.obras.filter(row=>norm(row.estado).includes("atras")||norm(row.estado).includes("suspens")).forEach(row=>rows.push({level:"danger",title:row.nome,text:`Obra em ${row.estado}`,view:"obras",kind:"work",id:row.id,action:"Abrir obra"}));
+  store.obras.filter(row=>num(row.progresso)>=100&&!norm(row.estado).includes("conclu")).forEach(row=>rows.push({level:"warning",title:row.nome,text:"Progresso completo; falta encerrar a obra.",view:"obras",kind:"work",id:row.id,action:"Abrir obra"}));
   store.orcamentos.filter(row=>norm(row.estado)==="enviado"&&row.data_emissao&&Date.now()-new Date(row.data_emissao).getTime()>15*86400000).forEach(row=>rows.push({level:"warning",title:`Orçamento ${row.numero||""}`,text:"Enviado há mais de 15 dias; confirmar resposta.",view:"orcamentos"}));
   const nowLocal=new Date();nowLocal.setMinutes(nowLocal.getMinutes()-nowLocal.getTimezoneOffset());const today=nowLocal.toISOString().slice(0,10);
-  store.agendaTarefas.filter(row=>row.estado!=="concluida"&&row.prazo<today).forEach(row=>rows.push({level:"danger",title:row.titulo,text:`Tarefa em atraso · ${row.prazo}`,view:"agenda"}));
-  store.agendaTarefas.filter(row=>row.estado!=="concluida"&&row.prazo===today).forEach(row=>rows.push({level:"warning",title:row.titulo,text:"Tarefa com prazo hoje",view:"agenda"}));
-  store.agendaTarefas.filter(row=>row.estado==="bloqueada").forEach(row=>rows.push({level:"danger",title:row.titulo,text:`Etapa bloqueada · ${workName(row.obra_id)}`,view:"agenda"}));
-  const unassigned=store.agendaTarefas.filter(row=>row.estado!=="concluida"&&!row.responsavel_id&&!row.funcionario_id&&["urgente","alta"].includes(row.prioridade));if(unassigned.length)rows.push({level:"warning",title:`${unassigned.length} tarefa(s) prioritária(s) sem responsável`,text:"Distribuir a carga no Comando do Dia.",view:"agenda"});
+  store.agendaTarefas.filter(row=>row.estado!=="concluida").forEach(row=>{const blocked=row.estado==="bloqueada",late=row.prazo<today,dueToday=row.prazo===today;if(!blocked&&!late&&!dueToday)return;rows.push({level:blocked||late?"danger":"warning",title:row.titulo,text:blocked?`Etapa bloqueada · ${workName(row.obra_id)}`:late?`Tarefa em atraso · ${row.prazo}`:"Tarefa com prazo hoje",view:"agenda",kind:"task",id:row.id,action:"Abrir tarefa"})});
+  const unassigned=store.agendaTarefas.filter(row=>row.estado!=="concluida"&&!row.responsavel_id&&!row.funcionario_id&&["urgente","alta"].includes(row.prioridade));if(unassigned.length)rows.push({level:"warning",title:`${unassigned.length} tarefa(s) prioritária(s) sem responsável`,text:"Distribuir a carga no Comando do Dia.",view:"agenda",filter:"unassigned",action:"Distribuir tarefas"});
   store.previsoesFinanceiras.filter(row=>!["realizado","cancelado"].includes(row.estado)&&row.data_prevista<today).forEach(row=>rows.push({level:"danger",title:row.descricao,text:`Previsão vencida · ${money(row.valor)}`,view:"previsoes"}));
   store.obras.filter(work=>num(work.progresso)>=80&&!store.documentosObra.some(doc=>String(doc.obra_id)===String(work.id)&&norm(doc.categoria)==="contrato")).forEach(work=>rows.push({level:"warning",title:work.nome,text:"Dossiê sem contrato e obra próxima da conclusão",view:"dossies"}));
   store.ocorrenciasObra.filter(row=>row.data===today).forEach(row=>rows.push({level:"warning",title:row.tipo||"Ocorrência em obra",text:`${workName(row.obra_id)} · ${row.descricao||"Consultar registo"}`,view:"operacional"}));
   store.pedidosCompra.filter(row=>["encomendado","parcial"].includes(row.estado)&&row.entrega_prevista&&row.entrega_prevista<today).forEach(row=>rows.push({level:"danger",title:row.titulo,text:`Entrega atrasada · ${row.fornecedor_selecionado||workName(row.obra_id)}`,view:"compras"}));
   store.autosMedicao.filter(row=>row.estado==="faturado"&&row.vencimento&&row.vencimento<today).forEach(row=>rows.push({level:"danger",title:`Auto ${row.numero}`,text:`Fatura vencida, recebimento não confirmado · ${money(row.total)}`,view:"medicoes"}));
   store.campoRegistos.filter(row=>row.estado==="pendente").forEach(row=>rows.push({level:"warning",title:row.titulo,text:`Registo de campo por rever · ${workName(row.obra_id)}`,view:"funcionario"}));
-  return rows;
+  return rows.map((row,index)=>({...row,action:row.action||"Abrir área",order:index})).sort((a,b)=>(a.level==="danger"?0:1)-(b.level==="danger"?0:1)||a.order-b.order);
 }
 
 function renderNotifications(){
-  const rows=alerts();
+  const rows=buildAlerts();
   $("notificationCount").textContent=rows.length;
   $("notificationCount").classList.toggle("empty",!rows.length);
-  $("notificationList").innerHTML=rows.length?rows.map(row=>`<button class="notification-item ${row.level}" data-alert-view="${row.view}"><strong>${esc(row.title)}</strong><span>${esc(row.text)}</span></button>`).join(""):'<div class="v3-empty"><strong>Tudo controlado</strong><p>Não existem alertas críticos neste momento.</p></div>';
+  $("notificationList").innerHTML=rows.length?rows.map(row=>`<button class="notification-item ${row.level}" data-alert-view="${row.view}"${row.kind?` data-alert-kind="${row.kind}"`:""}${row.id?` data-alert-id="${esc(row.id)}"`:""}${row.filter?` data-alert-filter="${row.filter}"`:""} aria-label="${esc(`${row.title}. ${row.action}`)}"><strong>${esc(row.title)}</strong><span>${esc(row.text)}</span><small>${esc(row.action)} <b aria-hidden="true">→</b></small></button>`).join(""):'<div class="v3-empty"><strong>Tudo controlado</strong><p>Não existem alertas críticos neste momento.</p></div>';
 }
 
 function renderReports(){
@@ -98,9 +97,9 @@ export function initV3(){
   $("notificationClose")?.addEventListener("click",()=>$("notificationPanel").classList.add("hidden"));
   $("printExecutiveReport")?.addEventListener("click",printExecutive);
   document.addEventListener("click",event=>{
-    const alertView=event.target.closest("[data-alert-view]")?.dataset.alertView;
+    const alert=event.target.closest("[data-alert-view]"),alertView=alert?.dataset.alertView;
     const searchResult=event.target.closest("[data-search-view]");
-    if(alertView){setView(alertView);$("notificationPanel").classList.add("hidden")}
+    if(alertView){setView(alertView);$("notificationPanel").classList.add("hidden");if(alert.dataset.alertFilter)setTimeout(()=>document.querySelector(`[data-agenda-quick="${alert.dataset.alertFilter}"]`)?.click(),50);if(alert.dataset.alertKind==="task"&&alert.dataset.alertId)setTimeout(()=>document.querySelector(`[data-edit-task="${alert.dataset.alertId}"]`)?.click(),80);if(alert.dataset.alertKind==="work"&&alert.dataset.alertId)setTimeout(()=>document.querySelector(`[data-view-obra="${alert.dataset.alertId}"]`)?.click(),80)}
     if(searchResult){setView(searchResult.dataset.searchView);$("globalSearchResults").classList.add("hidden");$("globalSearch").value="";const id=searchResult.dataset.searchWork;if(id)setTimeout(()=>document.querySelector(`[data-view-obra="${id}"]`)?.click(),50)}
     if(event.target.closest("[data-report-open-works]"))setView("obras");
   });
