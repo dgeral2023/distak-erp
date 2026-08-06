@@ -32,7 +32,7 @@ const requiredIds = [
   ,"option5ActiveWorks", "option5ExecutionValue", "option5Income", "option5Alerts"
   ,"aiAssistantButton", "aiAssistantPanel", "aiAssistantMessages", "aiAssistantForm", "aiAssistantInput"
   ,"aiPriorityCard", "aiPrioritySummary", "aiPriorityAction"
-  ,"view-agenda", "navTaskCount", "novaTarefaBtn", "agendaWeekGrid", "agendaTaskList",
+  ,"view-agenda", "navTaskCount", "novaTarefaBtn", "agendaWeekGrid", "agendaTaskList", "agendaQuickFilters", "agendaQuickUnassigned",
   "agendaTaskDialog", "agendaTaskForm", "agendaTaskWork", "agendaTaskDue"
   ,"planningWorkFilter", "planningToday", "planningHealth", "planningTimeline",
   "agendaTaskPhase", "agendaTaskProgress", "agendaTaskDependency", "agendaTaskMilestone"
@@ -144,7 +144,7 @@ for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"
   check(assistantFunction.includes(required), `Função segura do assistente incompleta: ${required}`);
 }
 const agendaModule = readFileSync(join(root, "assets", "js", "modules", "agenda.js"), "utf8");
-for (const required of ["renderAgenda", "initAgenda", "agenda_tarefas", "toggleTask", "prazo", "prioridade", "renderDailyCommand", "taskScore", "agendaWorkload"]){
+for (const required of ["renderAgenda", "initAgenda", "agenda_tarefas", "toggleTask", "prazo", "prioridade", "renderDailyCommand", "taskScore", "agendaWorkload", "setQuickFilter", "data-agenda-owner"]){
   check(agendaModule.includes(required), `Agenda operacional incompleta: ${required}`);
 }
 for (const required of ["renderPlanning", "planningTimeline", "depende_de", "progresso", "marco", "phaseLabel"]){
@@ -175,7 +175,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.5-rc1", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.5-rc2", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
