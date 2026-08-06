@@ -24,7 +24,7 @@ const requiredIds = [
   "view-orcamentos", "view-custos", "view-pagamentos", "view-funcionarios",
   "funcionarioForm", "funcionarioHorasForm", "dashboardTeam", "workDocumentList",
   "obraAssignments", "assignmentSummary"
-  ,"globalSearch", "globalSearchResults", "notificationPanel", "notificationList",
+  ,"globalSearch", "globalSearchResults", "notificationPanel", "notificationList", "inspectSafetyBackup", "safetyBackupFile", "safetyBackupDialog", "safetyBackupSummary",
   "view-relatorios", "reportKpis", "profitabilityReport", "maturityReport", "activityTimeline"
   ,"sidebarToggle", "mobileNav", "mobileRegister", "mobileAlerts", "mobileMore",
   "mobileMoreSheet", "mobileRegisterSheet", "mobileSheetBackdrop", "recentNav"
@@ -177,7 +177,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.5-rc3", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.5-rc3", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/field-queue.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
@@ -242,7 +242,7 @@ for (const required of [".skip-link", "prefers-reduced-motion:reduce", ":focus-v
   check(accessibilityCss.includes(required), `Acessibilidade global incompleta: ${required}`);
 }
 const backupModule = readFileSync(join(root, "assets", "js", "modules", "backup.js"), "utf8");
-for (const required of ["createSafetyBackup", "distak-erp-backup", "SHA-256", "crypto.subtle.digest", "Apenas um administrador", "Nenhum dado foi alterado"]){
+for (const required of ["createSafetyBackup", "inspectSafetyBackup", "distak-erp-backup", "SHA-256", "crypto.subtle.digest", "Apenas um administrador", "Nenhum dado foi alterado", "25*1024*1024"]){
   check(backupModule.includes(required), `Cópia de segurança incompleta: ${required}`);
 }
 const recoveryGuide = readFileSync(join(root, "docs", "RECUPERACAO.md"), "utf8");

@@ -11,6 +11,7 @@
 - Índices de apoio adicionados às relações de autoria de compras, propostas e autos de medição.
 - Bloqueios da agenda passam a registar motivo, momento do bloqueio e previsão não vinculativa de resolução.
 - Centro de notificações acionável, com alertas críticos primeiro, remoção de duplicados e acesso direto à tarefa, obra ou distribuição de carga.
+- Verificação administrativa de cópias de segurança, com validação de formato, versão, contagens e checksum, sem restaurar ou alterar dados.
 - Primeira fase construída apenas com dados já autorizados no ERP, sem serviços externos ou alterações financeiras.
 
 ## v3.4 — publicada em 5 de agosto de 2026
