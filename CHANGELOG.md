@@ -5,6 +5,9 @@
 - Novo Comando do Dia na Agenda, com prioridades explicáveis calculadas por atraso, bloqueio, urgência e proximidade do prazo.
 - Visão de carga da equipa, incluindo tarefas abertas, atrasadas e sem responsável.
 - Acesso rápido da prioridade recomendada à edição da respetiva etapa.
+- Filtros rápidos para hoje, atrasos, bloqueios e tarefas sem responsável.
+- Carga da equipa interativa para localizar e redistribuir trabalho com menos passos.
+- Alerta consolidado para tarefas urgentes ou de prioridade alta ainda sem responsável.
 - Primeira fase construída apenas com dados já autorizados no ERP, sem serviços externos ou alterações financeiras.
 
 ## v3.4 — publicada em 5 de agosto de 2026
