@@ -178,7 +178,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.6-rc2", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/accessibility.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/core/intelligence-actions.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.6-rc3", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/accessibility.js", "assets/js/core/backup-readiness.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/core/intelligence-actions.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
@@ -243,7 +243,7 @@ for (const required of [".skip-link", "prefers-reduced-motion:reduce", ":focus-v
   check(accessibilityCss.includes(required), `Acessibilidade global incompleta: ${required}`);
 }
 const backupModule = readFileSync(join(root, "assets", "js", "modules", "backup.js"), "utf8");
-for (const required of ["createSafetyBackup", "inspectSafetyBackup", "distak-erp-backup", "SHA-256", "crypto.subtle.digest", "Apenas um administrador", "Nenhum dado foi alterado", "25*1024*1024"]){
+for (const required of ["createSafetyBackup", "inspectSafetyBackup", "assessRecoveryReadiness", "distak-erp-backup", "SHA-256", "crypto.subtle.digest", "Apenas um administrador", "Nenhum dado foi alterado", "25*1024*1024", "revisão necessária"]){
   check(backupModule.includes(required), `Cópia de segurança incompleta: ${required}`);
 }
 const recoveryGuide = readFileSync(join(root, "docs", "RECUPERACAO.md"), "utf8");
