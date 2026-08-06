@@ -234,7 +234,7 @@ for (const required of ["enable row level security", "revoke all", "grant select
 }
 check(!clientMigration.includes("grant delete"), "O portal do cliente não deve conceder eliminação por SQL.");
 const uiModule = readFileSync(join(root, "assets", "js", "core", "ui.js"), "utf8");
-check(uiModule.includes('classList.contains("client-mode")&&v!=="cliente-portal"'), "A navegação deve bloquear módulos internos no modo cliente.");
+for(const required of ["canAccessView",'role==="cliente"','view==="cliente-portal"',"teamViews.has(view)"])check(uiModule.includes(required),`A navegação por papel está incompleta: ${required}`);
 const accessibilityCss = readFileSync(join(root, "assets", "css", "accessibility.css"), "utf8");
 for (const required of [".skip-link", "prefers-reduced-motion:reduce", ":focus-visible", "@media print"]){
   check(accessibilityCss.includes(required), `Acessibilidade global incompleta: ${required}`);
