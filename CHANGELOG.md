@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## v3.6 — preparada sobre a v3.5
+
+- A inteligência interna passa a indicar a próxima melhor ação para cada obra, priorizando bloqueios, atrasos, faturas vencidas, margem, recebimentos e qualidade dos dados.
+- Cada recomendação apresenta o motivo e abre apenas a área relevante; nenhuma alteração financeira ou operacional é executada automaticamente.
+
 ## v3.5 — em desenvolvimento
 
 - Novo Comando do Dia na Agenda, com prioridades explicáveis calculadas por atraso, bloqueio, urgência e proximidade do prazo.

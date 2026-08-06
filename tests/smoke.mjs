@@ -178,7 +178,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.5-rc3", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/accessibility.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.6-rc1", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/accessibility.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/core/intelligence-actions.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
@@ -217,7 +217,7 @@ for (const required of ["enable row level security", "revoke all", "grant select
 }
 
 const intelligenceModule = readFileSync(join(root, "assets", "js", "modules", "inteligencia.js"), "utf8");
-for (const required of ["calculateWorkIntelligence", "renderInteligencia", "initInteligencia", "projectedCost", "scheduleGap", "confidence", "Guardar análise", "confirmada", "descartada"]){
+for (const required of ["calculateWorkIntelligence", "renderInteligencia", "initInteligencia", "projectedCost", "scheduleGap", "confidence", "buildRecommendedActions", "data-intelligence-action", "Somente navegação", "Guardar análise", "confirmada", "descartada"]){
   check(intelligenceModule.includes(required), `Inteligência de gestão incompleta: ${required}`);
 }
 const intelligenceMigration = readFileSync(join(root, "supabase", "202608051800_inteligencia_gestao.sql"), "utf8");
