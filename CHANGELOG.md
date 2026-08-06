@@ -6,6 +6,7 @@
 - Cada recomendação apresenta o motivo e abre apenas a área relevante; nenhuma alteração financeira ou operacional é executada automaticamente.
 - A navegação móvel do cliente passa a mostrar somente os destinos permitidos, com “Minhas obras” como entrada principal e uma barra inferior adaptada ao perfil.
 - A verificação de cópias passa a apresentar prontidão para recuperação, idade do ficheiro, identificadores duplicados e ligações quebradas, mantendo qualquer restauro automático desativado.
+- A carga da equipa passa a ponderar prioridade, atraso, bloqueios, proximidade do prazo e horas do mês, indicando pressão e disponibilidade sem reatribuir tarefas automaticamente.
 
 ## v3.5 — em desenvolvimento
 
