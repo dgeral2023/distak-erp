@@ -4,6 +4,7 @@
 
 - A inteligência interna passa a indicar a próxima melhor ação para cada obra, priorizando bloqueios, atrasos, faturas vencidas, margem, recebimentos e qualidade dos dados.
 - Cada recomendação apresenta o motivo e abre apenas a área relevante; nenhuma alteração financeira ou operacional é executada automaticamente.
+- A navegação móvel do cliente passa a mostrar somente os destinos permitidos, com “Minhas obras” como entrada principal e uma barra inferior adaptada ao perfil.
 
 ## v3.5 — em desenvolvimento
 
