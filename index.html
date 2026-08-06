@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="assets/css/cliente-portal.css?v=20260805-client-v1">
   <link rel="stylesheet" href="assets/css/cliente-role.css?v=20260805-client-v1">
   <link rel="stylesheet" href="assets/css/cliente-approvals.css?v=20260805-client-v1">
-  <link rel="stylesheet" href="assets/css/accessibility.css?v=20260805-a11y-v1">
+  <link rel="stylesheet" href="assets/css/accessibility.css?v=20260806-a11y-v2">
   <link rel="stylesheet" href="assets/css/backup.css?v=20260806-backup-v1">
 
   <link rel="manifest" href="manifest.json">
@@ -80,8 +80,8 @@
     <button id="mobileMore" type="button"><i>☰</i><span>Mais</span></button>
   </nav>
   <div id="mobileSheetBackdrop" class="mobile-sheet-backdrop hidden"></div>
-  <section id="mobileMoreSheet" class="mobile-sheet hidden" aria-label="Mais opções"><header><div><span>Navegação</span><h3>Mais opções</h3></div><button data-close-mobile-sheet type="button">×</button></header><div id="mobileMoreLinks" class="mobile-sheet-grid"></div></section>
-  <section id="mobileRegisterSheet" class="mobile-sheet hidden" aria-label="Registo rápido"><header><div><span>Ação rápida</span><h3>O que deseja registar?</h3></div><button data-close-mobile-sheet type="button">×</button></header><div class="mobile-register-grid"><button data-quick-action="operacional"><i>◉</i><strong>Registo de obra</strong><small>Diário, material ou ocorrência</small></button><button data-quick-action="tarefa"><i>◫</i><strong>Tarefa</strong><small>Novo prazo</small></button><button class="admin-only" data-quick-action="cliente"><i>♙</i><strong>Cliente</strong><small>Novo contacto</small></button><button class="admin-only" data-quick-action="obra"><i>▥</i><strong>Obra</strong><small>Novo projeto</small></button><button class="admin-only" data-quick-action="orcamento"><i>▤</i><strong>Orçamento</strong><small>Nova proposta</small></button><button class="admin-only" data-quick-action="custo"><i>↘</i><strong>Custo</strong><small>Nova despesa</small></button><button class="admin-only" data-quick-action="pagamento"><i>€</i><strong>Pagamento</strong><small>Novo recebimento</small></button><button class="admin-only" data-quick-action="previsao"><i>↗</i><strong>Previsão</strong><small>Fluxo futuro</small></button><button data-quick-action="diario"><i>✓</i><strong>Diário de obra</strong><small>Abrir minhas obras</small></button></div></section>
+  <section id="mobileMoreSheet" class="mobile-sheet hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Mais opções"><header><div><span>Navegação</span><h3>Mais opções</h3></div><button data-close-mobile-sheet type="button" aria-label="Fechar mais opções">×</button></header><div id="mobileMoreLinks" class="mobile-sheet-grid"></div></section>
+  <section id="mobileRegisterSheet" class="mobile-sheet hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Registo rápido"><header><div><span>Ação rápida</span><h3>O que deseja registar?</h3></div><button data-close-mobile-sheet type="button" aria-label="Fechar registo rápido">×</button></header><div class="mobile-register-grid"><button data-quick-action="operacional"><i>◉</i><strong>Registo de obra</strong><small>Diário, material ou ocorrência</small></button><button data-quick-action="tarefa"><i>◫</i><strong>Tarefa</strong><small>Novo prazo</small></button><button class="admin-only" data-quick-action="cliente"><i>♙</i><strong>Cliente</strong><small>Novo contacto</small></button><button class="admin-only" data-quick-action="obra"><i>▥</i><strong>Obra</strong><small>Novo projeto</small></button><button class="admin-only" data-quick-action="orcamento"><i>▤</i><strong>Orçamento</strong><small>Nova proposta</small></button><button class="admin-only" data-quick-action="custo"><i>↘</i><strong>Custo</strong><small>Nova despesa</small></button><button class="admin-only" data-quick-action="pagamento"><i>€</i><strong>Pagamento</strong><small>Novo recebimento</small></button><button class="admin-only" data-quick-action="previsao"><i>↗</i><strong>Previsão</strong><small>Fluxo futuro</small></button><button data-quick-action="diario"><i>✓</i><strong>Diário de obra</strong><small>Abrir minhas obras</small></button></div></section>
 
   <main id="mainContent" class="content" tabindex="-1">
     <header class="topbar">
@@ -91,13 +91,13 @@
       </div>
       <div class="v3-top-actions">
         <label class="global-search"><span>⌕</span><input id="globalSearch" type="search" placeholder="Pesquisar comandos, obras, clientes..." autocomplete="off"><kbd>Ctrl + K</kbd></label>
-        <button id="notificationBtn" class="notification-button" type="button" aria-label="Abrir alertas">🔔<span id="notificationCount">0</span></button>
-        <button id="topUserMenu" class="top-user-menu" type="button" aria-label="Conta do utilizador"><span id="topUserInitial">D</span><i>⌄</i></button>
+        <button id="notificationBtn" class="notification-button" type="button" aria-label="Abrir alertas" aria-controls="notificationPanel" aria-expanded="false">🔔<span id="notificationCount">0</span></button>
+        <button id="topUserMenu" class="top-user-menu" type="button" aria-label="Conta do utilizador" aria-controls="accountPanel" aria-expanded="false"><span id="topUserInitial">D</span><i>⌄</i></button>
       </div>
     </header>
     <div id="globalSearchResults" class="global-search-results hidden"></div>
-    <aside id="notificationPanel" class="notification-panel hidden"><header><div><span>Centro de atenção</span><h3>Alertas e próximos passos</h3></div><button id="notificationClose" type="button" aria-label="Fechar">×</button></header><div id="notificationList"></div></aside>
-    <aside id="accountPanel" class="account-panel hidden"><div id="accountPanelUser"></div><button id="accountLogout" type="button">Sair da conta</button></aside>
+    <aside id="notificationPanel" class="notification-panel hidden" role="dialog" aria-label="Centro de atenção" aria-hidden="true"><header><div><span>Centro de atenção</span><h3>Alertas e próximos passos</h3></div><button id="notificationClose" type="button" aria-label="Fechar">×</button></header><div id="notificationList"></div></aside>
+    <aside id="accountPanel" class="account-panel hidden" aria-label="Menu da conta" aria-hidden="true"><div id="accountPanelUser"></div><button id="accountLogout" type="button">Sair da conta</button></aside>
 
     <button id="aiAssistantButton" class="ai-assistant-button" type="button" aria-label="Abrir Assistente DISTAK" aria-controls="aiAssistantPanel" aria-expanded="false"><span class="ai-button-mark">D</span><span>Assistente</span><b>IA</b></button>
     <div id="aiAssistantBackdrop" class="ai-assistant-backdrop hidden"></div>
@@ -1030,6 +1030,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260806-v35-integrated-2" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260806-v35-integrated-3" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>

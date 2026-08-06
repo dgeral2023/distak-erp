@@ -35,6 +35,8 @@ function renderNotifications(){
   $("notificationList").innerHTML=rows.length?rows.map(row=>`<button class="notification-item ${row.level}" data-alert-view="${row.view}"${row.kind?` data-alert-kind="${row.kind}"`:""}${row.id?` data-alert-id="${esc(row.id)}"`:""}${row.filter?` data-alert-filter="${row.filter}"`:""} aria-label="${esc(`${row.title}. ${row.action}`)}"><strong>${esc(row.title)}</strong><span>${esc(row.text)}</span><small>${esc(row.action)} <b aria-hidden="true">→</b></small></button>`).join(""):'<div class="v3-empty"><strong>Tudo controlado</strong><p>Não existem alertas críticos neste momento.</p></div>';
 }
 
+function toggleNotifications(force,restoreFocus=true){const panel=$("notificationPanel"),open=force??panel.classList.contains("hidden");panel.classList.toggle("hidden",!open);panel.setAttribute("aria-hidden",String(!open));$("notificationBtn").setAttribute("aria-expanded",String(open));if(open)setTimeout(()=>$("notificationClose")?.focus(),0);else if(restoreFocus)$("notificationBtn")?.focus()}
+
 function renderReports(){
   if(!$("profitabilityReport"))return;
   const contracted=store.obras.reduce((sum,row)=>sum+workValue(row),0);
@@ -93,13 +95,13 @@ export function renderV3(){renderNotifications();renderReports();renderActivity(
 export function initV3(){
   $("globalSearch")?.addEventListener("input",event=>search(event.target.value));
   $("globalSearch")?.addEventListener("keydown",event=>{if(event.key==="Escape")$("globalSearchResults").classList.add("hidden")});
-  $("notificationBtn")?.addEventListener("click",()=>$("notificationPanel").classList.toggle("hidden"));
-  $("notificationClose")?.addEventListener("click",()=>$("notificationPanel").classList.add("hidden"));
+  $("notificationBtn")?.addEventListener("click",()=>toggleNotifications());
+  $("notificationClose")?.addEventListener("click",()=>toggleNotifications(false));
   $("printExecutiveReport")?.addEventListener("click",printExecutive);
   document.addEventListener("click",event=>{
     const alert=event.target.closest("[data-alert-view]"),alertView=alert?.dataset.alertView;
     const searchResult=event.target.closest("[data-search-view]");
-    if(alertView){setView(alertView);$("notificationPanel").classList.add("hidden");if(alert.dataset.alertFilter)setTimeout(()=>document.querySelector(`[data-agenda-quick="${alert.dataset.alertFilter}"]`)?.click(),50);if(alert.dataset.alertKind==="task"&&alert.dataset.alertId)setTimeout(()=>document.querySelector(`[data-edit-task="${alert.dataset.alertId}"]`)?.click(),80);if(alert.dataset.alertKind==="work"&&alert.dataset.alertId)setTimeout(()=>document.querySelector(`[data-view-obra="${alert.dataset.alertId}"]`)?.click(),80)}
+    if(alertView){toggleNotifications(false,false);setView(alertView);if(alert.dataset.alertFilter)setTimeout(()=>document.querySelector(`[data-agenda-quick="${alert.dataset.alertFilter}"]`)?.click(),50);if(alert.dataset.alertKind==="task"&&alert.dataset.alertId)setTimeout(()=>document.querySelector(`[data-edit-task="${alert.dataset.alertId}"]`)?.click(),80);if(alert.dataset.alertKind==="work"&&alert.dataset.alertId)setTimeout(()=>document.querySelector(`[data-view-obra="${alert.dataset.alertId}"]`)?.click(),80)}
     if(searchResult){setView(searchResult.dataset.searchView);$("globalSearchResults").classList.add("hidden");$("globalSearch").value="";const id=searchResult.dataset.searchWork;if(id)setTimeout(()=>document.querySelector(`[data-view-obra="${id}"]`)?.click(),50)}
     if(event.target.closest("[data-report-open-works]"))setView("obras");
   });
