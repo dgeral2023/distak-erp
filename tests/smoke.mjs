@@ -10,7 +10,7 @@ function check(condition, message) {
   if (!condition) failures.push(message);
 }
 
-check(index.includes("DISTAK ERP v3.4"), "A versão candidata visível deve ser v3.4.");
+check(index.includes("DISTAK ERP v3.5"), "A versão candidata visível deve ser v3.5.");
 
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -144,7 +144,7 @@ for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"
   check(assistantFunction.includes(required), `Função segura do assistente incompleta: ${required}`);
 }
 const agendaModule = readFileSync(join(root, "assets", "js", "modules", "agenda.js"), "utf8");
-for (const required of ["renderAgenda", "initAgenda", "agenda_tarefas", "toggleTask", "prazo", "prioridade"]){
+for (const required of ["renderAgenda", "initAgenda", "agenda_tarefas", "toggleTask", "prazo", "prioridade", "renderDailyCommand", "taskScore", "agendaWorkload"]){
   check(agendaModule.includes(required), `Agenda operacional incompleta: ${required}`);
 }
 for (const required of ["renderPlanning", "planningTimeline", "depende_de", "progresso", "marco", "phaseLabel"]){
@@ -175,7 +175,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.4-rc1", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.5-rc1", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 

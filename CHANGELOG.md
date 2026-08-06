@@ -1,6 +1,13 @@
 # Histórico de versões
 
-## v3.4 — candidata, ainda não publicada
+## v3.5 — em desenvolvimento
+
+- Novo Comando do Dia na Agenda, com prioridades explicáveis calculadas por atraso, bloqueio, urgência e proximidade do prazo.
+- Visão de carga da equipa, incluindo tarefas abertas, atrasadas e sem responsável.
+- Acesso rápido da prioridade recomendada à edição da respetiva etapa.
+- Primeira fase construída apenas com dados já autorizados no ERP, sem serviços externos ou alterações financeiras.
+
+## v3.4 — publicada em 5 de agosto de 2026
 
 - Portal do Cliente responsivo com obras, fotografias, progresso, etapas, datas, atualizações e documentos explicitamente publicados.
 - Pedidos formais de aprovação com respostas limitadas a aprovar ou pedir revisão, sem efeitos financeiros ou operacionais automáticos.
@@ -10,9 +17,7 @@
 - Melhorias de teclado, leitores de ecrã, movimento reduzido, impressão e foco visível.
 - Orçamento automático de desempenho, cobertura do shell PWA, CSP e auditoria preventiva no GitHub Actions.
 
-### Ativação pendente
-
-A migração `202608052000_portal_cliente.sql` e a função `convidar-cliente` não foram aplicadas em produção. Nenhum perfil, acesso ou convite de cliente foi criado.
+As tabelas protegidas do Portal do Cliente e a função autenticada `convidar-cliente` foram ativadas. Nenhum convite ou acesso de cliente foi criado durante a publicação.
 
 ## v3.3 — publicada
 

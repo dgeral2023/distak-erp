@@ -31,7 +31,22 @@ export function renderAgenda(){
   $("agendaTodayCount").textContent=dueToday.length;$("agendaOverdueCount").textContent=overdue.length;$("agendaWeekCount").textContent=next.length;
   const done=tasks.filter(task=>task.estado==="concluida").length;$("agendaDoneCount").textContent=done;$("agendaDoneRate").textContent=`${tasks.length?Math.round(done/tasks.length*100):0}% do total`;
   $("navTaskCount").textContent=overdue.length+dueToday.length;$("navTaskCount").classList.toggle("hidden",!overdue.length&&!dueToday.length);
-  renderPlanning();renderWeek(filteredTasks());renderTaskList(filteredTasks());
+  renderDailyCommand(open);renderPlanning();renderWeek(filteredTasks());renderTaskList(filteredTasks());
+}
+
+function taskScore(task,current){
+  const days=Math.round((parseDate(task.prazo)-parseDate(current))/86400000);
+  return (days<0?120+Math.min(30,Math.abs(days)*4):Math.max(0,35-days*5))+(task.estado==="bloqueada"?55:0)+({urgente:45,alta:28,media:12,baixa:0}[task.prioridade]||0)+(task.depende_de?8:0);
+}
+
+function renderDailyCommand(open){
+  const current=today(),ranked=[...open].sort((a,b)=>taskScore(b,current)-taskScore(a,current)||String(a.prazo).localeCompare(String(b.prazo)));
+  const focus=ranked.slice(0,5);
+  $("agendaFocusList").innerHTML=focus.length?focus.map((task,index)=>{const late=task.prazo<current,blocked=task.estado==="bloqueada";return `<button type="button" class="agenda-focus-item ${late||blocked?"risk":""}" data-edit-task="${task.id}"><b>${index+1}</b><span><strong>${esc(task.titulo)}</strong><small>${esc(workName(task.obra_id))} · ${late?`atrasada desde ${parseDate(task.prazo).toLocaleDateString("pt-PT")}`:blocked?"etapa bloqueada":`prazo ${parseDate(task.prazo).toLocaleDateString("pt-PT")}`}</small></span><em>${esc(priorityLabel(task.prioridade))}</em></button>`}).join(""):'<div class="agenda-empty compact">Sem tarefas pendentes. O planeamento está em dia.</div>';
+  const groups=new Map();open.forEach(task=>{const key=task.responsavel_id||task.funcionario_id||"unassigned",name=task.responsavel_id?profileName(task.responsavel_id):task.funcionario_id?employeeName(task.funcionario_id):"Sem responsável",row=groups.get(key)||{name,total:0,late:0};row.total++;if(task.prazo<current)row.late++;groups.set(key,row)});
+  const workload=[...groups.values()].sort((a,b)=>b.total-a.total),maximum=Math.max(1,...workload.map(row=>row.total));
+  const unassigned=groups.get("unassigned")?.total||0;$("agendaUnassignedCount").textContent=`${unassigned} sem responsável`;
+  $("agendaWorkload").innerHTML=workload.length?workload.slice(0,6).map(row=>`<article><div><strong>${esc(row.name)}</strong><span>${row.total} aberta(s)${row.late?` · ${row.late} atrasada(s)`:""}</span></div><i><em style="width:${Math.max(8,row.total/maximum*100)}%"></em></i></article>`).join(""):'<div class="agenda-empty compact">Sem carga pendente para a equipa.</div>';
 }
 
 function renderPlanning(){
@@ -92,6 +107,7 @@ async function toggleTask(task){
 export function initAgenda(refresh){
   refreshApp=refresh;$("novaTarefaBtn").onclick=()=>openTask();$("agendaTaskForm").onsubmit=submitTask;
   $("agendaTaskWork").onchange=()=>fillDependencies();
+  $("agendaFocusAll").onclick=()=>{$("agendaSearch").value="";$("agendaStateFilter").value="";$("agendaPriorityFilter").value="";$("agendaTaskList").scrollIntoView({behavior:"smooth",block:"start"})};
   $("planningWorkFilter").onchange=renderPlanning;$("planningToday").onclick=()=>{weekStart=startOfWeek(new Date());renderAgenda()};
   $("agendaPrevWeek").onclick=()=>{weekStart=addDays(weekStart,-7);renderAgenda()};$("agendaNextWeek").onclick=()=>{weekStart=addDays(weekStart,7);renderAgenda()};$("agendaCurrentWeek").onclick=()=>{weekStart=startOfWeek(new Date());renderAgenda()};
   ["agendaSearch","agendaStateFilter","agendaPriorityFilter"].forEach(id=>$(id).addEventListener(id==="agendaSearch"?"input":"change",renderAgenda));

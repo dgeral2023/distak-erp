@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://usaaiubvynxyfviwgogs.supabase.co wss://usaaiubvynxyfviwgogs.supabase.co; img-src 'self' data: blob: https:; font-src 'self' data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'">
-  <title>DISTAK ERP v3.4</title>
+  <title>DISTAK ERP v3.5</title>
 
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
@@ -53,7 +53,7 @@
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="sidebar-brand"><button id="sidebarToggle" type="button" aria-label="Recolher menu" title="Recolher menu">☰</button><div class="brand">DISTAK ERP <small>v3.4</small></div><span class="brand-chevron">‹</span></div>
+    <div class="sidebar-brand"><button id="sidebarToggle" type="button" aria-label="Recolher menu" title="Recolher menu">☰</button><div class="brand">DISTAK ERP <small>v3.5</small></div><span class="brand-chevron">‹</span></div>
     <nav id="mainNav">
       <div class="nav-group client-only hidden"><button class="nav" data-view="cliente-portal"><i>◎</i><span>Minhas obras</span></button></div>
       <div class="nav-group admin-only"><button class="nav" data-view="portal-admin"><i>◎</i><span>Portal do cliente</span></button></div>
@@ -236,6 +236,10 @@
     <section id="view-agenda" class="view hidden">
       <div class="agenda-head"><div><span class="agenda-kicker">PLANEAMENTO AVANÇADO</span><h1>Agenda e cronograma</h1><p>Etapas, dependências, responsáveis e prazos de todas as obras.</p></div><button id="novaTarefaBtn" class="btn primary" type="button">＋ Nova etapa</button></div>
       <div class="agenda-kpis"><article><span>Para hoje</span><strong id="agendaTodayCount">0</strong><small>Tarefas com prazo hoje</small></article><article><span>Em atraso</span><strong id="agendaOverdueCount">0</strong><small>Precisam de atenção</small></article><article><span>Próximos 7 dias</span><strong id="agendaWeekCount">0</strong><small>Planeamento imediato</small></article><article><span>Concluídas</span><strong id="agendaDoneCount">0</strong><small id="agendaDoneRate">0% do total</small></article></div>
+      <div class="agenda-command-grid">
+        <section class="panel agenda-focus-panel"><div class="panel-title"><div><span class="agenda-kicker">COMANDO DO DIA</span><h3>Prioridades recomendadas</h3><p>Ordenadas por atraso, bloqueio, urgência e proximidade do prazo.</p></div><button id="agendaFocusAll" class="btn light" type="button">Ver lista completa</button></div><div id="agendaFocusList" class="agenda-focus-list"></div></section>
+        <section class="panel agenda-workload-panel"><div class="panel-title"><div><span class="agenda-kicker">CAPACIDADE</span><h3>Carga da equipa</h3><p>Tarefas abertas por responsável.</p></div><span id="agendaUnassignedCount" class="badge">0 sem responsável</span></div><div id="agendaWorkload" class="agenda-workload"></div></section>
+      </div>
       <section class="panel planning-panel"><div class="panel-title"><div><h3>Cronograma das obras</h3><p>Visão temporal das etapas e dependências</p></div><div class="planning-controls"><select id="planningWorkFilter" aria-label="Filtrar cronograma por obra"><option value="">Todas as obras</option></select><button id="planningToday" class="btn small light" type="button">Hoje</button></div></div><div id="planningHealth" class="planning-health"></div><div id="planningTimeline" class="planning-timeline"></div></section>
       <section class="panel agenda-calendar-panel"><div class="agenda-toolbar"><div class="agenda-week-nav"><button id="agendaPrevWeek" type="button" aria-label="Semana anterior">‹</button><strong id="agendaWeekLabel">Semana atual</strong><button id="agendaNextWeek" type="button" aria-label="Semana seguinte">›</button><button id="agendaCurrentWeek" type="button">Hoje</button></div><div class="agenda-filters"><input id="agendaSearch" type="search" placeholder="Pesquisar tarefa ou obra…"><select id="agendaStateFilter"><option value="">Todos os estados</option><option value="pendente">Pendente</option><option value="em_curso">Em curso</option><option value="bloqueada">Bloqueada</option><option value="concluida">Concluída</option></select><select id="agendaPriorityFilter"><option value="">Todas as prioridades</option><option value="urgente">Urgente</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div></div><div id="agendaWeekGrid" class="agenda-week-grid"></div></section>
       <section class="panel"><div class="panel-title"><div><h3>Lista de tarefas</h3><p>Ordenada por prazo e prioridade</p></div><span id="agendaResultCount" class="badge">0 tarefas</span></div><div id="agendaTaskList" class="agenda-task-list"></div></section>
@@ -1021,6 +1025,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260805-client-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260806-planning-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>
