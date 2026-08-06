@@ -961,6 +961,7 @@
   <label>Obra<select id="agendaTaskWork" required></select></label><label>Prioridade<select id="agendaTaskPriority"><option value="baixa">Baixa</option><option value="media" selected>Média</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></label>
   <label>Início<input id="agendaTaskStart" type="date" required></label><label>Prazo<input id="agendaTaskDue" type="date" required></label>
   <label>Hora<input id="agendaTaskTime" type="time"></label><label>Estado<select id="agendaTaskState"><option value="pendente">Pendente</option><option value="em_curso">Em curso</option><option value="bloqueada">Bloqueada</option><option value="concluida">Concluída</option></select></label>
+  <div id="agendaBlockFields" class="agenda-block-fields full hidden"><label>Motivo do bloqueio<textarea id="agendaTaskBlockReason" rows="2" maxlength="1000" placeholder="Indique o impedimento e o que é necessário para avançar"></textarea></label><label>Resolução prevista<input id="agendaTaskResolution" type="date"></label></div>
   <label>Fase<select id="agendaTaskPhase"><option value="preparacao">Preparação</option><option value="demolicao">Demolição</option><option value="estrutura">Estrutura</option><option value="instalacoes">Instalações</option><option value="acabamentos">Acabamentos</option><option value="entrega">Entrega</option><option value="execucao">Execução geral</option></select></label><label>Progresso<input id="agendaTaskProgress" type="number" min="0" max="100" step="5" value="0"></label>
   <label>Depende de<select id="agendaTaskDependency"><option value="">Sem dependência</option></select></label><label class="agenda-milestone"><input id="agendaTaskMilestone" type="checkbox"> É um marco da obra</label>
   <label>Responsável no ERP<select id="agendaTaskResponsible"></select></label><label class="admin-only">Funcionário associado<select id="agendaTaskEmployee"></select></label>
@@ -1026,6 +1027,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260806-planning-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260806-blockers-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>

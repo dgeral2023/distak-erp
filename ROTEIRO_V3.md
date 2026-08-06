@@ -19,12 +19,14 @@ Este documento mantém o plano de produção contínua do DISTAK ERP. Cada fase 
 - Portal da equipa em campo com tarefas, registos móveis, fotografias, fila offline, sincronização segura e revisão administrativa.
 - Inteligência de gestão interna e explicável para prever custo final, margem, prazo e risco de cobrança, com cenários e confirmação humana.
 - v3.4 publicada: Portal do Cliente isolado, publicações autorizadas, aprovações, convites server-side, recuperação, acessibilidade, desempenho e auditoria automatizada.
+- v3.5 construída: comando diário, distribuição de carga, agenda executável, prioridades, alertas explicáveis e bloqueios com motivo e previsão de resolução.
 
 ## Próximas fases
 
-1. Evoluir a v3.5 com comando diário, distribuição de carga, agenda executável, prioridades e alertas explicáveis.
-2. Validar os fluxos no computador e telemóvel com contas reais separadas de administrador, equipa e cliente.
-3. Continuar qualidade e escala; integração generativa externa permanece fora do âmbito até autorização específica própria.
+1. Concluir a publicação e a validação pública da v3.5 no computador e telemóvel.
+2. Validar os fluxos com contas reais separadas de administrador, equipa e cliente, somente após autorização específica para criar ou convidar esses utilizadores.
+3. Evoluir notificações acionáveis, gestão de fotografias e documentos, relatórios e recuperação controlada.
+4. Continuar qualidade e escala; integração generativa externa permanece fora do âmbito até autorização específica própria.
 
 ## Regras permanentes
 

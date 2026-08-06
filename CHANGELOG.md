@@ -9,6 +9,7 @@
 - Carga da equipa interativa para localizar e redistribuir trabalho com menos passos.
 - Alerta consolidado para tarefas urgentes ou de prioridade alta ainda sem responsável.
 - Índices de apoio adicionados às relações de autoria de compras, propostas e autos de medição.
+- Bloqueios da agenda passam a registar motivo, momento do bloqueio e previsão não vinculativa de resolução.
 - Primeira fase construída apenas com dados já autorizados no ERP, sem serviços externos ou alterações financeiras.
 
 ## v3.4 — publicada em 5 de agosto de 2026

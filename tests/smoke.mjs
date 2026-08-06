@@ -33,7 +33,7 @@ const requiredIds = [
   ,"aiAssistantButton", "aiAssistantPanel", "aiAssistantMessages", "aiAssistantForm", "aiAssistantInput"
   ,"aiPriorityCard", "aiPrioritySummary", "aiPriorityAction"
   ,"view-agenda", "navTaskCount", "novaTarefaBtn", "agendaWeekGrid", "agendaTaskList", "agendaQuickFilters", "agendaQuickUnassigned",
-  "agendaTaskDialog", "agendaTaskForm", "agendaTaskWork", "agendaTaskDue"
+  "agendaTaskDialog", "agendaTaskForm", "agendaTaskWork", "agendaTaskDue", "agendaBlockFields", "agendaTaskBlockReason", "agendaTaskResolution"
   ,"planningWorkFilter", "planningToday", "planningHealth", "planningTimeline",
   "agendaTaskPhase", "agendaTaskProgress", "agendaTaskDependency", "agendaTaskMilestone"
   ,"view-previsoes", "newForecastBtn", "forecastKpis", "forecastChart", "collectionRiskList",
@@ -158,6 +158,8 @@ const agendaMigration = readFileSync(join(root, "supabase", "202608042110_agenda
 for (const required of ["enable row level security", "private.can_access_obra", "agenda_tarefas_select", "agenda_tarefas_insert", "agenda_tarefas_update", "revoke all on public.agenda_tarefas from anon"]){
   check(agendaMigration.includes(required), `Migração da agenda incompleta: ${required}`);
 }
+const blockersMigration=readFileSync(join(root,"supabase","migrations","20260806175853_bloqueios_agenda_v35.sql"),"utf8");
+for(const required of ["bloqueio_motivo","bloqueado_em","resolucao_prevista","agenda_tarefas_bloqueios_idx"])check(blockersMigration.includes(required),`Tratamento de bloqueios incompleto: ${required}`);
 const forecastModule = readFileSync(join(root, "assets", "js", "modules", "previsoes.js"), "utf8");
 for (const required of ["renderPrevisoes", "initPrevisoes", "financeiro_previsoes", "collectionRisks", "weighted"]){
   check(forecastModule.includes(required), `Previsões financeiras incompletas: ${required}`);
@@ -175,7 +177,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.5-rc2", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.5-rc3", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 

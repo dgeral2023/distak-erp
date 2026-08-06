@@ -14,7 +14,7 @@ for(const src of [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match=>mat
   if(src.startsWith("http")&&!/^https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@\d+\.\d+\.\d+$/.test(src))failures.push(`Dependência externa não autorizada ou sem versão fixa: ${src}`);
 }
 for(const required of ["Content-Security-Policy","object-src 'none'","base-uri 'self'","form-action 'self'","strict-origin-when-cross-origin"])if(!html.includes(required))failures.push(`Proteção HTML em falta: ${required}`);
-const recentSql=walk(join(root,"supabase")).filter(path=>/20260805\d+_.*\.sql$/.test(path));
+const recentSql=walk(join(root,"supabase")).filter(path=>/2026080[56]\d+_.*\.sql$/.test(path));
 for(const path of recentSql){const sql=readFileSync(path,"utf8");if(/grant\s+[^;]+\s+to\s+anon\b/i.test(sql))failures.push(`${path.slice(root.length+1)} concede privilégios ao papel anon`);if(/grant\s+delete\b/i.test(sql))failures.push(`${path.slice(root.length+1)} concede DELETE sem revisão explícita`)}
 const portalSql=readFileSync(join(root,"supabase","202608052000_portal_cliente.sql"),"utf8");
 for(const table of ["cliente_portal_acessos","cliente_portal_obras","cliente_portal_atualizacoes","cliente_portal_ficheiros","cliente_portal_aprovacoes"])if(!portalSql.includes(`alter table public.${table} enable row level security`))failures.push(`RLS em falta: ${table}`);
