@@ -38,7 +38,7 @@ const requiredIds = [
   "agendaTaskPhase", "agendaTaskProgress", "agendaTaskDependency", "agendaTaskMilestone"
   ,"view-previsoes", "newForecastBtn", "forecastKpis", "forecastChart", "collectionRiskList",
   "forecastSearch", "forecastList", "forecastDialog", "forecastForm", "forecastProbability"
-  ,"view-dossies", "dossierPrintAll", "dossierKpis", "dossierSearch", "dossierStatusFilter",
+  ,"view-dossies", "dossierPrintAll", "dossierKpis", "dossierPriority", "dossierSearch", "dossierStatusFilter",
   "dossierResultCount", "dossierGrid"
   ,"view-operacional", "newOperationalRecord", "operationalKpis", "operationalSearch",
   "operationalDate", "operationalWorkGrid", "operationalTimeline", "operationalQuickDialog",
@@ -169,15 +169,16 @@ for (const required of ["enable row level security", "financeiro_previsoes_selec
   check(forecastMigration.includes(required), `Migração das previsões incompleta: ${required}`);
 }
 const dossierModule = readFileSync(join(root, "assets", "js", "modules", "dossies.js"), "utf8");
-for (const required of ["renderDossies", "initDossies", "printReport", "documentosObra", "Fotos depois"]){
-  check(dossierModule.includes(required), `Dossiê digital incompleto: ${required}`);
+const dossierQualityModule = readFileSync(join(root, "assets", "js", "core", "dossier-quality.js"), "utf8");
+for (const required of ["renderDossies", "initDossies", "buildDossier", "data-dossier-fix", "openTarget", "printReport", "documentosObra", "Orçamento associado", "Diário de obra", "Fotos depois"]){
+  check(`${dossierModule}\n${dossierQualityModule}`.includes(required), `Dossiê digital incompleto: ${required}`);
 }
 const pwaModule = readFileSync(join(root, "assets", "js", "core", "pwa.js"), "utf8");
 const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.5-rc3", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/field-queue.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.5-rc3", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 

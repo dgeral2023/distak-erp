@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="assets/css/assistant.css?v=20260804-ai-v2">
   <link rel="stylesheet" href="assets/css/agenda.css?v=20260804-agenda-v1">
   <link rel="stylesheet" href="assets/css/previsoes.css?v=20260804-finance-v1">
-  <link rel="stylesheet" href="assets/css/dossies.css?v=20260804-dossier-v1">
+  <link rel="stylesheet" href="assets/css/dossies.css?v=20260806-dossier-v2">
   <link rel="stylesheet" href="assets/css/operacional.css?v=20260805-operational-v1">
   <link rel="stylesheet" href="assets/css/compras.css?v=20260805-purchases-v1">
   <link rel="stylesheet" href="assets/css/medicoes.css?v=20260805-measurements-v1">
@@ -273,6 +273,7 @@
     <section id="view-dossies" class="view hidden">
       <div class="dossier-head"><div><span>ARQUIVO CENTRAL DAS OBRAS</span><h1>Dossiê digital</h1><p>Documentos, fotografias e pendências organizados por obra.</p></div><button id="dossierPrintAll" class="btn light" type="button">Imprimir resumo</button></div>
       <div id="dossierKpis" class="dossier-kpis"></div>
+      <section id="dossierPriority" class="dossier-priority" aria-label="Pendências documentais prioritárias"></section>
       <div class="dossier-toolbar"><input id="dossierSearch" type="search" placeholder="Pesquisar obra, cliente ou morada…"><select id="dossierStatusFilter"><option value="">Todos os níveis</option><option value="attention">Precisa de atenção</option><option value="progress">Em organização</option><option value="complete">Completo</option></select><span id="dossierResultCount" class="badge">0 obras</span></div>
       <div id="dossierGrid" class="dossier-grid"></div>
     </section>
@@ -1029,6 +1030,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260806-v35-integrated-1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260806-v35-integrated-2" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>
