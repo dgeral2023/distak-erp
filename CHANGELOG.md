@@ -8,6 +8,7 @@
 - Filtros rápidos para hoje, atrasos, bloqueios e tarefas sem responsável.
 - Carga da equipa interativa para localizar e redistribuir trabalho com menos passos.
 - Alerta consolidado para tarefas urgentes ou de prioridade alta ainda sem responsável.
+- Índices de apoio adicionados às relações de autoria de compras, propostas e autos de medição.
 - Primeira fase construída apenas com dados já autorizados no ERP, sem serviços externos ou alterações financeiras.
 
 ## v3.4 — publicada em 5 de agosto de 2026
