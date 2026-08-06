@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="assets/css/cliente-role.css?v=20260805-client-v1">
   <link rel="stylesheet" href="assets/css/cliente-approvals.css?v=20260805-client-v1">
   <link rel="stylesheet" href="assets/css/accessibility.css?v=20260805-a11y-v1">
+  <link rel="stylesheet" href="assets/css/backup.css?v=20260806-backup-v1">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -458,7 +459,7 @@
     </section>
 
     <section id="view-relatorios" class="view hidden">
-      <div class="v3-section-head"><div><span>Centro documental</span><h2>Relatórios e exportações</h2><p>Documentos prontos para acompanhamento, reunião e arquivo.</p></div><div class="actions"><button id="exportSafetyBackup" class="btn light admin-only" type="button">Exportar cópia de segurança</button><button id="printExecutiveReport" class="btn primary" type="button">Imprimir relatório executivo</button></div></div>
+      <div class="v3-section-head"><div><span>Centro documental</span><h2>Relatórios e exportações</h2><p>Documentos prontos para acompanhamento, reunião e arquivo.</p></div><div class="actions"><button id="inspectSafetyBackup" class="btn light admin-only" type="button">Verificar cópia</button><input id="safetyBackupFile" class="hidden" type="file" accept="application/json,.json"><button id="exportSafetyBackup" class="btn light admin-only" type="button">Exportar cópia de segurança</button><button id="printExecutiveReport" class="btn primary" type="button">Imprimir relatório executivo</button></div></div>
       <div id="reportKpis" class="report-kpis"></div>
       <div class="report-grid">
         <article class="panel"><h3>Rentabilidade por obra</h3><div id="profitabilityReport"></div></article>
@@ -466,6 +467,7 @@
       </div>
       <article class="panel report-guide"><h3>Dossiê completo da obra</h3><p>Abra a ficha de uma obra para imprimir o resumo financeiro, consultar o diário, organizar documentos e gerar o relatório fotográfico.</p><button class="btn light" type="button" data-report-open-works>Escolher obra</button></article>
     </section>
+    <dialog id="safetyBackupDialog" aria-labelledby="safetyBackupTitle"><div class="backup-inspection"><header><div><small>RECUPERAÇÃO CONTROLADA</small><h3 id="safetyBackupTitle">Verificação da cópia de segurança</h3></div><button type="button" data-close="safetyBackupDialog" aria-label="Fechar">×</button></header><div id="safetyBackupSummary" aria-live="polite"></div><p class="backup-inspection-warning">Esta verificação não restaura, substitui ou elimina qualquer dado.</p><footer><button class="btn primary" type="button" data-close="safetyBackupDialog">Concluir verificação</button></footer></div></dialog>
     <section id="view-portal-admin" class="view hidden admin-only">
       <div class="client-admin-head"><div><small>PUBLICAÇÃO CONTROLADA</small><h1>Portal do Cliente</h1><p>Escolha exatamente o que cada cliente poderá consultar.</p></div><div class="actions"><button id="clientInviteNew" class="btn light" type="button">Convidar cliente</button><button id="clientPublishNew" class="btn primary" type="button">Preparar obra</button></div></div>
       <div class="client-admin-grid"><section class="panel" aria-labelledby="clientAdminWorksTitle"><h2 id="clientAdminWorksTitle">Obras preparadas</h2><div id="clientAdminWorks" aria-live="polite"></div><div class="panel-title"><h2>Pedidos de aprovação</h2><button id="clientApprovalNew" class="btn small light" type="button">Novo pedido</button></div><div id="clientAdminApprovals" aria-live="polite"></div></section><section class="panel" aria-labelledby="clientAdminAccessTitle"><h2 id="clientAdminAccessTitle">Acessos autorizados</h2><div id="clientAdminAccess" aria-live="polite"></div><p class="client-admin-note">A criação e associação de contas será ativada apenas depois da autorização das novas permissões.</p></section></div>
@@ -1026,6 +1028,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260806-planning-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260806-recovery-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>
