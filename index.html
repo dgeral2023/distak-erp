@@ -104,8 +104,8 @@
     <aside id="aiAssistantPanel" class="ai-assistant-panel hidden" aria-label="Assistente DISTAK" aria-hidden="true">
       <header><div class="ai-assistant-title"><span class="ai-assistant-logo">D</span><div><small>INTELIGÊNCIA DISTAK</small><h3>Assistente de gestão</h3></div></div><button id="aiAssistantClose" type="button" aria-label="Fechar assistente">×</button></header>
       <div id="aiAssistantMessages" class="ai-assistant-messages" aria-live="polite"></div>
-      <div id="aiAssistantSuggestions" class="ai-assistant-suggestions"><button type="button">Quais obras precisam de atenção?</button><button type="button">Existem compras ou entregas atrasadas?</button><button type="button">Como está a atividade operacional de hoje?</button><button type="button">Que dossiês precisam de documentos ou fotografias?</button><button type="button">Como está o fluxo de caixa previsto?</button><button type="button">Quanto falta receber?</button><button type="button">Resume a situação financeira.</button><button type="button">Existem custos vencidos?</button></div>
-      <form id="aiAssistantForm" class="ai-assistant-form"><label for="aiAssistantInput">Pergunte sobre a gestão da DISTAK</label><div><textarea id="aiAssistantInput" rows="2" maxlength="1500" placeholder="Ex.: Que obras exigem atenção esta semana?" required></textarea><button id="aiAssistantSend" type="submit" aria-label="Enviar pergunta">➜</button></div><small>Consulta segura e somente leitura. Confirme decisões financeiras importantes.</small></form>
+      <div id="aiAssistantSuggestions" class="ai-assistant-suggestions"><button type="button">Como está a carga da equipa?</button><button type="button">Qual é a próxima melhor ação?</button><button type="button">Que dossiês precisam de documentos ou fotografias?</button><button type="button">Quais obras precisam de atenção?</button><button type="button">Existem compras ou entregas atrasadas?</button><button type="button">Como está a atividade operacional de hoje?</button><button type="button">Como está o fluxo de caixa previsto?</button><button type="button">Quanto falta receber?</button><button type="button">Resume a situação financeira.</button><button type="button">Existem custos vencidos?</button></div>
+      <form id="aiAssistantForm" class="ai-assistant-form"><label for="aiAssistantInput">Pergunte sobre a gestão da DISTAK</label><div><textarea id="aiAssistantInput" rows="2" maxlength="1500" placeholder="Ex.: Que obras exigem atenção esta semana?" required></textarea><button id="aiAssistantSend" type="submit" aria-label="Enviar pergunta">➜</button></div><small>Análises operacionais locais no dispositivo. Restantes consultas são seguras e somente leitura. Confirme decisões financeiras importantes.</small></form>
     </aside>
 
     <section id="view-dashboard" class="view non-client-only">
@@ -1030,6 +1030,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260807-v36-release" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260807-v37-local-assistant-v1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>

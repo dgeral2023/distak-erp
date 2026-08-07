@@ -1,6 +1,7 @@
 import {$,esc,setView} from "../core/ui.js";
 import {db} from "../core/supabase.js";
 import {store} from "../core/store.js";
+import {buildDeviceAssistantResponse} from "../core/assistant-local.js";
 
 const history=[];
 let busy=false;
@@ -11,7 +12,8 @@ function addMessage(role,text,mode,actions=[]){
   if(history.length>12)history.splice(0,history.length-12);
   const article=document.createElement("article");
   article.className=`ai-message ${role}`;
-  article.innerHTML=`${esc(message.text)}${mode?`<small class="ai-message-meta">${mode==="openai"?"Resposta com IA":"Análise automática dos dados atuais"}</small>`:""}${actions.length?`<div class="ai-message-actions">${actions.map((action,index)=>`<button type="button" data-assistant-action="${index}" data-view="${esc(action.view||"")}" data-work="${esc(action.work_id||"")}">${esc(action.label)}</button>`).join("")}</div>`:""}`;
+  const modeLabel={device:"Análise local neste dispositivo",local:"Análise segura do backend DISTAK",openai:"Resposta com IA"}[mode]||"";
+  article.innerHTML=`${esc(message.text)}${modeLabel?`<small class="ai-message-meta">${modeLabel}</small>`:""}${actions.length?`<div class="ai-message-actions">${actions.map((action,index)=>`<button type="button" data-assistant-action="${index}" data-view="${esc(action.view||"")}" data-work="${esc(action.work_id||"")}">${esc(action.label)}</button>`).join("")}</div>`:""}`;
   $("aiAssistantMessages").appendChild(article);
   $("aiAssistantMessages").scrollTop=$("aiAssistantMessages").scrollHeight;
   return article;
@@ -38,6 +40,12 @@ async function ask(message){
   loading.classList.add("loading");
   $("aiAssistantSend").disabled=true;
   try{
+    const local=buildDeviceAssistantResponse(message.trim(),{
+      role:store.profile?.role,profiles:store.profiles,funcionarios:store.funcionarios,funcionarioHoras:store.funcionarioHoras,
+      agendaTarefas:store.agendaTarefas,obras:store.obras,fotografias:store.fotografias,documentosObra:store.documentosObra,
+      orcamentos:store.orcamentos,diariosObra:store.diariosObra,custos:store.custos,pagamentos:store.pagamentos,autosMedicao:store.autosMedicao
+    });
+    if(local){loading.remove();addMessage("assistant",local.answer,local.mode,local.actions);return}
     const conversation=history.slice(0,-1).filter(x=>!x.text.includes("A analisar os dados")).slice(-6);
     const {data,error}=await db.functions.invoke("assistente-distak",{body:{message:message.trim(),history:conversation}});
     if(error)throw error;
@@ -59,7 +67,7 @@ export function initAssistant(){
   $("aiAssistantMessages").onclick=e=>{const button=e.target.closest("[data-assistant-action]");if(!button)return;closeAssistant();if(button.dataset.view)setView(button.dataset.view);if(button.dataset.work)setTimeout(()=>document.querySelector(`[data-view-obra="${button.dataset.work}"]`)?.click(),80)};
   $("aiPriorityAction").onclick=()=>{openAssistant();ask("Quais são as prioridades de gestão neste momento?")};
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("aiAssistantPanel").classList.contains("hidden"))closeAssistant()});
-  addMessage("assistant","Olá! Sou o Assistente DISTAK. Posso resumir obras, previsões, cobranças, custos e alertas usando apenas os dados a que tem acesso.");
+  addMessage("assistant","Olá! Sou o Assistente DISTAK. Posso analisar localmente a carga da equipa, a qualidade dos dossiês e as próximas ações. Também resumo obras, previsões, cobranças, custos e alertas usando apenas os dados a que tem acesso.");
 }
 
 const num=value=>Number(value||0)||0;

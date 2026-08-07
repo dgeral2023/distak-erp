@@ -1,5 +1,12 @@
 # Histórico de versões
 
+## v3.7 — em preparação
+
+- O Assistente DISTAK passa a responder no próprio dispositivo a perguntas sobre carga da equipa, qualidade dos dossiês e próximas ações recomendadas.
+- As análises locais reutilizam os motores explicáveis do ERP, não enviam os dados dessas consultas ao backend e não executam alterações automaticamente.
+- Consultas financeiras e restantes resumos continuam limitados ao backend DISTAK autenticado e somente de leitura.
+- A interface identifica claramente quando a resposta foi processada localmente e oferece atalhos seguros apenas para navegação.
+
 ## v3.6 — publicada em 7 de agosto de 2026
 
 - A inteligência interna passa a indicar a próxima melhor ação para cada obra, priorizando bloqueios, atrasos, faturas vencidas, margem, recebimentos e qualidade dos dados.
