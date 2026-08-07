@@ -172,6 +172,9 @@ for (const required of ["enable row level security", "financeiro_previsoes_selec
 }
 const dossierModule = readFileSync(join(root, "assets", "js", "modules", "dossies.js"), "utf8");
 const dossierQualityModule = readFileSync(join(root, "assets", "js", "core", "dossier-quality.js"), "utf8");
+for (const required of ["photoMetadata", "documentMetadata", "latestPhotoDate", "healthScore", "qualityIssues", "actionItems"]){
+  check(dossierQualityModule.includes(required), `Qualidade do dossiê incompleta: ${required}`);
+}
 for (const required of ["renderDossies", "initDossies", "buildDossier", "data-dossier-fix", "openTarget", "printReport", "documentosObra", "Orçamento associado", "Diário de obra", "Fotos depois"]){
   check(`${dossierModule}\n${dossierQualityModule}`.includes(required), `Dossiê digital incompleto: ${required}`);
 }
@@ -180,7 +183,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.6-rc4", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/accessibility.js", "assets/js/core/backup-readiness.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/core/intelligence-actions.js", "assets/js/core/workload-analysis.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.6-rc5", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/accessibility.js", "assets/js/core/backup-readiness.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/core/intelligence-actions.js", "assets/js/core/workload-analysis.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
