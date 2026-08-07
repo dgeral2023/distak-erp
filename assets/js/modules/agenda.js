@@ -1,6 +1,7 @@
 import {$,esc,toast} from "../core/ui.js";
 import {save} from "../core/supabase.js";
 import {store} from "../core/store.js";
+import {analyzeWorkload} from "../core/workload-analysis.js";
 
 let weekStart=startOfWeek(new Date());
 let refreshApp=async()=>{};
@@ -46,10 +47,9 @@ function renderDailyCommand(open){
   const current=today(),ranked=[...open].sort((a,b)=>taskScore(b,current)-taskScore(a,current)||String(a.prazo).localeCompare(String(b.prazo)));
   const focus=ranked.slice(0,5);
   $("agendaFocusList").innerHTML=focus.length?focus.map((task,index)=>{const late=task.prazo<current,blocked=task.estado==="bloqueada",detail=blocked?(task.bloqueio_motivo||"bloqueio sem motivo registado"):late?`atrasada desde ${parseDate(task.prazo).toLocaleDateString("pt-PT")}`:`prazo ${parseDate(task.prazo).toLocaleDateString("pt-PT")}`;return `<button type="button" class="agenda-focus-item ${late||blocked?"risk":""}" data-edit-task="${task.id}"><b>${index+1}</b><span><strong>${esc(task.titulo)}</strong><small>${esc(workName(task.obra_id))} · ${esc(detail)}</small></span><em>${esc(priorityLabel(task.prioridade))}</em></button>`}).join(""):'<div class="agenda-empty compact">Sem tarefas pendentes. O planeamento está em dia.</div>';
-  const groups=new Map();open.forEach(task=>{const key=task.responsavel_id||task.funcionario_id||"unassigned",name=task.responsavel_id?profileName(task.responsavel_id):task.funcionario_id?employeeName(task.funcionario_id):"Sem responsável",row=groups.get(key)||{key,name,total:0,late:0};row.total++;if(task.prazo<current)row.late++;groups.set(key,row)});
-  const workload=[...groups.values()].sort((a,b)=>b.total-a.total),maximum=Math.max(1,...workload.map(row=>row.total));
-  const unassigned=groups.get("unassigned")?.total||0;$("agendaUnassignedCount").textContent=`${unassigned} sem responsável`;
-  $("agendaWorkload").innerHTML=workload.length?workload.slice(0,6).map(row=>`<button type="button" data-agenda-owner="${esc(row.key)}" data-agenda-owner-name="${esc(row.name)}"><div><strong>${esc(row.name)}</strong><span>${row.total} aberta(s)${row.late?` · ${row.late} atrasada(s)`:""}</span></div><i><em style="width:${Math.max(8,row.total/maximum*100)}%"></em></i></button>`).join(""):'<div class="agenda-empty compact">Sem carga pendente para a equipa.</div>';
+  const analysis=analyzeWorkload({tasks:open,profiles:store.profiles,employees:store.funcionarios,hours:store.funcionarioHoras,today:current});
+  $("agendaUnassignedCount").textContent=`${analysis.summary.unassigned} sem responsável`;
+  $("agendaWorkload").innerHTML=analysis.rows.length?analysis.rows.slice(0,7).map(row=>`<button type="button" data-agenda-owner="${esc(row.key)}" data-agenda-owner-name="${esc(row.name)}"><div><strong>${esc(row.name)}</strong><span>${row.total} aberta(s)${row.late?` · ${row.late} atrasada(s)`:""}${row.blocked?` · ${row.blocked} bloqueada(s)`:""}${row.hours?` · ${row.hours.toFixed(1)} h/mês`:""}</span><b class="agenda-workload-status ${row.pressure}">${esc(row.label)}</b></div><i><em class="${row.pressure}" style="width:${Math.max(row.total?8:0,row.score/analysis.maximumScore*100)}%"></em></i></button>`).join("")+`<div class="agenda-workload-advice"><strong>Leitura recomendada</strong><span>${esc(analysis.recommendations[0])}</span><small>Somente análise. Nenhuma tarefa é reatribuída automaticamente.</small></div>`:'<div class="agenda-empty compact">Sem carga pendente para a equipa.</div>';
 }
 
 function setQuickFilter(mode){

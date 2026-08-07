@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://usaaiubvynxyfviwgogs.supabase.co wss://usaaiubvynxyfviwgogs.supabase.co; img-src 'self' data: blob: https:; font-src 'self' data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'">
-  <title>DISTAK ERP v3.5</title>
+  <title>DISTAK ERP v3.6</title>
 
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
@@ -19,19 +19,19 @@
   <link rel="stylesheet" href="assets/css/v3.css">
   <link rel="stylesheet" href="assets/css/hybrid-menu.css?v=20260804-top-right">
   <link rel="stylesheet" href="assets/css/assistant.css?v=20260804-ai-v2">
-  <link rel="stylesheet" href="assets/css/agenda.css?v=20260804-agenda-v1">
+  <link rel="stylesheet" href="assets/css/agenda.css?v=20260806-workload-v2">
   <link rel="stylesheet" href="assets/css/previsoes.css?v=20260804-finance-v1">
-  <link rel="stylesheet" href="assets/css/dossies.css?v=20260806-dossier-v2">
+  <link rel="stylesheet" href="assets/css/dossies.css?v=20260806-dossiers-quality-v2">
   <link rel="stylesheet" href="assets/css/operacional.css?v=20260805-operational-v1">
   <link rel="stylesheet" href="assets/css/compras.css?v=20260805-purchases-v1">
   <link rel="stylesheet" href="assets/css/medicoes.css?v=20260805-measurements-v1">
   <link rel="stylesheet" href="assets/css/campo.css?v=20260805-field-v1">
-  <link rel="stylesheet" href="assets/css/inteligencia.css?v=20260805-intelligence-v1">
+  <link rel="stylesheet" href="assets/css/inteligencia.css?v=20260806-intelligence-v2">
   <link rel="stylesheet" href="assets/css/cliente-portal.css?v=20260805-client-v1">
   <link rel="stylesheet" href="assets/css/cliente-role.css?v=20260805-client-v1">
   <link rel="stylesheet" href="assets/css/cliente-approvals.css?v=20260805-client-v1">
   <link rel="stylesheet" href="assets/css/accessibility.css?v=20260806-a11y-v2">
-  <link rel="stylesheet" href="assets/css/backup.css?v=20260806-backup-v1">
+  <link rel="stylesheet" href="assets/css/backup.css?v=20260806-backup-v2">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -54,7 +54,7 @@
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="sidebar-brand"><button id="sidebarToggle" type="button" aria-label="Recolher menu" title="Recolher menu">☰</button><div class="brand">DISTAK ERP <small>v3.5</small></div><span class="brand-chevron">‹</span></div>
+    <div class="sidebar-brand"><button id="sidebarToggle" type="button" aria-label="Recolher menu" title="Recolher menu">☰</button><div class="brand">DISTAK ERP <small>v3.6</small></div><span class="brand-chevron">‹</span></div>
     <nav id="mainNav">
       <div class="nav-group client-only hidden"><button class="nav" data-view="cliente-portal"><i>◎</i><span>Minhas obras</span></button></div>
       <div class="nav-group admin-only"><button class="nav" data-view="portal-admin"><i>◎</i><span>Portal do cliente</span></button></div>
@@ -73,8 +73,8 @@
   </aside>
 
   <nav id="mobileNav" class="mobile-nav" aria-label="Navegação principal móvel">
-    <button class="active" data-mobile-view="dashboard"><i>⌂</i><span>Início</span></button>
-    <button data-mobile-view="obras"><i>▥</i><span>Obras</span></button>
+    <button id="mobileHome" class="active" data-mobile-view="dashboard"><i>⌂</i><span>Início</span></button>
+    <button id="mobileWorks" data-mobile-view="obras"><i>▥</i><span>Obras</span></button>
     <button id="mobileRegister" class="mobile-register" type="button"><i>＋</i><span>Registar</span></button>
     <button id="mobileAlerts" type="button"><i>♢</i><span>Alertas</span><b id="mobileAlertCount">0</b></button>
     <button id="mobileMore" type="button"><i>☰</i><span>Mais</span></button>
@@ -1030,6 +1030,6 @@ window.addEventListener("unhandledrejection",event=>{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260806-v35-integrated-3" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260807-v36-release" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
 </body>
 </html>

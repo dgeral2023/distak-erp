@@ -1,5 +1,6 @@
 import {$,toast} from "../core/ui.js";
 import {store} from "../core/store.js";
+import {assessRecoveryReadiness} from "../core/backup-readiness.js";
 
 const collections=["profiles","obraUtilizadores","clientes","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra","clientePortalAcessos","clientePortalObras","clientePortalAtualizacoes","clientePortalFicheiros","clientePortalAprovacoes"];
 const hex=buffer=>[...new Uint8Array(buffer)].map(value=>value.toString(16).padStart(2,"0")).join("");
@@ -25,7 +26,8 @@ export async function inspectSafetyBackup(content){
   const counts={};for(const key of collections){const rows=payload.data[key];if(!Array.isArray(rows))fail(`Coleção inválida: ${key}.`);counts[key]=rows.length;if(payload.recordCounts[key]!==rows.length)fail(`Contagem inconsistente: ${key}.`)}
   const checksum=hex(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(JSON.stringify(payload))));
   if(checksum.toLowerCase()!==integrity.checksum.toLowerCase())fail("A cópia foi alterada ou está danificada.");
-  return {valid:true,version:payload.version,createdAt:payload.createdAt,source:payload.source||"desconhecida",checksum,totalRecords:Object.values(counts).reduce((sum,value)=>sum+value,0),counts};
+  const readiness=assessRecoveryReadiness(payload);
+  return {valid:true,version:payload.version,createdAt:payload.createdAt,source:payload.source||"desconhecida",checksum,totalRecords:Object.values(counts).reduce((sum,value)=>sum+value,0),counts,readiness};
 }
 
 async function download(){
@@ -36,7 +38,7 @@ async function download(){
 async function inspectFile(event){
   const input=event.currentTarget,file=input.files?.[0];input.value="";if(!file)return;
   if(file.size>25*1024*1024){toast("A cópia excede o limite de verificação de 25 MB.","error");return}
-  try{const result=await inspectSafetyBackup(await file.text()),nonEmpty=Object.entries(result.counts).filter(([,count])=>count);$("safetyBackupSummary").innerHTML=`<div class="backup-inspection-status"><b>✓ Cópia íntegra</b><span>Versão ${result.version} · ${result.totalRecords} registo(s)</span><small>Criada em ${new Date(result.createdAt).toLocaleString("pt-PT")} · SHA-256 confirmado</small></div><div class="backup-inspection-counts">${nonEmpty.length?nonEmpty.map(([name,count])=>`<span><b>${count}</b> ${name}</span>`).join(""):"<span>A cópia não contém registos.</span>"}</div>`;$("safetyBackupDialog").showModal()}catch(error){toast(error.message||"Não foi possível verificar a cópia.","error")}
+  try{const result=await inspectSafetyBackup(await file.text()),nonEmpty=Object.entries(result.counts).filter(([,count])=>count),ready=result.readiness.status==="ready";$("safetyBackupSummary").innerHTML=`<div class="backup-inspection-status ${ready?"":"review"}"><b>${ready?"✓ Cópia íntegra e preparada":"⚠ Cópia íntegra; revisão necessária"}</b><span>Versão ${result.version} · ${result.totalRecords} registo(s) · ${result.readiness.ageDays} dia(s)</span><small>Criada em ${new Date(result.createdAt).toLocaleString("pt-PT")} · SHA-256 confirmado</small></div><div class="backup-readiness-checks">${result.readiness.checks.map(item=>`<span>✓ ${item}</span>`).join("")}${result.readiness.issues.map(item=>`<strong>⚠ ${item.message}</strong>`).join("")}</div><div class="backup-inspection-counts">${nonEmpty.length?nonEmpty.map(([name,count])=>`<span><b>${count}</b> ${name}</span>`).join(""):"<span>A cópia não contém registos.</span>"}</div>`;$("safetyBackupDialog").showModal()}catch(error){toast(error.message||"Não foi possível verificar a cópia.","error")}
 }
 
 export function initBackup(){$("exportSafetyBackup")?.addEventListener("click",download);$("inspectSafetyBackup")?.addEventListener("click",()=>$("safetyBackupFile").click());$("safetyBackupFile")?.addEventListener("change",inspectFile)}
