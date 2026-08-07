@@ -45,7 +45,7 @@ function taskScore(task,current){
 function renderDailyCommand(open){
   const current=today(),ranked=[...open].sort((a,b)=>taskScore(b,current)-taskScore(a,current)||String(a.prazo).localeCompare(String(b.prazo)));
   const focus=ranked.slice(0,5);
-  $("agendaFocusList").innerHTML=focus.length?focus.map((task,index)=>{const late=task.prazo<current,blocked=task.estado==="bloqueada";return `<button type="button" class="agenda-focus-item ${late||blocked?"risk":""}" data-edit-task="${task.id}"><b>${index+1}</b><span><strong>${esc(task.titulo)}</strong><small>${esc(workName(task.obra_id))} · ${late?`atrasada desde ${parseDate(task.prazo).toLocaleDateString("pt-PT")}`:blocked?"etapa bloqueada":`prazo ${parseDate(task.prazo).toLocaleDateString("pt-PT")}`}</small></span><em>${esc(priorityLabel(task.prioridade))}</em></button>`}).join(""):'<div class="agenda-empty compact">Sem tarefas pendentes. O planeamento está em dia.</div>';
+  $("agendaFocusList").innerHTML=focus.length?focus.map((task,index)=>{const late=task.prazo<current,blocked=task.estado==="bloqueada",detail=blocked?(task.bloqueio_motivo||"bloqueio sem motivo registado"):late?`atrasada desde ${parseDate(task.prazo).toLocaleDateString("pt-PT")}`:`prazo ${parseDate(task.prazo).toLocaleDateString("pt-PT")}`;return `<button type="button" class="agenda-focus-item ${late||blocked?"risk":""}" data-edit-task="${task.id}"><b>${index+1}</b><span><strong>${esc(task.titulo)}</strong><small>${esc(workName(task.obra_id))} · ${esc(detail)}</small></span><em>${esc(priorityLabel(task.prioridade))}</em></button>`}).join(""):'<div class="agenda-empty compact">Sem tarefas pendentes. O planeamento está em dia.</div>';
   const groups=new Map();open.forEach(task=>{const key=task.responsavel_id||task.funcionario_id||"unassigned",name=task.responsavel_id?profileName(task.responsavel_id):task.funcionario_id?employeeName(task.funcionario_id):"Sem responsável",row=groups.get(key)||{key,name,total:0,late:0};row.total++;if(task.prazo<current)row.late++;groups.set(key,row)});
   const workload=[...groups.values()].sort((a,b)=>b.total-a.total),maximum=Math.max(1,...workload.map(row=>row.total));
   const unassigned=groups.get("unassigned")?.total||0;$("agendaUnassignedCount").textContent=`${unassigned} sem responsável`;
@@ -89,10 +89,11 @@ function fillOptions(){
   $("agendaTaskEmployee").innerHTML=`<option value="">Sem funcionário associado</option>${(store.funcionarios||[]).filter(employee=>norm(employee.estado)!=="inativo").map(employee=>`<option value="${employee.id}">${esc(employee.nome)}</option>`).join("")}`;
 }
 function fillDependencies(selected=""){const currentId=$("agendaTaskId").value,workId=$("agendaTaskWork").value;$("agendaTaskDependency").innerHTML=`<option value="">Sem dependência</option>${(store.agendaTarefas||[]).filter(task=>String(task.id)!==String(currentId)&&String(task.obra_id)===String(workId)).map(task=>`<option value="${task.id}">${esc(task.titulo)}</option>`).join("")}`;$("agendaTaskDependency").value=selected||""}
+function configureBlockFields(){const blocked=$("agendaTaskState").value==="bloqueada";$("agendaBlockFields").classList.toggle("hidden",!blocked);$("agendaTaskBlockReason").required=blocked}
 
 function openTask(task={}){
   $("agendaTaskId").value=task.id||"";fillOptions();const current=today();
-  $("agendaTaskDialogTitle").textContent=task.id?"Editar etapa":"Nova etapa";$("agendaTaskTitle").value=task.titulo||"";$("agendaTaskWork").value=task.obra_id||"";fillDependencies(task.depende_de);$("agendaTaskPriority").value=task.prioridade||"media";$("agendaTaskStart").value=task.inicio||current;$("agendaTaskDue").value=task.prazo||current;$("agendaTaskTime").value=task.hora?.slice(0,5)||"";$("agendaTaskState").value=task.estado||"pendente";$("agendaTaskPhase").value=task.fase||"execucao";$("agendaTaskProgress").value=Number(task.progresso||0);$("agendaTaskMilestone").checked=Boolean(task.marco);$("agendaTaskResponsible").value=task.responsavel_id||store.profile?.id||"";$("agendaTaskEmployee").value=task.funcionario_id||"";$("agendaTaskDescription").value=task.descricao||"";
+  $("agendaTaskDialogTitle").textContent=task.id?"Editar etapa":"Nova etapa";$("agendaTaskTitle").value=task.titulo||"";$("agendaTaskWork").value=task.obra_id||"";fillDependencies(task.depende_de);$("agendaTaskPriority").value=task.prioridade||"media";$("agendaTaskStart").value=task.inicio||current;$("agendaTaskDue").value=task.prazo||current;$("agendaTaskTime").value=task.hora?.slice(0,5)||"";$("agendaTaskState").value=task.estado||"pendente";$("agendaTaskBlockReason").value=task.bloqueio_motivo||"";$("agendaTaskResolution").value=task.resolucao_prevista||"";configureBlockFields();$("agendaTaskPhase").value=task.fase||"execucao";$("agendaTaskProgress").value=Number(task.progresso||0);$("agendaTaskMilestone").checked=Boolean(task.marco);$("agendaTaskResponsible").value=task.responsavel_id||store.profile?.id||"";$("agendaTaskEmployee").value=task.funcionario_id||"";$("agendaTaskDescription").value=task.descricao||"";
   $("agendaTaskDialog").showModal();
 }
 
@@ -100,7 +101,8 @@ export function openAgendaTask(task={}){openTask(task)}
 
 async function submitTask(event){
   event.preventDefault();const id=$("agendaTaskId").value,state=$("agendaTaskState").value;
-  const payload={obra_id:$("agendaTaskWork").value,titulo:$("agendaTaskTitle").value.trim(),descricao:$("agendaTaskDescription").value.trim()||null,responsavel_id:$("agendaTaskResponsible").value||null,funcionario_id:$("agendaTaskEmployee").value||null,inicio:$("agendaTaskStart").value,prazo:$("agendaTaskDue").value,hora:$("agendaTaskTime").value||null,prioridade:$("agendaTaskPriority").value,estado:state,fase:$("agendaTaskPhase").value,progresso:state==="concluida"?100:Number($("agendaTaskProgress").value||0),marco:$("agendaTaskMilestone").checked,depende_de:$("agendaTaskDependency").value||null,atualizado_em:new Date().toISOString(),concluida_em:state==="concluida"?new Date().toISOString():null};
+  const existing=(store.agendaTarefas||[]).find(task=>String(task.id)===String(id));
+  const payload={obra_id:$("agendaTaskWork").value,titulo:$("agendaTaskTitle").value.trim(),descricao:$("agendaTaskDescription").value.trim()||null,responsavel_id:$("agendaTaskResponsible").value||null,funcionario_id:$("agendaTaskEmployee").value||null,inicio:$("agendaTaskStart").value,prazo:$("agendaTaskDue").value,hora:$("agendaTaskTime").value||null,prioridade:$("agendaTaskPriority").value,estado:state,bloqueio_motivo:state==="bloqueada"?$("agendaTaskBlockReason").value.trim():null,bloqueado_em:state==="bloqueada"?(existing?.bloqueado_em||new Date().toISOString()):null,resolucao_prevista:state==="bloqueada"?($("agendaTaskResolution").value||null):null,fase:$("agendaTaskPhase").value,progresso:state==="concluida"?100:Number($("agendaTaskProgress").value||0),marco:$("agendaTaskMilestone").checked,depende_de:$("agendaTaskDependency").value||null,atualizado_em:new Date().toISOString(),concluida_em:state==="concluida"?new Date().toISOString():null};
   if(payload.prazo<payload.inicio){toast("O prazo não pode ser anterior ao início.","error");return}
   const button=$("agendaTaskSave");button.disabled=true;
   try{await save("agenda_tarefas",payload,id||null);$("agendaTaskDialog").close();await refreshApp();toast(id?"Tarefa atualizada.":"Tarefa criada.")}catch(error){toast(error.message||"Não foi possível guardar a tarefa.","error")}finally{button.disabled=false}
@@ -108,11 +110,11 @@ async function submitTask(event){
 
 async function toggleTask(task){
   const done=task.estado==="concluida";
-  try{await save("agenda_tarefas",{estado:done?"pendente":"concluida",progresso:done?0:100,concluida_em:done?null:new Date().toISOString(),atualizado_em:new Date().toISOString()},task.id);await refreshApp();toast(done?"Etapa reaberta.":"Etapa concluída.")}catch(error){toast(error.message||"Não foi possível atualizar a etapa.","error")}
+  try{await save("agenda_tarefas",{estado:done?"pendente":"concluida",progresso:done?0:100,concluida_em:done?null:new Date().toISOString(),bloqueio_motivo:null,bloqueado_em:null,resolucao_prevista:null,atualizado_em:new Date().toISOString()},task.id);await refreshApp();toast(done?"Etapa reaberta.":"Etapa concluída.")}catch(error){toast(error.message||"Não foi possível atualizar a etapa.","error")}
 }
 
 export function initAgenda(refresh){
-  refreshApp=refresh;$("novaTarefaBtn").onclick=()=>openTask();$("agendaTaskForm").onsubmit=submitTask;
+  refreshApp=refresh;$("novaTarefaBtn").onclick=()=>openTask();$("agendaTaskForm").onsubmit=submitTask;$("agendaTaskState").onchange=configureBlockFields;
   $("agendaTaskWork").onchange=()=>fillDependencies();
   $("agendaFocusAll").onclick=()=>{$("agendaSearch").value="";$("agendaStateFilter").value="";$("agendaPriorityFilter").value="";setQuickFilter("all")};
   $("agendaQuickFilters").onclick=event=>{const mode=event.target.closest("[data-agenda-quick]")?.dataset.agendaQuick;if(mode)setQuickFilter(mode)};

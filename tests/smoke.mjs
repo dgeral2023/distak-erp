@@ -24,7 +24,7 @@ const requiredIds = [
   "view-orcamentos", "view-custos", "view-pagamentos", "view-funcionarios",
   "funcionarioForm", "funcionarioHorasForm", "dashboardTeam", "workDocumentList",
   "obraAssignments", "assignmentSummary"
-  ,"globalSearch", "globalSearchResults", "notificationPanel", "notificationList",
+  ,"globalSearch", "globalSearchResults", "notificationPanel", "notificationList", "inspectSafetyBackup", "safetyBackupFile", "safetyBackupDialog", "safetyBackupSummary",
   "view-relatorios", "reportKpis", "profitabilityReport", "maturityReport", "activityTimeline"
   ,"sidebarToggle", "mobileNav", "mobileRegister", "mobileAlerts", "mobileMore",
   "mobileMoreSheet", "mobileRegisterSheet", "mobileSheetBackdrop", "recentNav"
@@ -33,12 +33,12 @@ const requiredIds = [
   ,"aiAssistantButton", "aiAssistantPanel", "aiAssistantMessages", "aiAssistantForm", "aiAssistantInput"
   ,"aiPriorityCard", "aiPrioritySummary", "aiPriorityAction"
   ,"view-agenda", "navTaskCount", "novaTarefaBtn", "agendaWeekGrid", "agendaTaskList", "agendaQuickFilters", "agendaQuickUnassigned",
-  "agendaTaskDialog", "agendaTaskForm", "agendaTaskWork", "agendaTaskDue"
+  "agendaTaskDialog", "agendaTaskForm", "agendaTaskWork", "agendaTaskDue", "agendaBlockFields", "agendaTaskBlockReason", "agendaTaskResolution"
   ,"planningWorkFilter", "planningToday", "planningHealth", "planningTimeline",
   "agendaTaskPhase", "agendaTaskProgress", "agendaTaskDependency", "agendaTaskMilestone"
   ,"view-previsoes", "newForecastBtn", "forecastKpis", "forecastChart", "collectionRiskList",
   "forecastSearch", "forecastList", "forecastDialog", "forecastForm", "forecastProbability"
-  ,"view-dossies", "dossierPrintAll", "dossierKpis", "dossierSearch", "dossierStatusFilter",
+  ,"view-dossies", "dossierPrintAll", "dossierKpis", "dossierPriority", "dossierSearch", "dossierStatusFilter",
   "dossierResultCount", "dossierGrid"
   ,"view-operacional", "newOperationalRecord", "operationalKpis", "operationalSearch",
   "operationalDate", "operationalWorkGrid", "operationalTimeline", "operationalQuickDialog",
@@ -158,6 +158,8 @@ const agendaMigration = readFileSync(join(root, "supabase", "202608042110_agenda
 for (const required of ["enable row level security", "private.can_access_obra", "agenda_tarefas_select", "agenda_tarefas_insert", "agenda_tarefas_update", "revoke all on public.agenda_tarefas from anon"]){
   check(agendaMigration.includes(required), `Migração da agenda incompleta: ${required}`);
 }
+const blockersMigration=readFileSync(join(root,"supabase","migrations","20260806175853_bloqueios_agenda_v35.sql"),"utf8");
+for(const required of ["bloqueio_motivo","bloqueado_em","resolucao_prevista","agenda_tarefas_bloqueios_idx"])check(blockersMigration.includes(required),`Tratamento de bloqueios incompleto: ${required}`);
 const forecastModule = readFileSync(join(root, "assets", "js", "modules", "previsoes.js"), "utf8");
 for (const required of ["renderPrevisoes", "initPrevisoes", "financeiro_previsoes", "collectionRisks", "weighted"]){
   check(forecastModule.includes(required), `Previsões financeiras incompletas: ${required}`);
@@ -167,15 +169,16 @@ for (const required of ["enable row level security", "financeiro_previsoes_selec
   check(forecastMigration.includes(required), `Migração das previsões incompleta: ${required}`);
 }
 const dossierModule = readFileSync(join(root, "assets", "js", "modules", "dossies.js"), "utf8");
-for (const required of ["renderDossies", "initDossies", "printReport", "documentosObra", "Fotos depois"]){
-  check(dossierModule.includes(required), `Dossiê digital incompleto: ${required}`);
+const dossierQualityModule = readFileSync(join(root, "assets", "js", "core", "dossier-quality.js"), "utf8");
+for (const required of ["renderDossies", "initDossies", "buildDossier", "data-dossier-fix", "openTarget", "printReport", "documentosObra", "Orçamento associado", "Diário de obra", "Fotos depois"]){
+  check(`${dossierModule}\n${dossierQualityModule}`.includes(required), `Dossiê digital incompleto: ${required}`);
 }
 const pwaModule = readFileSync(join(root, "assets", "js", "core", "pwa.js"), "utf8");
 const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.5-rc2", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/field-queue.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.5-rc3", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/accessibility.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
@@ -234,13 +237,13 @@ for (const required of ["enable row level security", "revoke all", "grant select
 }
 check(!clientMigration.includes("grant delete"), "O portal do cliente não deve conceder eliminação por SQL.");
 const uiModule = readFileSync(join(root, "assets", "js", "core", "ui.js"), "utf8");
-check(uiModule.includes('classList.contains("client-mode")&&v!=="cliente-portal"'), "A navegação deve bloquear módulos internos no modo cliente.");
+for(const required of ["canAccessView",'role==="cliente"','view==="cliente-portal"',"teamViews.has(view)"])check(uiModule.includes(required),`A navegação por papel está incompleta: ${required}`);
 const accessibilityCss = readFileSync(join(root, "assets", "css", "accessibility.css"), "utf8");
 for (const required of [".skip-link", "prefers-reduced-motion:reduce", ":focus-visible", "@media print"]){
   check(accessibilityCss.includes(required), `Acessibilidade global incompleta: ${required}`);
 }
 const backupModule = readFileSync(join(root, "assets", "js", "modules", "backup.js"), "utf8");
-for (const required of ["createSafetyBackup", "distak-erp-backup", "SHA-256", "crypto.subtle.digest", "Apenas um administrador", "Nenhum dado foi alterado"]){
+for (const required of ["createSafetyBackup", "inspectSafetyBackup", "distak-erp-backup", "SHA-256", "crypto.subtle.digest", "Apenas um administrador", "Nenhum dado foi alterado", "25*1024*1024"]){
   check(backupModule.includes(required), `Cópia de segurança incompleta: ${required}`);
 }
 const recoveryGuide = readFileSync(join(root, "docs", "RECUPERACAO.md"), "utf8");

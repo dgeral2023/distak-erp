@@ -20,8 +20,8 @@ function renderFavorites(){
   $("favoriteNavGroup")?.classList.toggle("hidden",!allowed.length);
   host.innerHTML=allowed.map(view=>`<button class="nav favorite-nav" data-view="${view}"><i>${meta[view][0]}</i><span>${meta[view][1]}</span></button>`).join("");
 }
-function closeSheets(){[$("mobileMoreSheet"),$("mobileRegisterSheet"),$("mobileSheetBackdrop")].forEach(node=>node?.classList.add("hidden"))}
-function openSheet(id){closeSheets();$(id)?.classList.remove("hidden");$("mobileSheetBackdrop")?.classList.remove("hidden")}
+function closeSheets(){[$("mobileMoreSheet"),$("mobileRegisterSheet")].forEach(node=>{node?.classList.add("hidden");node?.setAttribute("aria-hidden","true")});$("mobileSheetBackdrop")?.classList.add("hidden")}
+function openSheet(id){closeSheets();const sheet=$(id);sheet?.classList.remove("hidden");sheet?.setAttribute("aria-hidden","false");$("mobileSheetBackdrop")?.classList.remove("hidden");setTimeout(()=>sheet?.querySelector("button")?.focus(),0)}
 function navigate(view){setView(view);saveRecent(view);document.querySelectorAll("[data-mobile-view]").forEach(button=>button.classList.toggle("active",button.dataset.mobileView===view));closeSheets()}
 
 function renderMore(){
@@ -63,8 +63,8 @@ export function initHybridMenu(handlers){
     if(regularView)saveRecent(regularView);
     if(event.target.closest("#mobileRegister")){openSheet("mobileRegisterSheet");return}
     if(event.target.closest("#mobileMore")){openSheet("mobileMoreSheet");return}
-    if(event.target.closest("#mobileAlerts")){closeSheets();$("notificationPanel")?.classList.remove("hidden");return}
-    if(event.target.closest("#topUserMenu")){$("accountPanel")?.classList.toggle("hidden");return}
+    if(event.target.closest("#mobileAlerts")){closeSheets();$("notificationBtn")?.click();return}
+    if(event.target.closest("#topUserMenu")){const panel=$("accountPanel"),open=panel.classList.contains("hidden");panel.classList.toggle("hidden",!open);panel.setAttribute("aria-hidden",String(!open));$("topUserMenu").setAttribute("aria-expanded",String(open));if(open)setTimeout(()=>$("accountLogout")?.focus(),0);return}
     if(event.target.closest("#accountLogout")){$("logoutBtn")?.click();return}
     if(event.target.closest("[data-close-mobile-sheet]")||event.target.id==="mobileSheetBackdrop"){closeSheets();return}
     const quick=event.target.closest("[data-quick-action]")?.dataset.quickAction;
