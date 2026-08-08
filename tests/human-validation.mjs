@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
 import {validationScenarios} from "../assets/js/core/role-validation.js";
-import {buildValidationEvidence,createValidationRecord,scenarioForSession,validationDevice,validationRole,validationStatus} from "../assets/js/core/human-validation.js";
+import {buildFinalValidationReport,buildValidationEvidence,createValidationRecord,mergeValidationRecords,scenarioForSession,validateValidationEvidence,validationDevice,validationRole,validationStatus} from "../assets/js/core/human-validation.js";
 
 assert.equal(validationRole("admin"),"admin");assert.equal(validationRole("funcionario"),"team");assert.equal(validationRole("cliente"),null);
 assert.equal(validationDevice({width:390,coarse:true}),"Telemóvel");assert.equal(validationDevice({width:1440,coarse:false}),"Computador");
@@ -10,4 +12,13 @@ let incompleteAccepted=false;try{createValidationRecord({scenario:adminDesktop,c
 const records=validationScenarios.filter(row=>["admin","team"].includes(row.role)).map((scenario,index)=>createValidationRecord({scenario,checked:scenario.checks,attested:true,completedAt:`2026-08-08T12:0${index}:00.000Z`}));
 assert.deepEqual(validationStatus(records,validationScenarios),{passed:["admin-desktop","admin-mobile","team-desktop","team-mobile"],completed:4,total:4,complete:true});
 const evidence=buildValidationEvidence(records,"2026-08-08T13:00:00.000Z");assert.equal(evidence.results.length,4);assert.deepEqual(evidence.privacy,{containsNames:false,containsEmails:false,containsOperationalData:false,containsFinancialData:false});assert.equal(JSON.stringify(evidence).includes("@"),false);
-console.log("Validação humana aprovada: quatro cenários, confirmação explícita, isolamento por perfil/dispositivo e evidência local sem dados pessoais.");
+assert.equal(validateValidationEvidence(JSON.stringify(evidence),validationScenarios).length,4);
+assert.throws(()=>validateValidationEvidence("não é JSON",validationScenarios),/JSON válido/);
+const tampered=structuredClone(evidence);tampered.results[0].checks[0].label="Ação diferente";assert.throws(()=>validateValidationEvidence(tampered,validationScenarios));
+assert.throws(()=>buildFinalValidationReport(tampered.results,validationScenarios));
+const duplicated=structuredClone(evidence);duplicated.results.push(duplicated.results[0]);assert.throws(()=>validateValidationEvidence(duplicated,validationScenarios));
+const newer={...records[0],completedAt:"2026-08-09T12:00:00.000Z"},merged=mergeValidationRecords(records,[newer]);assert.equal(merged.length,4);assert.equal(merged.find(row=>row.scenarioId===newer.scenarioId).completedAt,newer.completedAt);
+assert.throws(()=>buildFinalValidationReport(records.slice(1),validationScenarios));
+const finalReport=buildFinalValidationReport(records,validationScenarios,"2026-08-08T14:00:00.000Z");assert.equal(finalReport.complete,true);assert.equal(finalReport.scenarios.length,4);assert.equal(JSON.stringify(finalReport).includes("checks\""),false);assert.equal(JSON.stringify(finalReport).includes("@"),false);
+const root=resolve(import.meta.dirname,".."),html=readFileSync(resolve(root,"index.html"),"utf8"),ui=readFileSync(resolve(root,"assets/js/modules/role-validation-ui.js"),"utf8");for(const token of ['id="validationEvidenceFile"','id="importValidationEvidence"','id="exportFinalValidation"',"256*1024","validateValidationEvidence","buildFinalValidationReport"])assert(html.includes(token)||ui.includes(token),`Consolidação incompleta: ${token}`);assert.equal(/db\.(from|rpc|functions)/.test(ui),false);
+console.log("Validação humana aprovada: quatro cenários, importação estrita, consolidação final e evidência local sem dados pessoais.");
