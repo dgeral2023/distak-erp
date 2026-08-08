@@ -44,6 +44,13 @@
 - O plano pode ser exportado localmente em JSON; não chama o banco de dados, não altera registos e não transmite informação a serviços externos.
 - A produção atual apresenta Administrador e Equipa preparados, Cliente pendente e apenas as duas contas existentes; nenhum perfil foi declarado validado.
 - O orçamento de JavaScript passa de 330 KB para 335 KB, mantendo total real de 333,7 KB e limite individual de 25 KB por módulo.
+- O Portal do Cliente passa a gerir atualizações e documentos como rascunhos explícitos, sem publicação automática e sem opção de eliminação neste fluxo.
+- A primeira publicação de obra, atualização ou documento exige confirmação humana e recorda a exclusão de custos, margens e informação interna.
+- Fotografias já existentes na obra podem ser escolhidas como capa, evitando copiar endereços manualmente; URLs manuais continuam disponíveis apenas por HTTPS.
+- Endereços com HTTP, protocolos executáveis, credenciais incorporadas ou mais de 2048 caracteres são rejeitados antes da gravação.
+- O painel apresenta separadamente rascunhos e conteúdos publicados, com formulários responsivos para atualização e documento.
+- A produção conserva zero obras, atualizações e documentos no portal; as cinco fotografias e sete documentos internos existentes não foram publicados nem alterados.
+- Os limites passam para 112 KB de HTML, 152 KB de CSS e 345 KB de JavaScript, mantendo valores reais de 108,4 KB, 148,5 KB e 341,9 KB.
 
 ## v3.7 — publicada em 8 de agosto de 2026
 
