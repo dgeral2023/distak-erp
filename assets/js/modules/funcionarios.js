@@ -1,13 +1,13 @@
 import {store} from "../core/store.js";
 import {$,esc,money,toast} from "../core/ui.js";
 import {db,save,remove} from "../core/supabase.js";
-import {analyzeAccessHealth,buildAccessAudit,filterAccessAccounts,isValidRole,latestActivityByUser,sessionHistory,summarizeAccess,summarizeSessions} from "../core/access-management.js";
+import {analyzeAccessHealth,buildAccessAudit,filterAccessAccounts,isTeamRole,isValidRole,latestActivityByUser,sessionHistory,summarizeAccess,summarizeSessions,validateAccountChange} from "../core/access-management.js";
 
 const currentMonth=()=>new Date().toISOString().slice(0,7);
 const hoursForMonth=(month=$("funcionarioMesFiltro")?.value||currentMonth())=>store.funcionarioHoras.filter(row=>String(row.data||"").startsWith(month));
 const formatDate=value=>value?new Date(`${value}T00:00:00`).toLocaleDateString("pt-PT"):"—";
 const badge=value=>`<span class="badge employee-${String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}">${esc(value)}</span>`;
-const roleLabel=role=>({admin:"Administrador",funcionario:"Equipa",cliente:"Cliente"}[role]||"Perfil inválido");
+const roleLabel=role=>({admin:"Administrador",escritorio:"Escritório",encarregado:"Encarregado",funcionario:"Funcionário",cliente:"Cliente"}[role]||"Perfil inválido");
 const sessionActionLabel=action=>({entrou:"Entrada",saiu:"Saída",recuperou_acesso:"Recuperação de acesso"}[action]||"Autenticação");
 
 function renderSessionHistory(){
@@ -32,7 +32,8 @@ function renderAccessCenter(){
     const roleValid=isValidRole(row.role),isActive=row.ativo!==false;
     const scope=row.role==="admin"?"Acesso administrativo":row.role==="cliente"?`${portals.length} cliente(s) associado(s)`: `${assigned.length} obra(s) atribuída(s)`;
     const activity=latest.get(String(row.id)),activityLabel=activity?.criado_em?new Date(activity.criado_em).toLocaleString("pt-PT"):"Sem atividade registada";
-    return `<article class="access-account ${isActive?"active":"inactive"}" data-access-account="${row.id}" tabindex="-1"><div class="access-avatar" aria-hidden="true">${esc((row.nome||row.email||"?").trim().charAt(0).toUpperCase())}</div><div class="access-identity"><strong>${esc(row.nome||"Nome não definido")}</strong><small>${esc(row.email||"E-mail não disponível")}</small><em>${esc(activityLabel)}</em></div><div class="access-role"><span>Perfil</span><strong class="${roleValid?"":"invalid"}">${esc(roleLabel(row.role))}</strong></div><div class="access-scope"><span>Alcance</span><strong>${esc(scope)}</strong></div><div class="access-status"><span class="${isActive?"enabled":"disabled"}">${isActive?"Ativo":"Desativado"}</span>${row.role==="funcionario"?`<button type="button" class="btn small light" data-review-assignment="${row.id}">Rever obras</button>`:row.role==="cliente"?'<button type="button" class="btn small light" data-review-client-access>Rever portal</button>':""}</div></article>`;
+    const own=String(row.id)===String(store.profile.id);
+    return `<article class="access-account ${isActive?"active":"inactive"}" data-access-account="${row.id}" tabindex="-1"><div class="access-avatar" aria-hidden="true">${esc((row.nome||row.email||"?").trim().charAt(0).toUpperCase())}</div><div class="access-identity"><strong>${esc(row.nome||"Nome não definido")}</strong><small>${esc(row.email||"E-mail não disponível")}</small><em>${esc(activityLabel)}</em></div><div class="access-role"><span>Perfil</span><strong class="${roleValid?"":"invalid"}">${esc(roleLabel(row.role))}</strong></div><div class="access-scope"><span>Alcance</span><strong>${esc(scope)}</strong></div><div class="access-status"><span class="${isActive?"enabled":"disabled"}">${isActive?"Ativo":"Desativado"}</span>${isTeamRole(row.role)?`<button type="button" class="btn small light" data-review-assignment="${row.id}">Rever obras</button>`:row.role==="cliente"?'<button type="button" class="btn small light" data-review-client-access>Rever portal</button>':""}${own?'<small>Conta atual protegida</small>':`<button type="button" class="btn small primary" data-manage-account="${row.id}">Gerir conta</button>`}</div></article>`;
   }).join(""):'<div class="crm-empty">Nenhuma conta corresponde aos filtros.</div>';renderSessionHistory();
 }
 
@@ -41,6 +42,21 @@ function exportAccessAudit(){
   if(!confirm("O relatório contém identificadores e e-mails das contas. Guarde-o apenas num local seguro. Deseja continuar?"))return;
   const report=buildAccessAudit({profiles:store.profiles,assignments:store.obraUtilizadores,clientAccess:store.clientePortalAcessos,activities:store.atividades}),content=JSON.stringify(report,null,2),blob=new Blob([content],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a"),stamp=new Date().toISOString().replaceAll(":","-").slice(0,19);
   link.href=url;link.download=`distak-auditoria-acessos-${stamp}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast("Auditoria exportada localmente. Nenhum dado foi alterado ou enviado.");
+}
+
+function openAccountManagement(userId){
+  const profile=store.profiles.find(row=>String(row.id)===String(userId));if(!profile||String(profile.id)===String(store.profile.id))return toast("A sua própria conta está protegida neste fluxo.","error");
+  $("accountManagementId").value=profile.id;$("accountManagementRole").value=profile.role;$("accountManagementActive").checked=profile.ativo!==false;$("accountManagementReason").value="";$("accountManagementWarning").textContent="";
+  $("accountManagementIdentity").innerHTML=`<strong>${esc(profile.nome||"Nome não definido")}</strong><small>${esc(profile.email)} · ${esc(roleLabel(profile.role))} · ${profile.ativo===false?"Desativado":"Ativo"}</small>`;
+  $("accountManagementDialog").showModal();$("accountManagementRole").focus();
+}
+
+async function submitAccountManagement(event,refresh){
+  event.preventDefault();const current=store.profiles.find(row=>String(row.id)===String($("accountManagementId").value)),next={role:$("accountManagementRole").value,active:$("accountManagementActive").checked,reason:$("accountManagementReason").value.trim()},warning=$("accountManagementWarning"),button=$("accountManagementSave"),errors=validateAccountChange(current,next,store.profile.id);
+  warning.textContent=errors.join(" ");if(errors.length)return;
+  const description=`${roleLabel(current.role)} / ${current.ativo===false?"desativado":"ativo"} → ${roleLabel(next.role)} / ${next.active?"ativo":"desativado"}`;
+  if(!confirm(`Confirma a alteração de ${current.nome||current.email}?\n\n${description}\n\nEsta ação será registada na auditoria.`))return;
+  button.disabled=true;try{const {data,error}=await db.rpc("gerir_utilizador",{p_user_id:current.id,p_role:next.role,p_ativo:next.active,p_motivo:next.reason});if(error)throw error;if(!data)throw new Error("A alteração não foi confirmada pelo servidor.");$("accountManagementDialog").close();await refresh();toast("Conta atualizada e alteração registada na auditoria.")}catch(error){warning.textContent=error.message||"Não foi possível atualizar a conta."}finally{button.disabled=false}
 }
 
 function fillSelectors(){
@@ -53,7 +69,7 @@ function fillSelectors(){
 
 function renderAssignments(){
   const host=$("obraAssignments");if(!host)return;
-  const users=store.profiles.filter(p=>p.ativo!==false&&p.role!=="admin");
+  const users=store.profiles.filter(p=>p.ativo!==false&&isTeamRole(p.role));
   const active=store.obraUtilizadores.filter(row=>row.ativo!==false);
   $("assignmentSummary").textContent=`${active.length} atribuição(ões)`;
   host.innerHTML=users.length?users.map(user=>{
@@ -107,6 +123,8 @@ export function initFuncionarios(refresh){
   $("exportAccessAudit")?.addEventListener("click",exportAccessAudit);
   ["accessSearch","accessRoleFilter","accessStateFilter"].forEach(id=>$(id)?.addEventListener(id==="accessSearch"?"input":"change",renderAccessCenter));
   document.addEventListener("click",event=>{const health=event.target.closest("[data-health-account]")?.dataset.healthAccount;if(health){const account=document.querySelector(`[data-access-account="${health}"]`);account?.scrollIntoView({behavior:"smooth",block:"center"});account?.focus()}const assignment=event.target.closest("[data-review-assignment]")?.dataset.reviewAssignment;if(assignment){const card=document.querySelector(`[data-assignment-user="${assignment}"]`);card?.scrollIntoView({behavior:"smooth",block:"center"});card?.querySelector("input")?.focus()}if(event.target.closest("[data-review-client-access]")){document.querySelector('[data-view="portal-admin"]')?.click()}});
+  document.addEventListener("click",event=>{const userId=event.target.closest("[data-manage-account]")?.dataset.manageAccount;if(userId)openAccountManagement(userId)});
+  $("accountManagementForm")?.addEventListener("submit",event=>submitAccountManagement(event,refresh));
   document.addEventListener("click",async event=>{const userId=event.target.closest("[data-save-assignment]")?.dataset.saveAssignment;if(!userId)return;try{await saveAssignments(userId,refresh)}catch(err){toast(err.message,"error")}});
   $("novoFuncionarioBtn")?.addEventListener("click",()=>openEmployee());$("novoRegistoHorasBtn")?.addEventListener("click",()=>openHours());
   ["funcionarioSearch","funcionarioEstadoFiltro","funcionarioMesFiltro"].forEach(id=>$(id)?.addEventListener(id==="funcionarioSearch"?"input":"change",renderFuncionarios));

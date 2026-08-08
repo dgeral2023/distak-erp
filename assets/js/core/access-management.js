@@ -1,5 +1,17 @@
-const validRoles=new Set(["admin","funcionario","cliente"]);
+const validRoles=new Set(["admin","escritorio","encarregado","funcionario","cliente"]);
 export const isValidRole=role=>validRoles.has(role);
+export const isTeamRole=role=>["escritorio","encarregado","funcionario"].includes(role);
+
+export function validateAccountChange(current,next,currentUserId=""){
+  const errors=[],reason=String(next.reason||"").trim();
+  if(!current?.id)errors.push("Conta inválida");
+  if(String(current?.id)===String(currentUserId))errors.push("A sua própria conta não pode ser alterada por este fluxo");
+  if(!isValidRole(next.role))errors.push("Perfil inválido");
+  if(next.role==="admin"&&next.active===false)errors.push("Um administrador deve permanecer ativo");
+  if(reason.length<10||reason.length>500)errors.push("Indique um motivo entre 10 e 500 caracteres");
+  if(current?.role===next.role&&(current?.ativo!==false)===next.active)errors.push("Não existem alterações para guardar");
+  return errors;
+}
 
 export function summarizeAccess({profiles=[],assignments=[],clientAccess=[]}={}){
   const activeAssignments=assignments.filter(row=>row.ativo!==false),activeClientAccess=clientAccess.filter(row=>row.ativo!==false);
@@ -8,7 +20,7 @@ export function summarizeAccess({profiles=[],assignments=[],clientAccess=[]}={})
     active:profiles.filter(row=>row.ativo!==false).length,
     inactive:profiles.filter(row=>row.ativo===false).length,
     invalid:profiles.filter(row=>!isValidRole(row.role)).length,
-    team:profiles.filter(row=>row.role==="funcionario").length,
+    team:profiles.filter(row=>isTeamRole(row.role)).length,
     clients:profiles.filter(row=>row.role==="cliente").length,
     assignments:activeAssignments.length,
     clientLinks:activeClientAccess.length
@@ -27,7 +39,7 @@ export function analyzeAccessHealth({profiles=[],assignments=[],clientAccess=[]}
     const linked=activeClientAccess.filter(row=>String(row.user_id)===String(profile.id)).length;
     if(!isValidRole(profile.role))findings.push({accountId:profile.id,severity:"critical",code:"invalid-role",message:"Perfil de acesso inválido"});
     if(profile.ativo===false&&(assigned||linked))findings.push({accountId:profile.id,severity:"critical",code:"inactive-access",message:`Conta desativada mantém ${assigned+linked} vínculo(s) ativo(s)`});
-    if(profile.ativo!==false&&profile.role==="funcionario"&&!assigned)findings.push({accountId:profile.id,severity:"warning",code:"team-without-work",message:"Conta de equipa sem obra atribuída"});
+    if(profile.ativo!==false&&isTeamRole(profile.role)&&!assigned)findings.push({accountId:profile.id,severity:"warning",code:"team-without-work",message:"Conta de equipa sem obra atribuída"});
     if(profile.ativo!==false&&profile.role==="cliente"&&!linked)findings.push({accountId:profile.id,severity:"warning",code:"client-without-link",message:"Conta de cliente sem vínculo autorizado"});
     if(profile.ativo!==false&&!profile.email)findings.push({accountId:profile.id,severity:"warning",code:"missing-email",message:"Conta ativa sem e-mail identificado"});
   }
