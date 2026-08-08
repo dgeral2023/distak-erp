@@ -2,6 +2,8 @@
 
 ## v3.8 — em desenvolvimento
 
+- O Centro de Relatórios ganha um fluxo de suporte operacional com prioridades P1/P2/P3 e exportação de diagnóstico técnico local sem nomes, e-mails, valores, credenciais ou conteúdo das obras.
+- O procedimento de operação documenta triagem, ensaio de recuperação exclusivamente fora de produção e critérios objetivos para um piloto comercial controlado.
 - A proposta 2 aprovada no Canva passa a orientar o sistema de ícones do ERP: traço linear arredondado, espessura uniforme, azul-marinho e acentos dourados discretos.
 - A navegação principal e a barra móvel deixam de usar símbolos tipográficos e recebem ícones vetoriais consistentes, locais, acessíveis e disponíveis offline.
 - O Dashboard de Obras recebe o acabamento “Executivo premium”: ícones vetoriais consistentes, gráfico financeiro com escala, curvas suaves, área de apoio e totais, além de um gráfico de estados com maior profundidade e legendas mais legíveis.

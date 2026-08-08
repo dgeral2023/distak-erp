@@ -53,7 +53,7 @@ Progresso: as três intensidades foram apresentadas e o proprietário escolheu *
 
 1. Continuar qualidade e escala; diagnóstico local de prontidão e recuperação controlada concluído, faltando ensaio de recuperação fora de produção.
 2. Evoluir o assistente operacional e preparar uma integração generativa externa somente após autorização específica própria.
-3. Preparar monitorização, suporte e critérios para utilização comercial controlada.
+3. Monitorização e suporte local concluídos com diagnóstico seguro, prioridades P1/P2/P3 e procedimento operacional. Critérios para utilização comercial controlada definidos; continuam pendentes o ensaio de recuperação isolado e a validação real em computador e telemóvel.
 
 ## Regras permanentes
 
