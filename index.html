@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="assets/css/accessibility.css?v=20260806-a11y-v2">
   <link rel="stylesheet" href="assets/css/backup.css?v=20260806-backup-v2">
   <link rel="stylesheet" href="assets/css/system-health.css?v=20260808-readiness-v1">
+  <link rel="stylesheet" href="assets/css/motion.css?v=20260808-anime-v1">
   <link rel="stylesheet" href="assets/css/user-management.css?v=20260808-users-v1">
   <link rel="stylesheet" href="assets/css/role-validation.css?v=20260808-validation-v1">
   <link rel="stylesheet" href="assets/css/portal-content-management.css?v=20260808-portal-content-v1">
@@ -125,7 +126,7 @@
     </header>
     <div id="globalSearchResults" class="global-search-results hidden"></div>
     <aside id="notificationPanel" class="notification-panel hidden" role="dialog" aria-label="Centro de atenção" aria-hidden="true"><header><div><span>Centro de atenção</span><h3>Alertas e próximos passos</h3></div><button id="notificationClose" type="button" aria-label="Fechar">×</button></header><div id="notificationList"></div></aside>
-    <aside id="accountPanel" class="account-panel hidden" aria-label="Menu da conta" aria-hidden="true"><div id="accountPanelUser"></div><button id="accountLogout" type="button">Sair da conta</button></aside>
+    <aside id="accountPanel" class="account-panel hidden" aria-label="Menu da conta" aria-hidden="true"><div id="accountPanelUser"></div><button id="motionToggle" data-motion-toggle type="button" aria-pressed="true"><span aria-hidden="true">✦</span><span><strong>Movimento criativo</strong><small data-motion-state>Criativa avançada</small></span></button><button id="accountLogout" type="button">Sair da conta</button></aside>
 
     <button id="aiAssistantButton" class="ai-assistant-button" type="button" aria-label="Abrir Assistente DISTAK" aria-controls="aiAssistantPanel" aria-expanded="false"><span class="ai-button-mark">D</span><span>Assistente</span><b>IA</b></button>
     <div id="aiAssistantBackdrop" class="ai-assistant-backdrop hidden"></div>

@@ -2,6 +2,11 @@
 
 ## v3.8 — em desenvolvimento
 
+- O escopo operacional desta fase passa a exigir somente Administrador e Funcionário; o perfil Cliente permanece suportado, mas a criação e validação de contas do portal foram adiadas e não bloqueiam a publicação.
+- A base de produção foi conferida sem alterações: existe uma conta Administrador ativa, uma conta Funcionário ativa com obras atribuídas e nenhum acesso de Cliente ativo.
+- A direção visual “Criativa avançada” foi escolhida e preparada com Anime.js 4.4.1 local para navegação, cartões, gráficos, alertas, modais e assistente.
+- A camada pode ser desligada, respeita redução de movimento, alto contraste, poupança de dados e equipamentos lentos, e não anima valores ou ações críticas.
+
 - O Centro de Relatórios passa a apresentar prontidão administrativa de ligação, sessão, módulos, PWA e atualidade da cópia local.
 - A exportação guarda neste dispositivo apenas data, versão e contagem total; não transmite telemetria nem permite recuperação automática.
 
