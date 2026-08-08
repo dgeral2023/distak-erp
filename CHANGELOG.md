@@ -13,6 +13,9 @@
 - O relatório não inclui dados financeiros e exige confirmação explícita antes do download; nenhum conteúdo é enviado para serviços externos.
 - O orçamento automatizado de JavaScript da v3.8 passa de 310 KB para 315 KB para acomodar a auditoria, mantendo limite rígido e crescimento inferior a 2%.
 - Inconsistências do Centro de Acessos passam a gerar notificações administrativas acionáveis, com destino direto à conta e sem exposição para equipa ou clientes.
+- A entrada passa a oferecer recuperação segura de acesso iniciada pelo próprio utilizador, com resposta neutra para não revelar contas registadas.
+- A nova palavra-passe segue as regras fortes do projeto (10 caracteres, minúscula, maiúscula, número e símbolo) e a sessão de recuperação é encerrada depois da alteração.
+- O orçamento automatizado de JavaScript passa de 315 KB para 320 KB para acomodar a recuperação, mantendo o total real em 315,8 KB.
 
 ## v3.7 — publicada em 8 de agosto de 2026
 
