@@ -7,6 +7,8 @@
 - Filtros por nome, e-mail, perfil e estado ajudam a auditar o alcance de cada conta.
 - Atalhos levam à revisão das obras atribuídas ou do Portal do Cliente sem executar mutações.
 - Novo validador automatizado cobre estados, papéis, vínculos, filtros e ausência de mutações na análise.
+- A saúde dos acessos sinaliza contas desativadas com vínculos ativos, perfis inválidos, equipa sem obra e clientes sem associação.
+- Cada conta apresenta a atividade mais recente conhecida a partir do histórico autorizado do ERP.
 
 ## v3.7 — publicada em 8 de agosto de 2026
 
