@@ -2,6 +2,8 @@
 
 ## v3.8 — em desenvolvimento
 
+- A proposta 2 aprovada no Canva passa a orientar o sistema de ícones do ERP: traço linear arredondado, espessura uniforme, azul-marinho e acentos dourados discretos.
+- A navegação principal e a barra móvel deixam de usar símbolos tipográficos e recebem ícones vetoriais consistentes, locais, acessíveis e disponíveis offline.
 - O Dashboard de Obras recebe o acabamento “Executivo premium”: ícones vetoriais consistentes, gráfico financeiro com escala, curvas suaves, área de apoio e totais, além de um gráfico de estados com maior profundidade e legendas mais legíveis.
 - Os novos elementos mantêm contraste, descrição acessível, redução de movimento, adaptação móvel e funcionamento local no PWA.
 - O escopo operacional desta fase passa a exigir somente Administrador e Funcionário; o perfil Cliente permanece suportado, mas a criação e validação de contas do portal foram adiadas e não bloqueiam a publicação.

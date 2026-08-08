@@ -15,6 +15,7 @@ import {initClientePortal,renderClientePortal,renderClientePortalAdmin} from "./
 import {initBackup} from "./modules/backup.js";
 import {initSystemHealth,renderSystemHealth} from "./modules/system-health.js";
 import {initMotion} from "./modules/motion.js";
+import {initIconography} from "./core/iconography.js";
 let lastDataWarning="";
 let passwordRecoveryActive=location.hash.includes("type=recovery");
 async function refresh(){await refreshData();const warning=(store.dataWarnings||[]).join(", ");if(warning&&warning!==lastDataWarning)toast(`Alguns módulos não foram carregados: ${warning}. Tente atualizar a página.`,"error");lastDataWarning=warning;if(store.profile?.role==="cliente"){renderClientePortal();renderHybridMenu();return}renderClientes();renderObras();renderOrcamentos();renderCustos();renderPagamentos();renderFuncionarios();renderDashboard();renderAgenda();renderPrevisoes();renderDossies();renderOperacional();renderCompras();renderMedicoes();renderInteligencia();renderClientePortalAdmin();renderV3();renderSystemHealth();renderHybridMenu();renderAssistantInsight();await renderCampo()}
@@ -52,5 +53,5 @@ document.body.onclick=e=>{
   if(delPag)deletePagamento(delPag,refresh);
 }
 $("clienteSearch").oninput=e=>renderClientes(store.clientes.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())));$("obraSearch").oninput=e=>renderObras(store.obras.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())));$("pagamentoSearch").oninput=e=>renderPagamentos(store.pagamentos.filter(x=>JSON.stringify(x).toLowerCase().includes(e.target.value.toLowerCase())))
-initAccessibility();initMotion();initBackup();initSystemHealth(refresh);initClientePortal(refresh);initCustos(refresh);initOrcamentos();initFuncionarios(refresh);initFotografias();initDocumentos();initDiario();initAgenda(refresh);initPrevisoes(refresh);initDossies();initOperacional(refresh);initCompras(refresh);initMedicoes(refresh);initCampo(refresh);initInteligencia(refresh);initV3();initHybridMenu({openCliente,openObra,openOrcamento,openCusto,openPagamento,openAgendaTask,openForecast,openOperationalQuick});initAssistant();initPwa();
+initIconography();initAccessibility();initMotion();initBackup();initSystemHealth(refresh);initClientePortal(refresh);initCustos(refresh);initOrcamentos();initFuncionarios(refresh);initFotografias();initDocumentos();initDiario();initAgenda(refresh);initPrevisoes(refresh);initDossies();initOperacional(refresh);initCompras(refresh);initMedicoes(refresh);initCampo(refresh);initInteligencia(refresh);initV3();initHybridMenu({openCliente,openObra,openOrcamento,openCusto,openPagamento,openAgendaTask,openForecast,openOperationalQuick});initAssistant();initPwa();
 session().then(s=>s&&!passwordRecoveryActive&&enter(s)).catch(err=>{$("loginError").textContent=err.message||"Não foi possível recuperar a sessão."})

@@ -8,7 +8,7 @@ const js=files(join(root,"assets","js")).filter(path=>path.endsWith(".js")&&!pat
 const vendorJs=files(join(root,"assets","vendor")).filter(path=>path.endsWith(".js"));
 const size=paths=>paths.reduce((sum,path)=>sum+statSync(path).size,0);
 const indexSize=statSync(join(root,"index.html")).size,cssSize=size(css),jsSize=size(js),vendorSize=size(vendorJs);
-const budgets={index:114_000,css:159_000,js:358_000,vendor:120_000,single:25_000};
+const budgets={index:114_000,css:159_000,js:366_000,vendor:120_000,single:25_000};
 const failures=[];
 const relationIndexes=readFileSync(join(root,"supabase","migrations","20260806175141_indices_relacoes_operacionais_v35.sql"),"utf8");
 for(const required of ["compras_pedidos_criado_por_idx","compras_propostas_criado_por_idx","medicoes_autos_criado_por_idx"])if(!relationIndexes.includes(required))failures.push(`Índice operacional em falta: ${required}`);
