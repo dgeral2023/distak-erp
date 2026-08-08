@@ -8,6 +8,7 @@ const yesterday=new Date(`${today}T12:00:00`);yesterday.setDate(yesterday.getDat
 const late=yesterday.toISOString().slice(0,10);
 
 Object.assign(store,{
+  profile:{id:"admin",role:"admin",ativo:true},profiles:[{id:"admin",nome:"Administrador",email:"admin@distak.test",role:"admin",ativo:true},{id:"team-unassigned",nome:"Equipa sem obra",email:"equipa@distak.test",role:"funcionario",ativo:true}],obraUtilizadores:[],clientePortalAcessos:[],
   custos:[],orcamentos:[],pagamentos:[],previsoesFinanceiras:[],documentosObra:[],
   ocorrenciasObra:[],pedidosCompra:[],autosMedicao:[],campoRegistos:[],
   obras:[{id:"work-1",nome:"Obra Norte",estado:"Em atraso",progresso:45}],
@@ -24,5 +25,11 @@ check(blocked[0].kind==="task"&&blocked[0].action==="Abrir tarefa","a notificaç
 check(rows.some(row=>row.kind==="work"&&row.id==="work-1"&&row.action==="Abrir obra"),"o alerta da obra deve apontar para a ficha correta");
 check(rows.some(row=>row.filter==="unassigned"&&row.action==="Distribuir tarefas"),"tarefas prioritárias sem responsável devem abrir a distribuição de carga");
 check(rows.findIndex(row=>row.level==="danger")<=rows.findIndex(row=>row.level==="warning"),"alertas críticos devem aparecer antes dos avisos");
+const accessAlerts=rows.filter(row=>row.kind==="access"&&row.id==="team-unassigned");
+check(accessAlerts.length===1,"uma inconsistência de acesso deve gerar apenas uma notificação");
+check(accessAlerts[0].view==="funcionarios"&&accessAlerts[0].action==="Rever conta","o alerta de acesso deve abrir a conta no Centro de Acessos");
+
+store.profile={id:"team-unassigned",role:"funcionario",ativo:true};
+check(buildAlerts().every(row=>row.kind!=="access"),"alertas administrativos de acesso não podem aparecer para a equipa");
 
 console.log(`Notificações aprovadas: ${rows.length} alertas ordenados, sem duplicação e com destinos acionáveis.`);
