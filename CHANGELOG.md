@@ -2,6 +2,9 @@
 
 ## v3.8 — em desenvolvimento
 
+- A verificação de cópias passa a reconstruir todos os registos num ambiente descartável em memória, comparando contagens, relações e preparação de Administrador/Funcionário com zero escritas em produção.
+- O ensaio local não restaura dados automaticamente e mantém qualquer recuperação real condicionada a autorização específica e a um projeto Supabase isolado.
+- A matriz operacional foi corrigida para refletir o escopo aprovado de apenas Administrador e Funcionário; Cliente permanece suportado, mas adiado.
 - O Centro de Relatórios ganha um fluxo de suporte operacional com prioridades P1/P2/P3 e exportação de diagnóstico técnico local sem nomes, e-mails, valores, credenciais ou conteúdo das obras.
 - O procedimento de operação documenta triagem, ensaio de recuperação exclusivamente fora de produção e critérios objetivos para um piloto comercial controlado.
 - A proposta 2 aprovada no Canva passa a orientar o sistema de ícones do ERP: traço linear arredondado, espessura uniforme, azul-marinho e acentos dourados discretos.

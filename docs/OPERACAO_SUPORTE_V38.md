@@ -14,20 +14,20 @@
 - **P2:** um utilizador bloqueado, módulo indisponível ou funcionamento degradado sem perda de dados.
 - **P3:** dúvida, melhoria visual ou problema sem bloqueio operacional.
 
-## Ensaio de recuperação fora de produção
+## Ensaio de recuperação isolado
 
 1. Exportar uma cópia administrativa e confirmar o checksum SHA-256.
-2. Usar apenas um projeto Supabase isolado, nunca a produção.
-3. Confirmar contagens, relações entre obras e documentos e acesso de Administrador/Funcionário.
+2. Usar a reconstrução descartável em memória apresentada pela verificação; nunca a produção.
+3. Confirmar contagens, relações entre obras e documentos e preparação de Administrador/Funcionário.
 4. Registar data, responsável, duração, resultado e diferenças encontradas.
-5. Não automatizar a reposição enquanto o ensaio não estiver aprovado.
+5. A simulação não escreve dados e não ativa reposição automática. Uma recuperação real continua dependente de autorização específica e de um projeto Supabase isolado.
 
 ## Critérios para piloto comercial controlado
 
 - zero achados críticos de segurança;
 - diagnóstico local em estado preparado;
 - cópia administrativa íntegra com menos de sete dias;
-- ensaio de recuperação isolado documentado;
+- ensaio de reconstrução local isolada aprovado; recuperação real autorizada separadamente quando necessária;
 - validação real de Administrador e Funcionário em computador e telemóvel;
 - procedimento P1/P2/P3 conhecido pelo responsável;
 - publicação aprovada e reversível no GitHub.
