@@ -1,11 +1,29 @@
 import {store} from "../core/store.js";
 import {$,esc,money,toast} from "../core/ui.js";
 import {db,save,remove} from "../core/supabase.js";
+import {filterAccessAccounts,isValidRole,summarizeAccess} from "../core/access-management.js";
 
 const currentMonth=()=>new Date().toISOString().slice(0,7);
 const hoursForMonth=(month=$("funcionarioMesFiltro")?.value||currentMonth())=>store.funcionarioHoras.filter(row=>String(row.data||"").startsWith(month));
 const formatDate=value=>value?new Date(`${value}T00:00:00`).toLocaleDateString("pt-PT"):"—";
 const badge=value=>`<span class="badge employee-${String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}">${esc(value)}</span>`;
+const roleLabel=role=>({admin:"Administrador",funcionario:"Equipa",cliente:"Cliente"}[role]||"Perfil inválido");
+
+function renderAccessCenter(){
+  const host=$("accessAccounts");if(!host||store.profile?.role!=="admin")return;
+  const profiles=store.profiles||[],activeAssignments=(store.obraUtilizadores||[]).filter(row=>row.ativo!==false),clientAccess=(store.clientePortalAcessos||[]).filter(row=>row.ativo!==false),summary=summarizeAccess({profiles,assignments:activeAssignments,clientAccess});
+  $("accessSummary").innerHTML=`<article><span>Contas</span><strong>${summary.total}</strong><small>${summary.active} ativa(s)</small></article><article><span>Equipa</span><strong>${summary.team}</strong><small>${summary.assignments} atribuição(ões)</small></article><article><span>Clientes</span><strong>${summary.clients}</strong><small>${summary.clientLinks} vínculo(s)</small></article><article class="${summary.inactive||summary.invalid?"warning":"secure"}"><span>A rever</span><strong>${summary.inactive+summary.invalid}</strong><small>${summary.invalid?`${summary.invalid} perfil(is) inválido(s)`:"Perfis válidos"}</small></article>`;
+  $("accessSecurityState").innerHTML=summary.invalid?`<strong>Revisão necessária</strong><small>${summary.invalid} conta(s) com perfil inválido</small>`:`<strong>Estrutura protegida</strong><small>Cadastro público e acesso anónimo desativados</small>`;
+  const search=$("accessSearch")?.value.trim().toLowerCase()||"",role=$("accessRoleFilter")?.value||"",state=$("accessStateFilter")?.value||"";
+  const rows=filterAccessAccounts(profiles,{search,role,state});
+  host.innerHTML=rows.length?rows.map(row=>{
+    const assigned=activeAssignments.filter(item=>String(item.user_id)===String(row.id));
+    const portals=clientAccess.filter(item=>String(item.user_id)===String(row.id));
+    const roleValid=isValidRole(row.role),isActive=row.ativo!==false;
+    const scope=row.role==="admin"?"Acesso administrativo":row.role==="cliente"?`${portals.length} cliente(s) associado(s)`: `${assigned.length} obra(s) atribuída(s)`;
+    return `<article class="access-account ${isActive?"active":"inactive"}"><div class="access-avatar" aria-hidden="true">${esc((row.nome||row.email||"?").trim().charAt(0).toUpperCase())}</div><div class="access-identity"><strong>${esc(row.nome||"Nome não definido")}</strong><small>${esc(row.email||"E-mail não disponível")}</small></div><div class="access-role"><span>Perfil</span><strong class="${roleValid?"":"invalid"}">${esc(roleLabel(row.role))}</strong></div><div class="access-scope"><span>Alcance</span><strong>${esc(scope)}</strong></div><div class="access-status"><span class="${isActive?"enabled":"disabled"}">${isActive?"Ativo":"Desativado"}</span>${row.role==="funcionario"?`<button type="button" class="btn small light" data-review-assignment="${row.id}">Rever obras</button>`:row.role==="cliente"?'<button type="button" class="btn small light" data-review-client-access>Rever portal</button>':""}</div></article>`;
+  }).join(""):'<div class="crm-empty">Nenhuma conta corresponde aos filtros.</div>';
+}
 
 function fillSelectors(){
   const employee=$("funcionarioHorasFuncionario"),work=$("funcionarioHorasObra");if(!employee||!work)return;
@@ -60,7 +78,7 @@ export function renderFuncionarios(){
   $("funcionariosTable").innerHTML=rows.length?`<div class="table-scroll"><table><thead><tr><th>Funcionário</th><th>Contacto</th><th>Entrada</th><th>Custo/hora</th><th>Horas no mês</th><th>Estado</th><th>Ações</th></tr></thead><tbody>${employeeBody}</tbody></table></div>`:'<div class="crm-empty">Sem funcionários para apresentar.</div>';
   const hoursBody=monthHours.map(r=>`<tr><td>${formatDate(r.data)}</td><td>${esc(r.funcionarios?.nome||"")}</td><td>${esc(r.obras?.nome||"Sem obra")}</td><td>${esc([r.hora_entrada,r.hora_saida].filter(Boolean).join("–")||"—")}</td><td>${Number(r.horas||0).toFixed(2)} h</td><td>${money(Number(r.horas||0)*Number(r.funcionarios?.custo_hora||0))}</td><td><button class="btn small danger" data-delete-employee-hours="${r.id}">Apagar</button></td></tr>`).join("");
   $("funcionarioHorasTable").innerHTML=monthHours.length?`<div class="table-scroll"><table><thead><tr><th>Data</th><th>Funcionário</th><th>Obra</th><th>Horário</th><th>Horas</th><th>Custo</th><th>Ações</th></tr></thead><tbody>${hoursBody}</tbody></table></div>`:'<div class="crm-empty">Sem horas registadas neste mês.</div>';
-  fillSelectors();renderAssignments();
+  fillSelectors();renderAssignments();renderAccessCenter();
 }
 
 function openEmployee(row={}){$("funcionarioId").value=row.id||"";$("funcionarioNome").value=row.nome||"";$("funcionarioFuncao").value=row.funcao||"";$("funcionarioTelefone").value=row.telefone||"";$("funcionarioEmail").value=row.email||"";$("funcionarioNif").value=row.nif||"";$("funcionarioDataEntrada").value=row.data_entrada||"";$("funcionarioCustoHora").value=Number(row.custo_hora||0);$("funcionarioEstado").value=row.estado||"Ativo";$("funcionarioObservacoes").value=row.observacoes||"";$("funcionarioDialog").showModal()}
@@ -68,6 +86,8 @@ function openHours(employeeId=""){fillSelectors();$("funcionarioHorasId").value=
 function calculateHours(){const start=$("funcionarioHorasEntrada").value,end=$("funcionarioHorasSaida").value;if(!start||!end)return;const [sh,sm]=start.split(":").map(Number),[eh,em]=end.split(":").map(Number);let minutes=(eh*60+em)-(sh*60+sm)-Number($("funcionarioHorasPausa").value||0);if(minutes<0)minutes+=1440;$("funcionarioHorasTotal").value=Math.max(0,minutes/60).toFixed(2)}
 
 export function initFuncionarios(refresh){
+  ["accessSearch","accessRoleFilter","accessStateFilter"].forEach(id=>$(id)?.addEventListener(id==="accessSearch"?"input":"change",renderAccessCenter));
+  document.addEventListener("click",event=>{const assignment=event.target.closest("[data-review-assignment]")?.dataset.reviewAssignment;if(assignment){const card=document.querySelector(`[data-assignment-user="${assignment}"]`);card?.scrollIntoView({behavior:"smooth",block:"center"});card?.querySelector("input")?.focus()}if(event.target.closest("[data-review-client-access]")){document.querySelector('[data-view="portal-admin"]')?.click()}});
   document.addEventListener("click",async event=>{const userId=event.target.closest("[data-save-assignment]")?.dataset.saveAssignment;if(!userId)return;try{await saveAssignments(userId,refresh)}catch(err){toast(err.message,"error")}});
   $("novoFuncionarioBtn")?.addEventListener("click",()=>openEmployee());$("novoRegistoHorasBtn")?.addEventListener("click",()=>openHours());
   ["funcionarioSearch","funcionarioEstadoFiltro","funcionarioMesFiltro"].forEach(id=>$(id)?.addEventListener(id==="funcionarioSearch"?"input":"change",renderFuncionarios));

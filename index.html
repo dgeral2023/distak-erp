@@ -32,6 +32,7 @@
   <link rel="stylesheet" href="assets/css/cliente-approvals.css?v=20260805-client-v1">
   <link rel="stylesheet" href="assets/css/accessibility.css?v=20260806-a11y-v2">
   <link rel="stylesheet" href="assets/css/backup.css?v=20260806-backup-v2">
+  <link rel="stylesheet" href="assets/css/user-management.css?v=20260808-users-v1">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -450,6 +451,13 @@
     <section id="view-funcionarios" class="view hidden">
       <div class="employee-head"><div><span>Gestão da equipa</span><h2>Funcionários</h2><p>Cadastro, horas trabalhadas e custo operacional por obra.</p></div><div class="employee-head-actions"><button id="novoRegistoHorasBtn" class="btn light">Registar horas</button><button id="novoFuncionarioBtn" class="btn primary">Novo funcionário</button></div></div>
       <div id="funcionariosResumo" class="employee-summary"></div>
+      <section class="panel access-center" aria-labelledby="accessCenterTitle">
+        <div class="access-center-head"><div><span>V3.8 · CONTROLO DE ACESSOS</span><h3 id="accessCenterTitle">Contas e permissões</h3><p>Consulte perfis, estados e alcance dos acessos antes de efetuar qualquer alteração.</p></div><div id="accessSecurityState" class="access-security-state" aria-live="polite"></div></div>
+        <div id="accessSummary" class="access-summary"></div>
+        <div class="access-toolbar"><label>Pesquisar conta<input id="accessSearch" type="search" placeholder="Nome ou e-mail"></label><label>Perfil<select id="accessRoleFilter"><option value="">Todos</option><option value="admin">Administrador</option><option value="funcionario">Equipa</option><option value="cliente">Cliente</option></select></label><label>Estado<select id="accessStateFilter"><option value="">Todos</option><option value="active">Ativos</option><option value="inactive">Desativados</option></select></label></div>
+        <div id="accessAccounts" class="access-accounts" aria-live="polite"></div>
+        <p class="access-safety-note">Esta vista é apenas de verificação. Convites, mudança de perfil, suspensão e reativação exigem confirmação administrativa específica.</p>
+      </section>
       <div class="toolbar employee-toolbar"><input id="funcionarioSearch" placeholder="Pesquisar nome, função ou contacto"><select id="funcionarioEstadoFiltro"><option value="">Todos os estados</option><option>Ativo</option><option>Férias</option><option>Inativo</option></select><input id="funcionarioMesFiltro" type="month" aria-label="Mês das horas"></div>
       <div class="panel"><div id="funcionariosTable"></div></div>
       <div class="panel employee-assignments-panel">

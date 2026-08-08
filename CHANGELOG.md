@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## v3.8 — em desenvolvimento
+
+- Primeiro Centro de Acessos administrativo, somente de leitura, reúne contas, estados, perfis, atribuições por obra e vínculos do Portal do Cliente.
+- Contas desativadas e perfis inválidos ficam visíveis como pontos de revisão, sem alterar permissões automaticamente.
+- Filtros por nome, e-mail, perfil e estado ajudam a auditar o alcance de cada conta.
+- Atalhos levam à revisão das obras atribuídas ou do Portal do Cliente sem executar mutações.
+- Novo validador automatizado cobre estados, papéis, vínculos, filtros e ausência de mutações na análise.
+
 ## v3.7 — publicada em 8 de agosto de 2026
 
 - O Assistente DISTAK passa a responder no próprio dispositivo a perguntas sobre carga da equipa, qualidade dos dossiês e próximas ações recomendadas.
