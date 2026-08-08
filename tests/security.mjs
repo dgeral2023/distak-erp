@@ -9,6 +9,10 @@ const forbidden=[/\bservice_role\b/i,/\bsb_secret_[A-Za-z0-9_-]+/i,/SUPABASE_SER
 for(const path of frontend){const source=readFileSync(path,"utf8");for(const pattern of forbidden)if(pattern.test(source))failures.push(`${path.slice(root.length+1)} contém padrão secreto ${pattern}`)}
 const config=readFileSync(join(root,"assets","js","config.js"),"utf8");
 if(!/SUPABASE_KEY:\s*"sb_publishable_[A-Za-z0-9_-]+"/.test(config))failures.push("O frontend deve usar somente uma chave Supabase publicável.");
+const rlsSecurity=readFileSync(join(root,"supabase","migrations","20260808083000_reforco_seguranca_rls_v37.sql"),"utf8");
+if(!/ou\.ativo\s*=\s*true/i.test(rlsSecurity))failures.push("A politica de obras deve ignorar atribuicoes inativas.");
+if(!/revoke all on function public\.is_admin\(\) from public, anon/i.test(rlsSecurity))failures.push("A funcao administrativa deve revogar execucao publica e anonima.");
+if(!/revoke all on function public\.responder_cliente_portal_aprovacao\(uuid, text\) from public, anon/i.test(rlsSecurity))failures.push("A funcao do portal deve revogar execucao publica e anonima.");
 const html=readFileSync(join(root,"index.html"),"utf8");
 for(const src of [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match=>match[1])){
   if(src.startsWith("http")&&!/^https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@\d+\.\d+\.\d+$/.test(src))failures.push(`Dependência externa não autorizada ou sem versão fixa: ${src}`);
