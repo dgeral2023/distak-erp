@@ -26,7 +26,7 @@ Este documento mantém o plano de produção contínua do DISTAK ERP. Cada fase 
 
 ## v3.8 — Utilizadores, validação real e evolução visual
 
-Progresso: Centro de Acessos administrativo concluído com inventário, estados, cinco perfis válidos, obras atribuídas, vínculos de clientes, atividade recente, diagnóstico, notificações, relatório local e alteração protegida de perfil/estado com confirmação e auditoria. Recuperação segura de palavra-passe e histórico mínimo de entradas, saídas e recuperações concluídos. O fluxo central de convites de Equipa e Cliente está preparado com confirmação, limite, vínculos e auditoria; nenhum convite real foi enviado. Execução de mudanças em contas reais e validação separada por perfil permanecem condicionadas à autorização específica.
+Progresso: Centro de Acessos administrativo concluído com inventário, estados, cinco perfis válidos, obras atribuídas, vínculos de clientes, atividade recente, diagnóstico, notificações, relatório local e alteração protegida de perfil/estado com confirmação e auditoria. Recuperação segura de palavra-passe e histórico mínimo de entradas, saídas e recuperações concluídos. O fluxo central de convites de Equipa e Cliente está preparado com confirmação, limite, vínculos e auditoria; nenhum convite real foi enviado. A revisão de acessos por obra é atómica, validada no servidor, preserva vínculos desativados e regista antes/depois. Execução de mudanças em contas reais e validação separada por perfil permanecem condicionadas à autorização específica.
 
 1. Gestão completa de utilizadores, convites, estados, perfis e acessos por obra.
 2. Validar os fluxos com contas reais separadas de administrador, equipa e cliente, somente após autorização específica para criar ou convidar esses utilizadores.
