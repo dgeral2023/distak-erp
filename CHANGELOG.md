@@ -2,6 +2,9 @@
 
 ## v3.8 — em desenvolvimento
 
+- A direção visual “Criativa avançada” foi escolhida e preparada com Anime.js 4.4.1 local para navegação, cartões, gráficos, alertas, modais e assistente.
+- A camada pode ser desligada, respeita redução de movimento, alto contraste, poupança de dados e equipamentos lentos, e não anima valores ou ações críticas.
+
 - O Centro de Relatórios passa a apresentar prontidão administrativa de ligação, sessão, módulos, PWA e atualidade da cópia local.
 - A exportação guarda neste dispositivo apenas data, versão e contagem total; não transmite telemetria nem permite recuperação automática.
 

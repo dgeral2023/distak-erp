@@ -3,7 +3,7 @@ import {join,resolve} from "node:path";
 
 const root=resolve(import.meta.dirname,"..");
 const walk=directory=>readdirSync(directory,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?walk(join(directory,entry.name)):[join(directory,entry.name)]);
-const frontend=[join(root,"index.html"),...walk(join(root,"assets","js")).filter(path=>path.endsWith(".js")&&!path.includes(`${join("assets","assets")}`))];
+const frontend=[join(root,"index.html"),...walk(join(root,"assets","js")).filter(path=>path.endsWith(".js")&&!path.includes(`${join("assets","assets")}`)),...walk(join(root,"assets","vendor")).filter(path=>path.endsWith(".js"))];
 const failures=[];
 const forbidden=[/\bservice_role\b/i,/\bsb_secret_[A-Za-z0-9_-]+/i,/SUPABASE_SERVICE_ROLE/i,/OPENAI_API_KEY/i,/\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}/];
 for(const path of frontend){const source=readFileSync(path,"utf8");for(const pattern of forbidden)if(pattern.test(source))failures.push(`${path.slice(root.length+1)} contém padrão secreto ${pattern}`)}

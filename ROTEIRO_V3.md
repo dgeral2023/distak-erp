@@ -38,6 +38,8 @@ Progresso: Centro de Acessos administrativo concluído com inventário, estados,
 
 Esta fase começa somente depois da validação funcional dos perfis. Antes de integrar a biblioteca, serão apresentados exemplos visuais comparáveis para aprovação do estilo.
 
+Progresso: as três intensidades foram apresentadas e o proprietário escolheu **Criativa avançada**. A implementação técnica local e reversível está preparada para validação, mas a publicação continua condicionada ao gate funcional dos perfis previsto neste roteiro.
+
 1. Criar demonstrações do menu híbrido, cartões do dashboard, gráficos, notificações, modais e assistente DISTAK.
 2. Apresentar pelo menos três intensidades: discreta e profissional, dinâmica equilibrada e criativa avançada.
 3. Escolher com o proprietário quais efeitos entram no computador e no telemóvel.

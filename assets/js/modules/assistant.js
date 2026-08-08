@@ -16,6 +16,7 @@ function addMessage(role,text,mode,actions=[]){
   article.innerHTML=`${esc(message.text)}${modeLabel?`<small class="ai-message-meta">${modeLabel}</small>`:""}${actions.length?`<div class="ai-message-actions">${actions.map((action,index)=>`<button type="button" data-assistant-action="${index}" data-view="${esc(action.view||"")}" data-work="${esc(action.work_id||"")}">${esc(action.label)}</button>`).join("")}</div>`:""}`;
   $("aiAssistantMessages").appendChild(article);
   $("aiAssistantMessages").scrollTop=$("aiAssistantMessages").scrollHeight;
+  document.dispatchEvent(new CustomEvent("distak:assistant-message",{detail:{node:article}}));
   return article;
 }
 
@@ -24,6 +25,7 @@ function openAssistant(){
   $("aiAssistantBackdrop").classList.remove("hidden");
   $("aiAssistantPanel").setAttribute("aria-hidden","false");
   $("aiAssistantButton").setAttribute("aria-expanded","true");
+  document.dispatchEvent(new CustomEvent("distak:assistant-open"));
   setTimeout(()=>$("aiAssistantInput").focus(),50);
 }
 function closeAssistant(){

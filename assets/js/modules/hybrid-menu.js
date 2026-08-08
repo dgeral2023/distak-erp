@@ -25,9 +25,11 @@ function openSheet(id){closeSheets();const sheet=$(id);sheet?.classList.remove("
 function navigate(view){setView(view);saveRecent(view);document.querySelectorAll("[data-mobile-view]").forEach(button=>button.classList.toggle("active",button.dataset.mobileView===view));closeSheets()}
 
 function renderMore(){
-  if(store.profile?.role==="cliente"){$("mobileMoreLinks").innerHTML=`<button data-mobile-view="cliente-portal"><i>◎</i><strong>Minhas obras</strong></button>`;return}
+  const motion=`<button data-motion-toggle type="button" aria-pressed="true"><i>✦</i><strong>Movimento</strong><small data-motion-state>Criativa avançada</small></button>`;
+  if(store.profile?.role==="cliente"){$("mobileMoreLinks").innerHTML=`<button data-mobile-view="cliente-portal"><i>◎</i><strong>Minhas obras</strong></button>${motion}`;document.dispatchEvent(new CustomEvent("distak:motion-controls"));return}
   const views=store.profile?.role==="admin"?["inteligencia","funcionario","operacional","agenda","dossies","clientes","orcamentos","compras","medicoes","custos","pagamentos","previsoes","funcionarios","relatorios","empresa"]:["operacional","agenda","dossies","funcionario"];
-  $("mobileMoreLinks").innerHTML=views.map(view=>`<button data-mobile-view="${view}"><i>${meta[view][0]}</i><strong>${meta[view][1]}</strong></button>`).join("");
+  $("mobileMoreLinks").innerHTML=views.map(view=>`<button data-mobile-view="${view}"><i>${meta[view][0]}</i><strong>${meta[view][1]}</strong></button>`).join("")+motion;
+  document.dispatchEvent(new CustomEvent("distak:motion-controls"));
 }
 
 export function renderHybridMenu(){
@@ -64,7 +66,7 @@ export function initHybridMenu(handlers){
     if(event.target.closest("#mobileRegister")){openSheet("mobileRegisterSheet");return}
     if(event.target.closest("#mobileMore")){openSheet("mobileMoreSheet");return}
     if(event.target.closest("#mobileAlerts")){closeSheets();$("notificationBtn")?.click();return}
-    if(event.target.closest("#topUserMenu")){const panel=$("accountPanel"),open=panel.classList.contains("hidden");panel.classList.toggle("hidden",!open);panel.setAttribute("aria-hidden",String(!open));$("topUserMenu").setAttribute("aria-expanded",String(open));if(open)setTimeout(()=>$("accountLogout")?.focus(),0);return}
+    if(event.target.closest("#topUserMenu")){const panel=$("accountPanel"),open=panel.classList.contains("hidden");panel.classList.toggle("hidden",!open);panel.setAttribute("aria-hidden",String(!open));$("topUserMenu").setAttribute("aria-expanded",String(open));if(open)setTimeout(()=>$("motionToggle")?.focus(),0);return}
     if(event.target.closest("#accountLogout")){$("logoutBtn")?.click();return}
     if(event.target.closest("[data-close-mobile-sheet]")||event.target.id==="mobileSheetBackdrop"){closeSheets();return}
     const quick=event.target.closest("[data-quick-action]")?.dataset.quickAction;
