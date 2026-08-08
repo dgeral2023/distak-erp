@@ -32,7 +32,7 @@ export async function inspectSafetyBackup(content){
 
 async function download(){
   if(!confirm("Esta cópia contém dados comerciais, financeiros e operacionais. Guarde-a apenas num local seguro. Deseja continuar?"))return;
-  try{const content=await createSafetyBackup(),blob=new Blob([content],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a"),stamp=new Date().toISOString().replaceAll(":","-").slice(0,19);link.href=url;link.download=`distak-erp-backup-${stamp}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast("Cópia de segurança exportada. Nenhum dado foi alterado.")}catch(error){toast(error.message||"Não foi possível exportar a cópia.","error")}
+  try{const content=await createSafetyBackup(),envelope=JSON.parse(content),blob=new Blob([content],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a"),stamp=new Date().toISOString().replaceAll(":","-").slice(0,19);link.href=url;link.download=`distak-erp-backup-${stamp}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);const totalRecords=Object.values(envelope.payload.recordCounts).reduce((sum,value)=>sum+Number(value||0),0);localStorage.setItem("distak-backup-metadata-v1",JSON.stringify({createdAt:envelope.payload.createdAt,totalRecords,version:envelope.payload.version}));window.dispatchEvent(new CustomEvent("distak:backup-exported"));toast("Cópia de segurança exportada. Nenhum dado foi alterado.")}catch(error){toast(error.message||"Não foi possível exportar a cópia.","error")}
 }
 
 async function inspectFile(event){

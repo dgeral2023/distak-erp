@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import {assessOperationalReadiness} from "../assets/js/core/operational-readiness.js";
+const now=Date.parse("2026-08-08T12:00:00Z"),profile={id:"admin-1",role:"admin"};
+const ready=assessOperationalReadiness({online:true,profile,dataWarnings:[],serviceWorker:true,backup:{createdAt:"2026-08-07T12:00:00Z",totalRecords:42},now});
+assert.equal(ready.status,"ready");assert.equal(ready.externalTelemetry,false);assert.equal(ready.automaticRecovery,false);
+const warning=assessOperationalReadiness({online:true,profile,dataWarnings:["custos"],serviceWorker:false,backup:null,now});
+assert.equal(warning.status,"attention");assert.equal(warning.warnings,3);
+const critical=assessOperationalReadiness({online:false,profile:null,dataWarnings:[],serviceWorker:true,backup:{createdAt:"2026-06-01T00:00:00Z",totalRecords:10},now});
+assert.equal(critical.status,"critical");assert.equal(critical.critical,3);assert.equal(critical.checks.find(row=>row.code==="backup").status,"critical");
+console.log("Prontidão operacional aprovada: ligação, sessão, dados, PWA e cópia avaliados localmente sem telemetria nem recuperação automática.");

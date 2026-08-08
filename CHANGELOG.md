@@ -2,6 +2,9 @@
 
 ## v3.8 — em desenvolvimento
 
+- O Centro de Relatórios passa a apresentar prontidão administrativa de ligação, sessão, módulos, PWA e atualidade da cópia local.
+- A exportação guarda neste dispositivo apenas data, versão e contagem total; não transmite telemetria nem permite recuperação automática.
+
 - Primeiro Centro de Acessos administrativo, somente de leitura, reúne contas, estados, perfis, atribuições por obra e vínculos do Portal do Cliente.
 - Contas desativadas e perfis inválidos ficam visíveis como pontos de revisão, sem alterar permissões automaticamente.
 - Filtros por nome, e-mail, perfil e estado ajudam a auditar o alcance de cada conta.
