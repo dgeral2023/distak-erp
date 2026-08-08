@@ -2,6 +2,7 @@ import {store} from "../core/store.js";
 import {$,esc,money,toast} from "../core/ui.js";
 import {db,save,remove} from "../core/supabase.js";
 import {analyzeAccessHealth,buildAccessAudit,filterAccessAccounts,isTeamRole,isValidRole,latestActivityByUser,sessionHistory,summarizeAccess,summarizeSessions,validateAccountChange} from "../core/access-management.js";
+import {initRoleValidation} from "./role-validation-ui.js";
 
 const currentMonth=()=>new Date().toISOString().slice(0,7);
 const hoursForMonth=(month=$("funcionarioMesFiltro")?.value||currentMonth())=>store.funcionarioHoras.filter(row=>String(row.data||"").startsWith(month));
@@ -132,6 +133,7 @@ function calculateHours(){const start=$("funcionarioHorasEntrada").value,end=$("
 
 export function initFuncionarios(refresh){
   $("inviteUserNew")?.addEventListener("click",()=>openUserInvite());$("userInviteRole")?.addEventListener("change",renderInviteScope);$("userInviteForm")?.addEventListener("submit",event=>submitUserInvite(event,refresh));document.addEventListener("distak:open-user-invite",event=>openUserInvite(event.detail?.role));
+  initRoleValidation();
   $("exportAccessAudit")?.addEventListener("click",exportAccessAudit);
   ["accessSearch","accessRoleFilter","accessStateFilter"].forEach(id=>$(id)?.addEventListener(id==="accessSearch"?"input":"change",renderAccessCenter));
   document.addEventListener("click",event=>{const health=event.target.closest("[data-health-account]")?.dataset.healthAccount;if(health){const account=document.querySelector(`[data-access-account="${health}"]`);account?.scrollIntoView({behavior:"smooth",block:"center"});account?.focus()}const assignment=event.target.closest("[data-review-assignment]")?.dataset.reviewAssignment;if(assignment){const card=document.querySelector(`[data-assignment-user="${assignment}"]`);card?.scrollIntoView({behavior:"smooth",block:"center"});card?.querySelector("input")?.focus()}if(event.target.closest("[data-review-client-access]")){document.querySelector('[data-view="portal-admin"]')?.click()}});

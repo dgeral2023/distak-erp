@@ -39,6 +39,11 @@
 - A revisão é atómica, valida conta e clientes no servidor, preserva vínculos removidos como inativos e regista alcance anterior/final na auditoria.
 - O orçamento de JavaScript passa de 325 KB para 330 KB para acomodar a gestão de vínculos, mantendo tamanho real de 327,6 KB e limite automatizado.
 - A migração conservou zero vínculos antes e depois; nenhuma conta de cliente ou associação real foi criada durante a publicação.
+- O Centro de Acessos passa a incluir uma matriz de validação por perfil, com seis cenários separados para Administrador, Equipa e Cliente no computador e telemóvel.
+- A matriz calcula somente pré-condições a partir dos dados já autorizados, identifica pendências e mantém `realValidationPerformed=false` até à execução com contas separadas.
+- O plano pode ser exportado localmente em JSON; não chama o banco de dados, não altera registos e não transmite informação a serviços externos.
+- A produção atual apresenta Administrador e Equipa preparados, Cliente pendente e apenas as duas contas existentes; nenhum perfil foi declarado validado.
+- O orçamento de JavaScript passa de 330 KB para 335 KB, mantendo total real de 333,7 KB e limite individual de 25 KB por módulo.
 
 ## v3.7 — publicada em 8 de agosto de 2026
 
