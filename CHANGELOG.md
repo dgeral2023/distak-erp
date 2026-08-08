@@ -19,6 +19,12 @@
 - Entradas, saídas e recuperações de acesso passam a ficar registadas no histórico protegido existente, sem tokens, palavras-passe, IP, navegador ou identificação do dispositivo.
 - O Centro de Acessos apresenta ao administrador os eventos de autenticação dos últimos 30 dias e a auditoria local passa ao formato v2 com um resumo mínimo das sessões.
 - A migração adiciona apenas três ações ao controlo existente e um índice parcial, preservando as políticas RLS e todos os registos anteriores.
+- O Centro de Acessos passa a preparar alterações administrativas de perfil e estado para os cinco papéis válidos: Administrador, Escritório, Encarregado, Funcionário e Cliente.
+- Cada alteração exige motivo, revisão e confirmação humana; o servidor impede autoalteração, administrador desativado, remoção do último administrador e transições incompatíveis com vínculos ativos.
+- A tabela de perfis concede somente leitura ao papel autenticado; escritas diretas e o privilégio antigo de TRUNCATE são removidos, enquanto mudanças passam exclusivamente pela operação protegida e ficam registadas na auditoria.
+- O Portal do Cliente passa a exigir perfil de cliente ativo mesmo quando existe uma sessão anterior, e clientes deixam de aparecer na atribuição operacional de obras.
+- A API pública de gestão usa `SECURITY INVOKER`; a lógica privilegiada fica no esquema privado, removendo o novo aviso do advisor sem enfraquecer as validações.
+- O orçamento automatizado de JavaScript passa de 320 KB para 325 KB, mantendo o total real em 322,2 KB.
 
 ## v3.7 — publicada em 8 de agosto de 2026
 

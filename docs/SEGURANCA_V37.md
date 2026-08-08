@@ -10,6 +10,16 @@ Data: 8 de agosto de 2026
 - O frontend nao determina nem envia a hora do evento; `criado_em` continua a usar `now()` no PostgreSQL.
 - O indice parcial `atividades_sistema_sessao_data_idx` acelera a consulta administrativa sem alterar dados anteriores.
 
+## Evolucao v3.8 — gestao de contas
+
+- O papel autenticado conserva somente `SELECT` em `profiles`; INSERT, UPDATE, DELETE e TRUNCATE ficam removidos.
+- A funcao `gerir_utilizador` valida no servidor o administrador ativo, o motivo e os vinculos antes de efetuar uma alteracao.
+- A API publica usa `SECURITY INVOKER`; a implementacao privilegiada fica no esquema `private`, fora dos esquemas expostos pelo PostgREST.
+- Autoalteracao, administrador desativado e remocao do ultimo administrador ativo sao bloqueados.
+- Uma conta nao pode mudar entre Cliente e Equipa enquanto mantiver vinculos incompatíveis ativos.
+- O Portal do Cliente confirma `profiles.ativo=true` e `role='cliente'` em cada consulta protegida.
+- Aplicar a migracao e publicar o frontend nao altera nenhuma conta existente; uma mudanca exige acao e confirmacao posterior do administrador.
+
 ## Chaves do frontend
 
 - O navegador recebe somente a chave Supabase `sb_publishable_...`, apropriada para componentes publicos.

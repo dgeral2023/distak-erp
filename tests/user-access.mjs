@@ -1,19 +1,26 @@
 import assert from "node:assert/strict";
-import {analyzeAccessHealth,buildAccessAudit,filterAccessAccounts,isValidRole,latestActivityByUser,sessionHistory,summarizeAccess,summarizeSessions} from "../assets/js/core/access-management.js";
+import {analyzeAccessHealth,buildAccessAudit,filterAccessAccounts,isTeamRole,isValidRole,latestActivityByUser,sessionHistory,summarizeAccess,summarizeSessions,validateAccountChange} from "../assets/js/core/access-management.js";
 
 const profiles=[
   {id:"admin",nome:"Administrador",email:"admin@distak.test",role:"admin",ativo:true},
   {id:"team",nome:"Equipa Norte",email:"equipa@distak.test",role:"funcionario",ativo:true},
+  {id:"office",nome:"Escritório",email:"office@distak.test",role:"escritorio",ativo:true},
   {id:"client",nome:"Cliente",email:"cliente@distak.test",role:"cliente",ativo:false},
   {id:"invalid",nome:"Perfil inválido",email:"risco@distak.test",role:"owner",ativo:true}
 ];
 const summary=summarizeAccess({profiles,assignments:[{user_id:"team",ativo:true},{user_id:"team",ativo:false}],clientAccess:[{user_id:"client",ativo:true}]});
-assert.deepEqual(summary,{total:4,active:3,inactive:1,invalid:1,team:1,clients:1,assignments:1,clientLinks:1});
+assert.deepEqual(summary,{total:5,active:4,inactive:1,invalid:1,team:2,clients:1,assignments:1,clientLinks:1});
 assert.equal(isValidRole("admin"),true);
+assert.equal(isValidRole("escritorio"),true);
+assert.equal(isValidRole("encarregado"),true);
+assert.equal(isTeamRole("cliente"),false);
 assert.equal(isValidRole("owner"),false);
 assert.deepEqual(filterAccessAccounts(profiles,{search:"norte"}).map(row=>row.id),["team"]);
 assert.deepEqual(filterAccessAccounts(profiles,{role:"cliente",state:"inactive"}).map(row=>row.id),["client"]);
 assert.equal(filterAccessAccounts(profiles,{state:"active"}).some(row=>row.id==="client"),false);
+assert.deepEqual(validateAccountChange(profiles[1],{role:"encarregado",active:true,reason:"Reorganização da equipa"},"admin"),[]);
+assert(validateAccountChange(profiles[0],{role:"funcionario",active:true,reason:"Mudança administrativa"},"admin").some(error=>error.includes("própria conta")));
+assert(validateAccountChange(profiles[1],{role:"admin",active:false,reason:"Alteração de segurança"},"admin").some(error=>error.includes("permanecer ativo")));
 const health=analyzeAccessHealth({profiles,assignments:[{user_id:"client",ativo:true}],clientAccess:[]});
 assert.equal(health[0].severity,"critical","Situações críticas devem aparecer primeiro.");
 assert(health.some(row=>row.accountId==="client"&&row.code==="inactive-access"),"Conta desativada com vínculo deve ser sinalizada.");
