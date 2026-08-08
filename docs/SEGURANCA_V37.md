@@ -20,6 +20,15 @@ Data: 8 de agosto de 2026
 - O Portal do Cliente confirma `profiles.ativo=true` e `role='cliente'` em cada consulta protegida.
 - Aplicar a migracao e publicar o frontend nao altera nenhuma conta existente; uma mudanca exige acao e confirmacao posterior do administrador.
 
+## Evolucao v3.8 — convites centralizados
+
+- Apenas um administrador autenticado e ativo pode preparar convites de Escritorio, Encarregado, Funcionario ou Cliente; o fluxo não permite criar outro Administrador.
+- O servidor valida origem, sessão, perfil, cliente, obras e o limite de cinco convites por administrador a cada hora.
+- A interface exige confirmação explícita do e-mail, perfil e alcance antes de chamar a função protegida.
+- Vínculos iniciais de cliente ou obra são criados no servidor e registados na auditoria sem guardar o endereço de e-mail nos metadados.
+- Se perfil, vínculos ou auditoria falharem, somente a conta recém-criada naquele pedido é cancelada para evitar um acesso parcial.
+- A implantação da função e da interface não envia convite nem cria conta; isso ocorre apenas após uma ação administrativa confirmada.
+
 ## Chaves do frontend
 
 - O navegador recebe somente a chave Supabase `sb_publishable_...`, apropriada para componentes publicos.
