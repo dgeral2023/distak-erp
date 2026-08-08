@@ -1,5 +1,6 @@
 import {store} from "../core/store.js";
 import {$,esc,money,setView} from "../core/ui.js";
+import {analyzeAccessHealth} from "../core/access-management.js";
 
 const num=value=>Number(value||0);
 const norm=value=>String(value||"").trim().toLowerCase();
@@ -25,6 +26,7 @@ export function buildAlerts(){
   store.pedidosCompra.filter(row=>["encomendado","parcial"].includes(row.estado)&&row.entrega_prevista&&row.entrega_prevista<today).forEach(row=>rows.push({level:"danger",title:row.titulo,text:`Entrega atrasada · ${row.fornecedor_selecionado||workName(row.obra_id)}`,view:"compras"}));
   store.autosMedicao.filter(row=>row.estado==="faturado"&&row.vencimento&&row.vencimento<today).forEach(row=>rows.push({level:"danger",title:`Auto ${row.numero}`,text:`Fatura vencida, recebimento não confirmado · ${money(row.total)}`,view:"medicoes"}));
   store.campoRegistos.filter(row=>row.estado==="pendente").forEach(row=>rows.push({level:"warning",title:row.titulo,text:`Registo de campo por rever · ${workName(row.obra_id)}`,view:"funcionario"}));
+  if(store.profile?.role==="admin")analyzeAccessHealth({profiles:store.profiles,assignments:store.obraUtilizadores,clientAccess:store.clientePortalAcessos}).forEach(item=>{const profile=store.profiles.find(row=>String(row.id)===String(item.accountId));rows.push({level:item.severity==="critical"?"danger":"warning",title:`Acesso · ${profile?.nome||profile?.email||"Conta"}`,text:item.message,view:"funcionarios",kind:"access",id:item.accountId,action:"Rever conta"})});
   return rows.map((row,index)=>({...row,action:row.action||"Abrir área",order:index})).sort((a,b)=>(a.level==="danger"?0:1)-(b.level==="danger"?0:1)||a.order-b.order);
 }
 
@@ -101,7 +103,7 @@ export function initV3(){
   document.addEventListener("click",event=>{
     const alert=event.target.closest("[data-alert-view]"),alertView=alert?.dataset.alertView;
     const searchResult=event.target.closest("[data-search-view]");
-    if(alertView){toggleNotifications(false,false);setView(alertView);if(alert.dataset.alertFilter)setTimeout(()=>document.querySelector(`[data-agenda-quick="${alert.dataset.alertFilter}"]`)?.click(),50);if(alert.dataset.alertKind==="task"&&alert.dataset.alertId)setTimeout(()=>document.querySelector(`[data-edit-task="${alert.dataset.alertId}"]`)?.click(),80);if(alert.dataset.alertKind==="work"&&alert.dataset.alertId)setTimeout(()=>document.querySelector(`[data-view-obra="${alert.dataset.alertId}"]`)?.click(),80)}
+    if(alertView){toggleNotifications(false,false);setView(alertView);if(alert.dataset.alertFilter)setTimeout(()=>document.querySelector(`[data-agenda-quick="${alert.dataset.alertFilter}"]`)?.click(),50);if(alert.dataset.alertKind==="task"&&alert.dataset.alertId)setTimeout(()=>document.querySelector(`[data-edit-task="${alert.dataset.alertId}"]`)?.click(),80);if(alert.dataset.alertKind==="work"&&alert.dataset.alertId)setTimeout(()=>document.querySelector(`[data-view-obra="${alert.dataset.alertId}"]`)?.click(),80);if(alert.dataset.alertKind==="access"&&alert.dataset.alertId)setTimeout(()=>{const account=document.querySelector(`[data-access-account="${alert.dataset.alertId}"]`);account?.scrollIntoView({behavior:"smooth",block:"center"});account?.focus()},80)}
     if(searchResult){setView(searchResult.dataset.searchView);$("globalSearchResults").classList.add("hidden");$("globalSearch").value="";const id=searchResult.dataset.searchWork;if(id)setTimeout(()=>document.querySelector(`[data-view-obra="${id}"]`)?.click(),50)}
     if(event.target.closest("[data-report-open-works]"))setView("obras");
   });

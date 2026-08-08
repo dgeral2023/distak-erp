@@ -12,6 +12,7 @@
 - O administrador pode exportar uma auditoria local em JSON com contas, perfis, estados, obras atribuídas, vínculos de cliente, atividade recente e achados de segurança.
 - O relatório não inclui dados financeiros e exige confirmação explícita antes do download; nenhum conteúdo é enviado para serviços externos.
 - O orçamento automatizado de JavaScript da v3.8 passa de 310 KB para 315 KB para acomodar a auditoria, mantendo limite rígido e crescimento inferior a 2%.
+- Inconsistências do Centro de Acessos passam a gerar notificações administrativas acionáveis, com destino direto à conta e sem exposição para equipa ou clientes.
 
 ## v3.7 — publicada em 8 de agosto de 2026
 
