@@ -10,7 +10,7 @@ function check(condition, message) {
   if (!condition) failures.push(message);
 }
 
-check(index.includes("DISTAK ERP v3.6"), "A versão publicada visível deve ser v3.6.");
+check(index.includes("DISTAK ERP v3.7"), "A versão publicada visível deve ser v3.7.");
 
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -187,7 +187,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.7-rc1", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/accessibility.js", "assets/js/core/assistant-local.js", "assets/js/core/backup-readiness.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/core/intelligence-actions.js", "assets/js/core/workload-analysis.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.7-20260808", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/accessibility.js", "assets/js/core/assistant-local.js", "assets/js/core/backup-readiness.js", "assets/js/core/bootstrap-errors.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/core/intelligence-actions.js", "assets/js/core/supabase.js", "assets/js/core/workload-analysis.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
@@ -239,6 +239,7 @@ for (const required of ["renderClientePortal", "renderClientePortalAdmin", "init
   check(clientPortalModule.includes(required), `Portal do cliente incompleto: ${required}`);
 }
 const clientData = readFileSync(join(root, "assets", "js", "modules", "data.js"), "utf8");
+check(clientData.includes("dataWarnings")&&clientData.includes('warn("fotografias")'),"Falhas opcionais de dados devem ficar visíveis ao utilizador.");
 check(clientData.indexOf('if(isClient)') < clientData.indexOf('query("clientes")'), "O cliente deve sair do carregamento antes das tabelas internas.");
 const clientMigration = readFileSync(join(root, "supabase", "202608052000_portal_cliente.sql"), "utf8");
 for (const required of ["enable row level security", "revoke all", "grant select,insert,update", "private.can_access_cliente_portal", "cliente_portal_obras_select", "cliente_portal_aprovacoes_select", "responder_cliente_portal_aprovacao", "p_decisao not in ('aprovado','revisao')", "a.estado='pendente'", "não criam pagamentos", "publicado and", "from anon, authenticated"]){

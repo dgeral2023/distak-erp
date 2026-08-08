@@ -18,6 +18,7 @@ for(const path of [...css,...js])if(statSync(path).size>budgets.single)failures.
 const html=readFileSync(join(root,"index.html"),"utf8"),worker=readFileSync(join(root,"service-worker.js"),"utf8");
 const localStyles=[...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"?]+)(?:\?[^" ]*)?"/g)].map(match=>match[1]);
 for(const path of localStyles)if(!worker.includes(`'./${path}'`))failures.push(`PWA não pré-carrega ${path}`);
-for(const required of ["'./assets/js/config.js'","'./assets/js/app.js'","ignoreSearch:true"])if(!worker.includes(required))failures.push(`PWA incompleto: ${required}`);
+for(const path of js.map(path=>path.slice(root.length+1).replaceAll("\\","/")))if(!worker.includes(`'./${path}'`))failures.push(`PWA não pré-carrega ${path}`);
+for(const required of ["'./assets/js/config.js'","'./assets/js/app.js'","'./assets/js/core/bootstrap-errors.js'","ignoreSearch:true"])if(!worker.includes(required))failures.push(`PWA incompleto: ${required}`);
 if(failures.length){console.error(`Orçamento de desempenho falhou:\n- ${failures.join("\n- ")}`);process.exit(1)}
 console.log(`Desempenho aprovado: HTML ${indexSize} B · CSS ${cssSize} B · JS ${jsSize} B · ${localStyles.length} estilos no shell PWA.`);

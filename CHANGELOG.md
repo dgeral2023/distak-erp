@@ -1,11 +1,15 @@
 # Histórico de versões
 
-## v3.7 — em preparação
+## v3.7 — publicada em 8 de agosto de 2026
 
 - O Assistente DISTAK passa a responder no próprio dispositivo a perguntas sobre carga da equipa, qualidade dos dossiês e próximas ações recomendadas.
 - As análises locais reutilizam os motores explicáveis do ERP, não enviam os dados dessas consultas ao backend e não executam alterações automaticamente.
 - Consultas financeiras e restantes resumos continuam limitados ao backend DISTAK autenticado e somente de leitura.
 - A interface identifica claramente quando a resposta foi processada localmente e oferece atalhos seguros apenas para navegação.
+- A PWA passa a guardar todos os módulos necessários para funcionamento offline e apresenta um botão claro para aplicar novas versões.
+- O carregamento de listas suporta paginação acima de mil registos, evitando truncamento silencioso à medida que o ERP cresce.
+- Falhas em módulos opcionais passam a ser comunicadas ao utilizador, em vez de aparecerem como listas vazias sem explicação.
+- A política de segurança deixa de permitir scripts inline e a versão é alinhada no site, manifesto, documentação e cache.
 
 ## v3.6 — publicada em 7 de agosto de 2026
 

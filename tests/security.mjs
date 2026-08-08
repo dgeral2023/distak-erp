@@ -14,6 +14,10 @@ for(const src of [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match=>mat
   if(src.startsWith("http")&&!/^https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@\d+\.\d+\.\d+$/.test(src))failures.push(`Dependência externa não autorizada ou sem versão fixa: ${src}`);
 }
 for(const required of ["Content-Security-Policy","object-src 'none'","base-uri 'self'","form-action 'self'","strict-origin-when-cross-origin"])if(!html.includes(required))failures.push(`Proteção HTML em falta: ${required}`);
+const scriptPolicy=html.match(/script-src ([^;]+)/)?.[1]||"";
+if(scriptPolicy.includes("'unsafe-inline'"))failures.push("A política de scripts não deve permitir execução inline.");
+if(/<script(?![^>]*src=)[^>]*>/i.test(html))failures.push("O HTML não deve conter scripts inline.");
+if(!html.includes('src="assets/js/core/bootstrap-errors.js"'))failures.push("O tratamento inicial de erros deve usar um ficheiro sujeito à CSP.");
 const recentSql=walk(join(root,"supabase")).filter(path=>/2026080[56]\d+_.*\.sql$/.test(path));
 for(const path of recentSql){const sql=readFileSync(path,"utf8");if(/grant\s+[^;]+\s+to\s+anon\b/i.test(sql))failures.push(`${path.slice(root.length+1)} concede privilégios ao papel anon`);if(/grant\s+delete\b/i.test(sql))failures.push(`${path.slice(root.length+1)} concede DELETE sem revisão explícita`)}
 const portalSql=readFileSync(join(root,"supabase","202608052000_portal_cliente.sql"),"utf8");

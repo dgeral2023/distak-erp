@@ -19,14 +19,16 @@ Este documento mantém o plano de produção contínua do DISTAK ERP. Cada fase 
 - Portal da equipa em campo com tarefas, registos móveis, fotografias, fila offline, sincronização segura e revisão administrativa.
 - Inteligência de gestão interna e explicável para prever custo final, margem, prazo e risco de cobrança, com cenários e confirmação humana.
 - v3.4 publicada: Portal do Cliente isolado, publicações autorizadas, aprovações, convites server-side, recuperação, acessibilidade, desempenho e auditoria automatizada.
-- v3.5 construída: comando diário, distribuição de carga, agenda executável, prioridades, alertas explicáveis e bloqueios com motivo e previsão de resolução.
+- v3.5 publicada: comando diário, distribuição de carga, agenda executável, prioridades, alertas explicáveis e bloqueios com motivo e previsão de resolução.
+- v3.6 publicada: próximas ações explicáveis, carga ponderada, dossiês com qualidade documental, recuperação e navegação móvel por perfil.
+- v3.7 publicada: assistente operacional local no dispositivo, PWA offline completo, paginação de dados e diagnóstico visível de módulos indisponíveis.
 
 ## Próximas fases
 
-1. Concluir a publicação e a validação pública da v3.5 no computador e telemóvel.
-2. Validar os fluxos com contas reais separadas de administrador, equipa e cliente, somente após autorização específica para criar ou convidar esses utilizadores.
+1. Validar os fluxos com contas reais separadas de administrador, equipa e cliente, somente após autorização específica para criar ou convidar esses utilizadores.
+2. Corrigir avisos de segurança do Supabase que dependem de alteração explícita de permissões ou configuração de autenticação.
 3. Evoluir notificações acionáveis, gestão de fotografias e documentos, relatórios e recuperação controlada.
-4. Continuar qualidade e escala; integração generativa externa permanece fora do âmbito até autorização específica própria.
+4. Continuar qualidade, escala e observabilidade; integração generativa externa permanece fora do âmbito até autorização específica própria.
 
 ## Regras permanentes
 

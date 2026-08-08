@@ -1,5 +1,16 @@
 let lastTrigger=null;
 
+const controlLabels={agendaStateFilter:"Filtrar agenda por estado",agendaPriorityFilter:"Filtrar agenda por prioridade",operationalStateFilter:"Filtrar obras por estado",purchaseWorkFilter:"Filtrar compras por obra",purchaseStateFilter:"Filtrar compras por estado",measurementWorkFilter:"Filtrar autos por obra",measurementStateFilter:"Filtrar autos por estado",dossierStatusFilter:"Filtrar dossiês por qualidade",forecastTypeFilter:"Filtrar previsões por tipo",forecastStateFilter:"Filtrar previsões por estado",funcionarioEstadoFiltro:"Filtrar funcionários por estado",safetyBackupFile:"Selecionar cópia de segurança para verificar",crmMoradaTipo:"Tipo de morada",crmComunicacaoTipo:"Tipo de comunicação",crmComunicacaoData:"Data da comunicação",crmDocumentoCategoria:"Categoria do documento",crmDocumentoFicheiro:"Selecionar documento do cliente"};
+
+function labelControls(){
+  document.querySelectorAll("input:not([type='hidden']),select,textarea").forEach(control=>{
+    const id=control.id,hasLabel=control.hasAttribute("aria-label")||control.hasAttribute("aria-labelledby")||control.closest("label")||(id&&document.querySelector(`label[for="${id}"]`));
+    if(hasLabel)return;
+    const placeholder=control.getAttribute("placeholder")?.replace(/[…]+$/g,"").trim();
+    control.setAttribute("aria-label",controlLabels[id]||placeholder||"Campo do formulário");
+  });
+}
+
 function labelDialog(dialog,index){
   dialog.setAttribute("aria-modal","true");
   if(dialog.hasAttribute("aria-label")||dialog.hasAttribute("aria-labelledby"))return;
@@ -9,6 +20,7 @@ function labelDialog(dialog,index){
 }
 
 export function initAccessibility(){
+  labelControls();
   document.addEventListener("pointerdown",event=>{const trigger=event.target.closest("button,a,[role='button']");if(trigger)lastTrigger=trigger},true);
   document.addEventListener("click",event=>{const trigger=event.target.closest("button,a,[role='button']");if(trigger)lastTrigger=trigger},true);
   document.querySelectorAll("dialog").forEach((dialog,index)=>{
