@@ -39,6 +39,16 @@ Data: 8 de agosto de 2026
 - `anon` não executa a API; a superfície pública usa `SECURITY INVOKER` e delega para a implementação protegida no esquema privado.
 - A aplicação da migração conservou os seis vínculos ativos e a mesma assinatura de conteúdo antes e depois.
 
+## Evolucao v3.8 — vinculos atomicos do cliente
+
+- O painel administrativo identifica contas de cliente por nome e e-mail e apresenta somente os clientes existentes como opções de vínculo.
+- Contas inativas permanecem visíveis para auditoria, mas a interface e o servidor impedem novas associações.
+- A operação valida administrador ativo, conta de cliente ativa, todos os clientes informados e revisões concorrentes da mesma conta.
+- Vínculos removidos são desativados, não eliminados; o histórico anterior/final, adições e remoções ficam na auditoria.
+- A superfície pública usa `SECURITY INVOKER`, a implementação privilegiada permanece no esquema privado e `anon` não recebe execução.
+- Nenhuma política existente ou privilégio crítico foi alterado por este incremento.
+- A verificação de produção confirmou zero vínculos e a mesma assinatura vazia antes e depois da migração.
+
 ## Chaves do frontend
 
 - O navegador recebe somente a chave Supabase `sb_publishable_...`, apropriada para componentes publicos.

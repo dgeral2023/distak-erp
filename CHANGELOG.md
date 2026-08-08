@@ -34,6 +34,11 @@
 - A função aceita somente contas ativas de Escritório, Encarregado ou Funcionário, valida todas as obras, serializa alterações concorrentes e exige confirmação humana.
 - Vínculos removidos são desativados em vez de eliminados; o histórico anterior, as adições, remoções e o alcance final ficam registados na auditoria.
 - A migração foi aplicada sem alterar os seis vínculos ativos existentes, confirmados por contagem e assinatura antes/depois.
+- O Portal do Cliente passa a apresentar contas por nome e e-mail, clientes associados e estado, substituindo a antiga lista de identificadores técnicos.
+- Administradores podem preparar a revisão completa dos clientes associados a cada conta; contas inativas ficam visíveis, mas não podem receber alterações.
+- A revisão é atómica, valida conta e clientes no servidor, preserva vínculos removidos como inativos e regista alcance anterior/final na auditoria.
+- O orçamento de JavaScript passa de 325 KB para 330 KB para acomodar a gestão de vínculos, mantendo tamanho real de 327,6 KB e limite automatizado.
+- A migração conservou zero vínculos antes e depois; nenhuma conta de cliente ou associação real foi criada durante a publicação.
 
 ## v3.7 — publicada em 8 de agosto de 2026
 
