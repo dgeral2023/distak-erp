@@ -1,6 +1,6 @@
 # Matriz de validação de perfis — DISTAK ERP v3.8
 
-Estado atual: preparação somente de leitura. Administrador e Equipa cumprem as pré-condições; Cliente permanece pendente. Existem duas contas reais e nenhuma conta foi criada para esta fase.
+Estado atual: Administrador e Funcionário cumprem as pré-condições automáticas. Existem duas contas reais e nenhuma conta foi criada para esta fase. O perfil Cliente permanece suportado, mas está fora do escopo operacional atual por decisão do proprietário.
 
 ## Regra de conclusão
 
@@ -8,9 +8,8 @@ Um perfil só pode ser marcado como validado depois de uma sessão real separada
 
 ## Evidências obrigatórias
 
-- Administrador: entrada/saída, Centro de Acessos, obras, Portal do Cliente e bloqueio da autoalteração.
-- Equipa: somente obras atribuídas, agenda, dossiê, operação e campo; ausência das áreas financeira, comercial e administrativa.
-- Cliente: somente obras associadas e publicadas, fotografias, documentos e aprovações; ausência de dados internos, custos e navegação administrativa.
+- Administrador: entrada/saída, Centro de Acessos, obras, relatórios, finanças e bloqueio da autoalteração.
+- Funcionário: somente obras atribuídas, agenda, dossiê, operação e campo; ausência das áreas financeira, comercial e administrativa.
 - Computador: navegação, teclado, foco, tabelas e término de sessão.
 - Telemóvel: menu híbrido, alvos táteis, área segura, conteúdo responsivo e isolamento da barra inferior.
 
@@ -19,4 +18,5 @@ Um perfil só pode ser marcado como validado depois de uma sessão real separada
 - Não criar ou convidar contas sem autorização específica.
 - Não alterar permissões para produzir uma evidência artificial.
 - Não usar dados financeiros ou operacionais fora do ERP.
-- Não avançar para Anime.js enquanto os três perfis não forem validados funcionalmente.
+- Não considerar testes automáticos como substitutos da validação humana nos dispositivos reais.
+- A conta Cliente e a respetiva validação ficam adiadas sem bloquear o escopo atual.

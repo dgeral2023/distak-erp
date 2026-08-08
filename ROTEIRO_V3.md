@@ -51,9 +51,9 @@ Progresso: as três intensidades foram apresentadas e o proprietário escolheu *
 
 ## Fases seguintes
 
-1. Continuar qualidade e escala; diagnóstico local de prontidão e recuperação controlada concluído, faltando ensaio de recuperação fora de produção.
+1. Continuar qualidade e escala; diagnóstico local, verificação de integridade e ensaio de reconstrução descartável em memória concluídos com zero escritas em produção. Uma recuperação real num projeto Supabase isolado permanece condicionada a necessidade e autorização específica.
 2. Evoluir o assistente operacional e preparar uma integração generativa externa somente após autorização específica própria.
-3. Monitorização e suporte local concluídos com diagnóstico seguro, prioridades P1/P2/P3 e procedimento operacional. Critérios para utilização comercial controlada definidos; continuam pendentes o ensaio de recuperação isolado e a validação real em computador e telemóvel.
+3. Monitorização e suporte local concluídos com diagnóstico seguro, prioridades P1/P2/P3, ensaio local isolado e procedimento operacional. Critérios para utilização comercial controlada definidos; continua pendente a validação real em computador e telemóvel.
 
 ## Regras permanentes
 
