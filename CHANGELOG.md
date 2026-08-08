@@ -9,6 +9,9 @@
 - Novo validador automatizado cobre estados, papéis, vínculos, filtros e ausência de mutações na análise.
 - A saúde dos acessos sinaliza contas desativadas com vínculos ativos, perfis inválidos, equipa sem obra e clientes sem associação.
 - Cada conta apresenta a atividade mais recente conhecida a partir do histórico autorizado do ERP.
+- O administrador pode exportar uma auditoria local em JSON com contas, perfis, estados, obras atribuídas, vínculos de cliente, atividade recente e achados de segurança.
+- O relatório não inclui dados financeiros e exige confirmação explícita antes do download; nenhum conteúdo é enviado para serviços externos.
+- O orçamento automatizado de JavaScript da v3.8 passa de 310 KB para 315 KB para acomodar a auditoria, mantendo limite rígido e crescimento inferior a 2%.
 
 ## v3.7 — publicada em 8 de agosto de 2026
 
