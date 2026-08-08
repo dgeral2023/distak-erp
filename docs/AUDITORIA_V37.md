@@ -30,7 +30,8 @@ A aplicação está funcional, com separação por papéis, RLS ativa em todas a
 
 1. Concluído: a política de leitura de `obras` exige agora `obra_utilizadores.ativo = true`.
 2. Concluído: as funções privilegiadas revogam execução para `public` e `anon`, mantendo apenas os papéis internos e autenticados necessários.
-3. Pendente de sessão administrativa: ativar a proteção contra palavras-passe comprometidas no Supabase Auth.
-4. Pendente de contas de teste: validar os fluxos completos de administrador, equipa e cliente.
+3. Concluído com as opções do plano gratuito: cadastro público e login anónimo desativados, confirmação de e-mail obrigatória, palavra-passe forte e OTP de 10 minutos.
+4. Limitação conhecida: a verificação contra palavras-passe comprometidas exige o plano Pro e permanece como melhoria futura.
+5. Pendente de contas de teste: validar os fluxos completos de administrador, equipa e cliente.
 
 Os avisos de índices não utilizados são apenas informativos neste momento. Não foram removidos porque a base é recente e a ausência de utilização ainda não prova que sejam desnecessários.

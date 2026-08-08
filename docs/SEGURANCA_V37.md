@@ -16,5 +16,11 @@ Data: 8 de agosto de 2026
 
 ## Configuracao de autenticacao
 
-- A protecao contra palavras-passe comprometidas deve permanecer ativada no Supabase Auth.
+- O cadastro publico de utilizadores esta desativado; novas contas entram apenas pelos fluxos administrativos de convite.
+- Login anonimo e vinculacao manual permanecem desativados.
+- A confirmacao de e-mail permanece obrigatoria.
+- As palavras-passe novas ou alteradas exigem no minimo 10 caracteres, com minusculas, maiusculas, digitos e simbolos.
+- A alteracao de palavra-passe exige autenticacao recente e a palavra-passe atual.
+- O codigo OTP de e-mail usa 8 digitos e expira em 600 segundos.
+- A verificacao de palavras-passe comprometidas nao esta disponivel no plano gratuito. O aviso do Security Advisor e conhecido e fica como melhoria futura caso o projeto migre para Pro.
 
