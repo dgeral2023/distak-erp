@@ -2,6 +2,13 @@ import {db,getProfile} from "./supabase.js";
 
 const ALLOWED_ROLES=new Set(["admin","escritorio","encarregado","funcionario","cliente"]);
 
+async function recordAuthActivity(acao,resumo){
+  const {data:{user}}=await db.auth.getUser();
+  if(!user)return;
+  const {error}=await db.from("atividades_sistema").insert({utilizador_id:user.id,entidade:"sessao",acao,resumo,metadados:{origem:"web-v3.8",contexto:"autenticacao"}});
+  if(error)console.warn("Evento de autenticação não registado:",error.message);
+}
+
 async function authorizedSession(user){
   if(!user)return null;
   const profile=await getProfile(user.id);
@@ -19,10 +26,12 @@ async function authorizedSession(user){
 export async function login(email,password){
   const {data,error}=await db.auth.signInWithPassword({email,password});
   if(error)throw error;
-  return authorizedSession(data.user);
+  const current=await authorizedSession(data.user);
+  await recordAuthActivity("entrou","Entrada no DISTAK ERP");
+  return current;
 }
 
-export async function logout(){await db.auth.signOut()}
+export async function logout(){await recordAuthActivity("saiu","Saída do DISTAK ERP");await db.auth.signOut()}
 
 export function passwordIssues(password=""){
   const issues=[];
@@ -47,6 +56,7 @@ export async function updateRecoveredPassword(password){
   if(issues.length)throw new Error(`A palavra-passe precisa de ${issues.join(", ")}.`);
   const {error}=await db.auth.updateUser({password});
   if(error)throw error;
+  await recordAuthActivity("recuperou_acesso","Palavra-passe recuperada pelo utilizador");
 }
 
 export function onPasswordRecovery(callback){

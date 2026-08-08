@@ -2,6 +2,14 @@
 
 Data: 8 de agosto de 2026
 
+## Evolucao v3.8 — historico de autenticacao
+
+- O ERP regista somente entrada, saida e recuperacao de acesso, com utilizador e data gerados pelo banco de dados.
+- Tokens, palavras-passe, IP, user-agent e identificadores do dispositivo nao sao guardados.
+- As politicas RLS permanecem inalteradas: o administrador consulta o historico global e cada conta apenas os seus proprios eventos.
+- O frontend nao determina nem envia a hora do evento; `criado_em` continua a usar `now()` no PostgreSQL.
+- O indice parcial `atividades_sistema_sessao_data_idx` acelera a consulta administrativa sem alterar dados anteriores.
+
 ## Chaves do frontend
 
 - O navegador recebe somente a chave Supabase `sb_publishable_...`, apropriada para componentes publicos.
