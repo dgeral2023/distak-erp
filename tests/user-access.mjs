@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {filterAccessAccounts,isValidRole,summarizeAccess} from "../assets/js/core/access-management.js";
+import {analyzeAccessHealth,filterAccessAccounts,isValidRole,latestActivityByUser,summarizeAccess} from "../assets/js/core/access-management.js";
 
 const profiles=[
   {id:"admin",nome:"Administrador",email:"admin@distak.test",role:"admin",ativo:true},
@@ -14,5 +14,12 @@ assert.equal(isValidRole("owner"),false);
 assert.deepEqual(filterAccessAccounts(profiles,{search:"norte"}).map(row=>row.id),["team"]);
 assert.deepEqual(filterAccessAccounts(profiles,{role:"cliente",state:"inactive"}).map(row=>row.id),["client"]);
 assert.equal(filterAccessAccounts(profiles,{state:"active"}).some(row=>row.id==="client"),false);
+const health=analyzeAccessHealth({profiles,assignments:[{user_id:"client",ativo:true}],clientAccess:[]});
+assert.equal(health[0].severity,"critical","Situações críticas devem aparecer primeiro.");
+assert(health.some(row=>row.accountId==="client"&&row.code==="inactive-access"),"Conta desativada com vínculo deve ser sinalizada.");
+assert(health.some(row=>row.accountId==="team"&&row.code==="team-without-work"),"Equipa ativa sem obra deve ser revista.");
+assert(health.some(row=>row.accountId==="invalid"&&row.code==="invalid-role"),"Perfil fora da lista deve ser crítico.");
+const latest=latestActivityByUser([{utilizador_id:"team",criado_em:"2026-08-01T10:00:00Z"},{utilizador_id:"team",criado_em:"2026-08-02T10:00:00Z"},{utilizador_id:"admin",criado_em:"2026-08-01T09:00:00Z"}]);
+assert.equal(latest.get("team").criado_em,"2026-08-02T10:00:00Z","A atividade mais recente deve prevalecer.");
 console.log("Acessos v3.8 aprovados: estados, perfis inválidos, vínculos e filtros validados sem mutações.");
 
