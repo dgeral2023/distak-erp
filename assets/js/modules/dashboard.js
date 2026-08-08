@@ -117,12 +117,18 @@ function renderFinanceChart(custos,pagamentos){
     pagamentos:pagamentos.filter(x=>monthKey(x.data||x.created_at)===m.key).reduce((s,x)=>s+num(x.valor),0)
   }));
   const host=$("dashboardFinanceChart");
-  host.innerHTML=`<div class="chart-legend"><span><i class="legend-received"></i>Recebimentos</span><span><i class="legend-cost"></i>Custos</span></div><canvas class="finance-line-chart" width="760" height="250" aria-label="Evolução financeira"></canvas><div class="line-chart-labels">${rows.map(r=>`<span>${esc(r.label)}</span>`).join("")}</div>`;
-  const canvas=host.querySelector("canvas"),ctx=canvas.getContext("2d"),max=Math.max(1,...rows.flatMap(row=>[row.custos,row.pagamentos]));
-  ctx.clearRect(0,0,760,250);ctx.strokeStyle="#e2e8f0";ctx.lineWidth=1;
-  for(let y=30;y<=220;y+=47.5){ctx.beginPath();ctx.moveTo(28,y);ctx.lineTo(744,y);ctx.stroke()}
-  const draw=(values,color,dashed=false)=>{ctx.strokeStyle=color;ctx.lineWidth=3;ctx.setLineDash(dashed?[7,6]:[]);ctx.beginPath();values.forEach((value,index)=>{const x=40+index*(690/(values.length-1)),y=218-(value/max)*175;index?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();ctx.setLineDash([]);values.forEach((value,index)=>{const x=40+index*(690/(values.length-1)),y=218-(value/max)*175;ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill()})};
-  draw(rows.map(row=>row.custos),"#233d68",true);draw(rows.map(row=>row.pagamentos),"#dda92f");
+  const totalCosts=rows.reduce((sum,row)=>sum+row.custos,0),totalIncome=rows.reduce((sum,row)=>sum+row.pagamentos,0);
+  host.innerHTML=`<div class="chart-legend premium-chart-legend"><span><i class="legend-received"></i>Recebimentos <b>${money(totalIncome)}</b></span><span><i class="legend-cost"></i>Custos <b>${money(totalCosts)}</b></span></div><canvas class="finance-line-chart" width="900" height="250" role="img" aria-label="Evolução financeira dos últimos seis meses. Recebimentos: ${money(totalIncome)}. Custos: ${money(totalCosts)}."></canvas><div class="line-chart-labels">${rows.map(r=>`<span>${esc(r.label)}</span>`).join("")}</div>`;
+  const canvas=host.querySelector("canvas"),ctx=canvas.getContext("2d"),width=900,height=250,max=Math.max(1,...rows.flatMap(row=>[row.custos,row.pagamentos])),left=72,right=880,top=25,bottom=218;
+  const short=value=>value>=1e6?`${(value/1e6).toFixed(value%1e6?1:0)}M €`:value>=1e3?`${Math.round(value/1e3)}k €`:`${Math.round(value)} €`;
+  ctx.clearRect(0,0,width,height);ctx.font="11px system-ui, sans-serif";ctx.textAlign="right";ctx.textBaseline="middle";
+  for(let i=0;i<5;i++){const y=top+i*((bottom-top)/4),value=max*(1-i/4);ctx.strokeStyle=i===4?"#cbd5e1":"#e8edf4";ctx.lineWidth=1;ctx.setLineDash(i===4?[]:[3,4]);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();ctx.fillStyle="#718096";ctx.fillText(short(value),left-12,y)}
+  ctx.setLineDash([]);
+  const points=values=>values.map((value,index)=>({x:left+index*((right-left)/(values.length-1)),y:bottom-(value/max)*(bottom-top)}));
+  const curve=pts=>{ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(let i=0;i<pts.length-1;i++){const current=pts[i],next=pts[i+1],mid=(current.x+next.x)/2;ctx.bezierCurveTo(mid,current.y,mid,next.y,next.x,next.y)}};
+  const costs=points(rows.map(row=>row.custos)),income=points(rows.map(row=>row.pagamentos)),fill=ctx.createLinearGradient(0,top,0,bottom);fill.addColorStop(0,"rgba(49,91,145,.24)");fill.addColorStop(1,"rgba(49,91,145,.015)");curve(costs);ctx.lineTo(costs.at(-1).x,bottom);ctx.lineTo(costs[0].x,bottom);ctx.closePath();ctx.fillStyle=fill;ctx.fill();
+  const draw=(pts,color,dashed=false)=>{curve(pts);ctx.strokeStyle=color;ctx.lineWidth=3;ctx.setLineDash(dashed?[7,6]:[]);ctx.stroke();ctx.setLineDash([]);pts.forEach((point,index)=>{ctx.fillStyle="#fff";ctx.strokeStyle=color;ctx.lineWidth=index===pts.length-1?3:2;ctx.beginPath();ctx.arc(point.x,point.y,index===pts.length-1?5:3.5,0,Math.PI*2);ctx.fill();ctx.stroke()})};
+  draw(costs,"#294e7f",true);draw(income,"#dfa91f");
 }
 
 function renderStatusChart(obras){
@@ -135,7 +141,7 @@ function renderStatusChart(obras){
   ];
   const total=Math.max(1,groups.reduce((sum,row)=>sum+row[1],0)),colors=["#315b91","#59b99d","#93a8c4","#e1ad38","#e5eaf1"];
   let cursor=0;const stops=groups.map((row,index)=>{const start=cursor;cursor+=row[1]/total*100;return `${colors[index]} ${start}% ${cursor}%`}).join(",");
-  $("dashboardStatusChart").innerHTML=`<div class="donut-chart" style="background:conic-gradient(${stops})"><div><strong>${groups.reduce((sum,row)=>sum+row[1],0)}</strong><span>Total</span></div></div><div class="donut-legend">${groups.map(([label,value],index)=>`<div><i style="background:${colors[index]}"></i><span>${esc(label)}</span><strong>${value} (${(value/total*100).toFixed(0)}%)</strong></div>`).join("")}</div>`;
+  $("dashboardStatusChart").innerHTML=`<div class="donut-shell"><div class="donut-chart" role="img" aria-label="Distribuição de ${groups.reduce((sum,row)=>sum+row[1],0)} obras por estado" style="background:conic-gradient(${stops})"><div><strong>${groups.reduce((sum,row)=>sum+row[1],0)}</strong><span>Total de obras</span></div></div></div><div class="donut-legend">${groups.map(([label,value],index)=>`<div><i style="background:${colors[index]}"></i><span>${esc(label)}</span><strong>${value} <small>${(value/total*100).toFixed(0)}%</small></strong></div>`).join("")}</div>`;
 }
 
 function renderTopWorks(obras,custos,pagamentos){
