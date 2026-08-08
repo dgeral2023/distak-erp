@@ -2,6 +2,10 @@
 
 ## v3.8 — em desenvolvimento
 
+- O menu do perfil passa a oferecer uma validação humana guiada, limitada ao perfil autenticado e ao dispositivo atual, para Administrador e Funcionário.
+- Cada cenário exige confirmação individual de todos os pontos e uma declaração explícita; os resultados ficam somente no dispositivo e podem ser exportados sem nomes, e-mails, dados operacionais ou financeiros.
+- A matriz administrativa apresenta o progresso local dos quatro cenários, sem declarar testes automáticos como validação humana e sem incluir o perfil Cliente adiado.
+- O orçamento de JavaScript passa de 366 KB para 372 KB para acomodar o fluxo completo, mantendo o crescimento real em cerca de 1,4% e o limite individual de 25 KB por módulo.
 - A verificação de cópias passa a reconstruir todos os registos num ambiente descartável em memória, comparando contagens, relações e preparação de Administrador/Funcionário com zero escritas em produção.
 - O ensaio local não restaura dados automaticamente e mantém qualquer recuperação real condicionada a autorização específica e a um projeto Supabase isolado.
 - A matriz operacional foi corrigida para refletir o escopo aprovado de apenas Administrador e Funcionário; Cliente permanece suportado, mas adiado.
