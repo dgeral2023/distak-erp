@@ -2,6 +2,8 @@
 
 ## v3.8 — em desenvolvimento
 
+- O Dashboard de Obras recebe o acabamento “Executivo premium”: ícones vetoriais consistentes, gráfico financeiro com escala, curvas suaves, área de apoio e totais, além de um gráfico de estados com maior profundidade e legendas mais legíveis.
+- Os novos elementos mantêm contraste, descrição acessível, redução de movimento, adaptação móvel e funcionamento local no PWA.
 - O escopo operacional desta fase passa a exigir somente Administrador e Funcionário; o perfil Cliente permanece suportado, mas a criação e validação de contas do portal foram adiadas e não bloqueiam a publicação.
 - A base de produção foi conferida sem alterações: existe uma conta Administrador ativa, uma conta Funcionário ativa com obras atribuídas e nenhum acesso de Cliente ativo.
 - A direção visual “Criativa avançada” foi escolhida e preparada com Anime.js 4.4.1 local para navegação, cartões, gráficos, alertas, modais e assistente.
