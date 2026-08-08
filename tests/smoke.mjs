@@ -136,8 +136,12 @@ for (const required of ["initHybridMenu", "renderHybridMenu", "distakSidebarColl
   check(hybridMenu.includes(required), `Menu híbrido incompleto: ${required}`);
 }
 const assistantModule = readFileSync(join(root, "assets", "js", "modules", "assistant.js"), "utf8");
-for (const required of ["initAssistant", "renderAssistantInsight", "db.functions.invoke", "assistente-distak", "history.slice", "data-assistant-action"]){
+for (const required of ["initAssistant", "renderAssistantInsight", "db.functions.invoke", "assistente-distak", "history.slice", "data-assistant-action", "buildDeviceAssistantResponse", "Análise local neste dispositivo"]){
   check(assistantModule.includes(required), `Assistente DISTAK incompleto: ${required}`);
+}
+const assistantLocal=readFileSync(join(root,"assets","js","core","assistant-local.js"),"utf8");
+for(const required of ["detectDeviceIntent","buildDeviceAssistantResponse",'mode:"device"','privacy:"device_only"',"automaticActions:false"]){
+  check(assistantLocal.includes(required),`Assistente local incompleto: ${required}`);
 }
 const assistantFunction = readFileSync(join(root, "supabase", "functions", "assistente-distak", "index.ts"), "utf8");
 for (const required of ["localAnalysis", "intent: \"recebimentos\"", "intent: \"custos\"", "intent: \"orcamentos\"", "intent: \"prioridades\"", "intent: \"agenda\"", "intent: \"dossies\"", "intent: \"operacional\"", "intent: \"compras\"", "intent: \"medicoes\"", "intent: \"inteligencia\"", "auth.getUser"]){
@@ -183,7 +187,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.6", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/accessibility.js", "assets/js/core/backup-readiness.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/core/intelligence-actions.js", "assets/js/core/workload-analysis.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.7-rc1", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/accessibility.js", "assets/js/core/assistant-local.js", "assets/js/core/backup-readiness.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/core/intelligence-actions.js", "assets/js/core/workload-analysis.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 
