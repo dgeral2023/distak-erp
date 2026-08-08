@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="assets/css/cliente-approvals.css?v=20260805-client-v1">
   <link rel="stylesheet" href="assets/css/accessibility.css?v=20260806-a11y-v2">
   <link rel="stylesheet" href="assets/css/backup.css?v=20260806-backup-v2">
+  <link rel="stylesheet" href="assets/css/system-health.css?v=20260808-readiness-v1">
   <link rel="stylesheet" href="assets/css/user-management.css?v=20260808-users-v1">
   <link rel="stylesheet" href="assets/css/role-validation.css?v=20260808-validation-v1">
   <link rel="stylesheet" href="assets/css/portal-content-management.css?v=20260808-portal-content-v1">
@@ -500,6 +501,7 @@
 
     <section id="view-relatorios" class="view hidden">
       <div class="v3-section-head"><div><span>Centro documental</span><h2>Relatórios e exportações</h2><p>Documentos prontos para acompanhamento, reunião e arquivo.</p></div><div class="actions"><button id="inspectSafetyBackup" class="btn light admin-only" type="button">Verificar cópia</button><input id="safetyBackupFile" class="hidden" type="file" accept="application/json,.json"><button id="exportSafetyBackup" class="btn light admin-only" type="button">Exportar cópia de segurança</button><button id="printExecutiveReport" class="btn primary" type="button">Imprimir relatório executivo</button></div></div>
+      <section id="systemHealth" class="system-health admin-only" aria-live="polite" aria-label="Prontidão operacional"></section>
       <div id="reportKpis" class="report-kpis"></div>
       <div class="report-grid">
         <article class="panel"><h3>Rentabilidade por obra</h3><div id="profitabilityReport"></div></article>

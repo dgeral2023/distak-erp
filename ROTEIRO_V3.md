@@ -49,7 +49,7 @@ Esta fase começa somente depois da validação funcional dos perfis. Antes de i
 
 ## Fases seguintes
 
-1. Continuar qualidade, escala, observabilidade e recuperação controlada.
+1. Continuar qualidade e escala; diagnóstico local de prontidão e recuperação controlada concluído, faltando ensaio de recuperação fora de produção.
 2. Evoluir o assistente operacional e preparar uma integração generativa externa somente após autorização específica própria.
 3. Preparar monitorização, suporte e critérios para utilização comercial controlada.
 
