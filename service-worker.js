@@ -1,4 +1,4 @@
-const CACHE='distak-shell-v3.8-access-health-20260808';
+const CACHE='distak-shell-v3.8-access-audit-20260808';
 const SHELL=[
   './','./index.html','./manifest.json','./icon.svg',
   './assets/css/accessibility.css','./assets/css/agenda.css','./assets/css/assistant.css','./assets/css/backup.css','./assets/css/campo.css','./assets/css/cliente-approvals.css','./assets/css/cliente-portal.css','./assets/css/cliente-role.css','./assets/css/compras.css','./assets/css/dashboard-executivo.css','./assets/css/diario.css','./assets/css/distak-ios.css','./assets/css/dossies.css','./assets/css/fotografias.css','./assets/css/hybrid-menu.css','./assets/css/inteligencia.css','./assets/css/medicoes.css','./assets/css/obra-ficha.css','./assets/css/operacional.css','./assets/css/previsoes.css','./assets/css/style.css','./assets/css/user-management.css','./assets/css/v3.css',

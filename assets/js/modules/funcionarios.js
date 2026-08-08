@@ -1,7 +1,7 @@
 import {store} from "../core/store.js";
 import {$,esc,money,toast} from "../core/ui.js";
 import {db,save,remove} from "../core/supabase.js";
-import {analyzeAccessHealth,filterAccessAccounts,isValidRole,latestActivityByUser,summarizeAccess} from "../core/access-management.js";
+import {analyzeAccessHealth,buildAccessAudit,filterAccessAccounts,isValidRole,latestActivityByUser,summarizeAccess} from "../core/access-management.js";
 
 const currentMonth=()=>new Date().toISOString().slice(0,7);
 const hoursForMonth=(month=$("funcionarioMesFiltro")?.value||currentMonth())=>store.funcionarioHoras.filter(row=>String(row.data||"").startsWith(month));
@@ -26,6 +26,13 @@ function renderAccessCenter(){
     const activity=latest.get(String(row.id)),activityLabel=activity?.criado_em?new Date(activity.criado_em).toLocaleString("pt-PT"):"Sem atividade registada";
     return `<article class="access-account ${isActive?"active":"inactive"}" data-access-account="${row.id}" tabindex="-1"><div class="access-avatar" aria-hidden="true">${esc((row.nome||row.email||"?").trim().charAt(0).toUpperCase())}</div><div class="access-identity"><strong>${esc(row.nome||"Nome não definido")}</strong><small>${esc(row.email||"E-mail não disponível")}</small><em>${esc(activityLabel)}</em></div><div class="access-role"><span>Perfil</span><strong class="${roleValid?"":"invalid"}">${esc(roleLabel(row.role))}</strong></div><div class="access-scope"><span>Alcance</span><strong>${esc(scope)}</strong></div><div class="access-status"><span class="${isActive?"enabled":"disabled"}">${isActive?"Ativo":"Desativado"}</span>${row.role==="funcionario"?`<button type="button" class="btn small light" data-review-assignment="${row.id}">Rever obras</button>`:row.role==="cliente"?'<button type="button" class="btn small light" data-review-client-access>Rever portal</button>':""}</div></article>`;
   }).join(""):'<div class="crm-empty">Nenhuma conta corresponde aos filtros.</div>';
+}
+
+function exportAccessAudit(){
+  if(store.profile?.role!=="admin")return toast("Apenas um administrador pode exportar esta auditoria.","error");
+  if(!confirm("O relatório contém identificadores e e-mails das contas. Guarde-o apenas num local seguro. Deseja continuar?"))return;
+  const report=buildAccessAudit({profiles:store.profiles,assignments:store.obraUtilizadores,clientAccess:store.clientePortalAcessos,activities:store.atividades}),content=JSON.stringify(report,null,2),blob=new Blob([content],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a"),stamp=new Date().toISOString().replaceAll(":","-").slice(0,19);
+  link.href=url;link.download=`distak-auditoria-acessos-${stamp}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast("Auditoria exportada localmente. Nenhum dado foi alterado ou enviado.");
 }
 
 function fillSelectors(){
@@ -89,6 +96,7 @@ function openHours(employeeId=""){fillSelectors();$("funcionarioHorasId").value=
 function calculateHours(){const start=$("funcionarioHorasEntrada").value,end=$("funcionarioHorasSaida").value;if(!start||!end)return;const [sh,sm]=start.split(":").map(Number),[eh,em]=end.split(":").map(Number);let minutes=(eh*60+em)-(sh*60+sm)-Number($("funcionarioHorasPausa").value||0);if(minutes<0)minutes+=1440;$("funcionarioHorasTotal").value=Math.max(0,minutes/60).toFixed(2)}
 
 export function initFuncionarios(refresh){
+  $("exportAccessAudit")?.addEventListener("click",exportAccessAudit);
   ["accessSearch","accessRoleFilter","accessStateFilter"].forEach(id=>$(id)?.addEventListener(id==="accessSearch"?"input":"change",renderAccessCenter));
   document.addEventListener("click",event=>{const health=event.target.closest("[data-health-account]")?.dataset.healthAccount;if(health){const account=document.querySelector(`[data-access-account="${health}"]`);account?.scrollIntoView({behavior:"smooth",block:"center"});account?.focus()}const assignment=event.target.closest("[data-review-assignment]")?.dataset.reviewAssignment;if(assignment){const card=document.querySelector(`[data-assignment-user="${assignment}"]`);card?.scrollIntoView({behavior:"smooth",block:"center"});card?.querySelector("input")?.focus()}if(event.target.closest("[data-review-client-access]")){document.querySelector('[data-view="portal-admin"]')?.click()}});
   document.addEventListener("click",async event=>{const userId=event.target.closest("[data-save-assignment]")?.dataset.saveAssignment;if(!userId)return;try{await saveAssignments(userId,refresh)}catch(err){toast(err.message,"error")}});

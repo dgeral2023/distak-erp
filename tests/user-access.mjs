@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {analyzeAccessHealth,filterAccessAccounts,isValidRole,latestActivityByUser,summarizeAccess} from "../assets/js/core/access-management.js";
+import {analyzeAccessHealth,buildAccessAudit,filterAccessAccounts,isValidRole,latestActivityByUser,summarizeAccess} from "../assets/js/core/access-management.js";
 
 const profiles=[
   {id:"admin",nome:"Administrador",email:"admin@distak.test",role:"admin",ativo:true},
@@ -21,5 +21,11 @@ assert(health.some(row=>row.accountId==="team"&&row.code==="team-without-work"),
 assert(health.some(row=>row.accountId==="invalid"&&row.code==="invalid-role"),"Perfil fora da lista deve ser crítico.");
 const latest=latestActivityByUser([{utilizador_id:"team",criado_em:"2026-08-01T10:00:00Z"},{utilizador_id:"team",criado_em:"2026-08-02T10:00:00Z"},{utilizador_id:"admin",criado_em:"2026-08-01T09:00:00Z"}]);
 assert.equal(latest.get("team").criado_em,"2026-08-02T10:00:00Z","A atividade mais recente deve prevalecer.");
+const audit=buildAccessAudit({profiles,assignments:[{user_id:"team",obra_id:"work-1",ativo:true}],clientAccess:[{user_id:"client",cliente_id:"customer-1",ativo:true}],activities:[{utilizador_id:"team",criado_em:"2026-08-02T10:00:00Z"}],generatedAt:"2026-08-08T12:00:00Z"});
+assert.equal(audit.format,"distak-access-audit");
+assert.equal(audit.version,1);
+assert.deepEqual(audit.accounts.find(row=>row.id==="team").assignedWorks,["work-1"]);
+assert.equal(audit.accounts.find(row=>row.id==="team").lastActivityAt,"2026-08-02T10:00:00Z");
+assert.equal(JSON.stringify(audit).includes("pagamentos"),false,"A auditoria não deve conter dados financeiros.");
 console.log("Acessos v3.8 aprovados: estados, perfis inválidos, vínculos e filtros validados sem mutações.");
 

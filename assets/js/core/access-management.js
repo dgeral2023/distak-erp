@@ -40,3 +40,17 @@ export function latestActivityByUser(activities=[]){
   return latest;
 }
 
+export function buildAccessAudit({profiles=[],assignments=[],clientAccess=[],activities=[],generatedAt=new Date().toISOString()}={}){
+  const activeAssignments=assignments.filter(row=>row.ativo!==false),activeClientAccess=clientAccess.filter(row=>row.ativo!==false),latest=latestActivityByUser(activities);
+  return {
+    format:"distak-access-audit",version:1,generatedAt,source:"web-v3.8",summary:summarizeAccess({profiles,assignments,clientAccess}),
+    findings:analyzeAccessHealth({profiles,assignments,clientAccess}),
+    accounts:profiles.map(profile=>({
+      id:profile.id,email:profile.email||null,name:profile.nome||null,role:profile.role||null,active:profile.ativo!==false,
+      assignedWorks:activeAssignments.filter(row=>String(row.user_id)===String(profile.id)).map(row=>row.obra_id),
+      clientLinks:activeClientAccess.filter(row=>String(row.user_id)===String(profile.id)).map(row=>row.cliente_id),
+      lastActivityAt:latest.get(String(profile.id))?.criado_em||null
+    }))
+  };
+}
+
