@@ -7,9 +7,14 @@ export async function getProfile(id){
 }
 
 export async function query(table,select="*"){
-  const {data,error}=await db.from(table).select(select).order("id",{ascending:false});
-  if(error)throw error;
-  return data||[];
+  const rows=[],pageSize=1000;
+  for(let from=0;;from+=pageSize){
+    const {data,error}=await db.from(table).select(select).order("id",{ascending:false}).range(from,from+pageSize-1);
+    if(error)throw error;
+    rows.push(...(data||[]));
+    if(!data||data.length<pageSize)break;
+  }
+  return rows;
 }
 
 export async function save(table,payload,id){

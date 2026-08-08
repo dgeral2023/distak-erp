@@ -1,4 +1,4 @@
-# DISTAK ERP v3.5
+# DISTAK ERP v3.7
 
 Aplicação web de gestão comercial, financeira e operacional da DISTAK, otimizada para computador e telemóvel.
 
@@ -16,6 +16,8 @@ Aplicação web de gestão comercial, financeira e operacional da DISTAK, otimiz
 - Histórico central de alterações com identificação do utilizador.
 - Menu híbrido inteligente: lateral recolhível por áreas no computador e barra inferior no telemóvel.
 - Atalhos recentes, pesquisa por `Ctrl + K` e painel de registo rápido.
+- Assistente operacional com análises locais de carga da equipa, qualidade dos dossiês e próximas ações explicáveis.
+- Portal do cliente isolado, portal móvel da equipa, cópias de segurança verificáveis e funcionamento PWA offline.
 
 ## Segurança
 
@@ -26,11 +28,10 @@ Aplicação web de gestão comercial, financeira e operacional da DISTAK, otimiz
 
 ## Verificação local
 
-Execute os testes estáticos com:
+Execute a verificação completa com:
 
 ```powershell
-node tests/smoke.mjs
-Get-ChildItem assets/js -Recurse -Filter *.js | ForEach-Object { node --check $_.FullName }
+node tests/preflight.mjs
 ```
 
 ## Publicação
@@ -38,3 +39,5 @@ Get-ChildItem assets/js -Recurse -Filter *.js | ForEach-Object { node --check $_
 A versão de produção é publicada pelo GitHub Pages a partir do branch `main`:
 
 https://dgeral2023.github.io/distak-erp/
+
+O resultado da revisão mais recente está em [`docs/AUDITORIA_V37.md`](docs/AUDITORIA_V37.md).
