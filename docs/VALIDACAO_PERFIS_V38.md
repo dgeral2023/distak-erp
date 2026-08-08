@@ -14,6 +14,8 @@ Um perfil só pode ser marcado como validado depois de uma sessão real separada
 4. Confirmar a declaração e guardar a validação local.
 5. Exportar a evidência antes de mudar de dispositivo. O ficheiro não contém nomes, e-mails, valores nem conteúdo das obras.
 6. Repetir no computador e no telemóvel para Administrador e Funcionário, totalizando quatro cenários.
+7. No computador do Administrador, abrir **Centro de Acessos → Plano de validação** e importar as evidências exportadas noutros dispositivos.
+8. Confirmar que a matriz apresenta 4/4 e exportar o **Relatório final**. Ficheiros incompatíveis, duplicados, alterados ou incompletos são rejeitados.
 
 O registo local é uma declaração humana do teste realizado. Não é uma auditoria independente e não pode ser tratado como prova automática de identidade.
 

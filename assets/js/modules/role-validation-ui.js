@@ -1,7 +1,7 @@
 import {$,esc,toast} from "../core/ui.js";
 import {store} from "../core/store.js";
 import {buildRoleValidationPlan,validationScenarios} from "../core/role-validation.js";
-import {buildValidationEvidence,createValidationRecord,scenarioForSession,validationDevice,validationStatus} from "../core/human-validation.js";
+import {buildFinalValidationReport,buildValidationEvidence,createValidationRecord,mergeValidationRecords,scenarioForSession,validateValidationEvidence,validationDevice,validationStatus} from "../core/human-validation.js";
 
 const STORAGE="distak-human-validation-v1";
 const records=()=>{try{const value=JSON.parse(localStorage.getItem(STORAGE)||"[]");return Array.isArray(value)?value:[]}catch{return []}};
@@ -13,7 +13,8 @@ function openPlan(){
   const plan=currentPlan(),scoped=plan.roles.filter(row=>row.inScope),ready=scoped.filter(row=>row.ready).length,scenarios=scoped.flatMap(row=>row.scenarios),status=validationStatus(records(),validationScenarios);
   $("roleValidationSummary").innerHTML=`<article class="${plan.ready?"ready":""}"><span>Perfis preparados</span><strong>${ready}/${scoped.length}</strong><small>${plan.ready?"Pré-condições completas":"Ainda existem pendências"}</small></article><article><span>Cenários desta fase</span><strong>${scenarios.length}</strong><small>Computador e telemóvel</small></article><article class="${status.complete?"ready":""}"><span>Validações neste dispositivo</span><strong>${status.completed}/${status.total}</strong><small>${status.complete?"Evidências locais completas":"Continuar em cada conta e dispositivo"}</small></article>`;
   $("roleValidationRoles").innerHTML=plan.roles.map(row=>`<section class="validation-role ${row.ready&&row.inScope?"ready":""}"><header><div><strong>${esc(row.label)}</strong><small>${row.inScope?`${row.scenarios.length} cenário(s) preparado(s)`:"Fora do escopo desta fase"}</small></div><span>${row.inScope?(row.ready?"Pré-condições prontas":"Preparação pendente"):"Adiado"}</span></header>${row.inScope&&row.reasons.length?`<p>${esc(row.reasons.join(" "))}</p>`:""}${row.inScope?`<div class="validation-scenarios">${row.scenarios.map(scenario=>`<article class="${status.passed.includes(scenario.id)?"passed":""}"><small>${esc(scenario.device)}</small><strong>${esc(scenario.title)}</strong><ul>${scenario.checks.map(check=>`<li>${esc(check)}</li>`).join("")}</ul><em>${status.passed.includes(scenario.id)?"✓ Evidência guardada neste dispositivo":"Pendente neste dispositivo"}</em></article>`).join("")}</div>`:""}</section>`).join("");
-  $("roleValidationDialog").showModal();
+  $("exportFinalValidation").disabled=!status.complete;
+  if(!$("roleValidationDialog").open)$("roleValidationDialog").showModal();
 }
 
 function openDeviceValidation(){
@@ -32,4 +33,9 @@ function complete(event){
 
 function exportPlan(){download(currentPlan(),`distak-plano-validacao-${new Date().toISOString().slice(0,10)}.json`);toast("Plano exportado localmente.")}
 function exportEvidence(){const evidence=buildValidationEvidence(records());if(!evidence.results.length){toast("Ainda não existe uma validação concluída neste dispositivo.","error");return}download(evidence,`distak-evidencia-validacao-${new Date().toISOString().slice(0,10)}.json`);toast("Evidência local exportada sem dados pessoais ou operacionais.")}
-export function initRoleValidation(){$("openRoleValidation")?.addEventListener("click",openPlan);$("openDeviceValidation")?.addEventListener("click",openDeviceValidation);$("exportRoleValidation")?.addEventListener("click",exportPlan);$("exportDeviceValidation")?.addEventListener("click",exportEvidence);$("deviceValidationForm")?.addEventListener("submit",complete)}
+async function importEvidence(event){
+  const input=event.currentTarget,file=input.files?.[0];input.value="";if(!file)return;if(store.profile?.role!=="admin"){toast("Apenas o administrador pode consolidar evidências.","error");return}if(file.size>256*1024){toast("O ficheiro de evidência excede 256 KB.","error");return}
+  try{const incoming=validateValidationEvidence(await file.text(),validationScenarios),merged=mergeValidationRecords(records(),incoming);saveRecords(merged);toast(`${incoming.length} cenário(s) importado(s) e verificado(s).`);openPlan()}catch(error){toast(error.message||"Não foi possível importar a evidência.","error")}
+}
+function exportFinal(){try{download(buildFinalValidationReport(records(),validationScenarios),`distak-relatorio-validacao-final-${new Date().toISOString().slice(0,10)}.json`);toast("Relatório final consolidado e exportado localmente.")}catch(error){toast(error.message,"error")}}
+export function initRoleValidation(){$("openRoleValidation")?.addEventListener("click",openPlan);$("openDeviceValidation")?.addEventListener("click",openDeviceValidation);$("exportRoleValidation")?.addEventListener("click",exportPlan);$("exportDeviceValidation")?.addEventListener("click",exportEvidence);$("importValidationEvidence")?.addEventListener("click",()=>$("validationEvidenceFile").click());$("validationEvidenceFile")?.addEventListener("change",importEvidence);$("exportFinalValidation")?.addEventListener("click",exportFinal);$("deviceValidationForm")?.addEventListener("submit",complete)}

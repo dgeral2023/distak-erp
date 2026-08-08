@@ -53,7 +53,7 @@ Progresso: as três intensidades foram apresentadas e o proprietário escolheu *
 
 1. Continuar qualidade e escala; diagnóstico local, verificação de integridade e ensaio de reconstrução descartável em memória concluídos com zero escritas em produção. Uma recuperação real num projeto Supabase isolado permanece condicionada a necessidade e autorização específica.
 2. Evoluir o assistente operacional e preparar uma integração generativa externa somente após autorização específica própria.
-3. Monitorização e suporte local concluídos com diagnóstico seguro, prioridades P1/P2/P3, ensaio local isolado e procedimento operacional. O roteiro guiado de validação humana para Administrador/Funcionário em computador/telemóvel está disponível com evidência local segura; continua pendente a execução dos quatro cenários reais.
+3. Monitorização e suporte local concluídos com diagnóstico seguro, prioridades P1/P2/P3, ensaio local isolado e procedimento operacional. O roteiro guiado de validação humana para Administrador/Funcionário em computador/telemóvel inclui importação validada e relatório final consolidado; continua pendente a execução dos quatro cenários reais.
 
 ## Regras permanentes
 
