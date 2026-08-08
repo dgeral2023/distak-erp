@@ -25,6 +25,11 @@
 - O Portal do Cliente passa a exigir perfil de cliente ativo mesmo quando existe uma sessão anterior, e clientes deixam de aparecer na atribuição operacional de obras.
 - A API pública de gestão usa `SECURITY INVOKER`; a lógica privilegiada fica no esquema privado, removendo o novo aviso do advisor sem enfraquecer as validações.
 - O orçamento automatizado de JavaScript passa de 320 KB para 325 KB, mantendo o total real em 322,2 KB.
+- Os convites de Escritório, Encarregado, Funcionário e Cliente passam a usar um único fluxo administrativo protegido; convites de Administrador continuam proibidos.
+- O formulário exige revisão explícita do e-mail, perfil e alcance, associa clientes ou obras no servidor e limita cada administrador a cinco convites por hora.
+- Falhas na preparação do perfil, vínculos ou auditoria cancelam apenas a conta recém-criada no mesmo pedido, evitando acessos incompletos.
+- O botão de convite do Portal do Cliente encaminha para o fluxo central; nenhuma chave privilegiada ou operação administrativa foi exposta no frontend.
+- A publicação deste incremento não envia convites nem cria contas: a primeira validação real continua condicionada à autorização específica.
 
 ## v3.7 — publicada em 8 de agosto de 2026
 

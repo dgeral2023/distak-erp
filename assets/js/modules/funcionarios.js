@@ -59,6 +59,23 @@ async function submitAccountManagement(event,refresh){
   button.disabled=true;try{const {data,error}=await db.rpc("gerir_utilizador",{p_user_id:current.id,p_role:next.role,p_ativo:next.active,p_motivo:next.reason});if(error)throw error;if(!data)throw new Error("A alteração não foi confirmada pelo servidor.");$("accountManagementDialog").close();await refresh();toast("Conta atualizada e alteração registada na auditoria.")}catch(error){warning.textContent=error.message||"Não foi possível atualizar a conta."}finally{button.disabled=false}
 }
 
+function renderInviteScope(){
+  const client=$("userInviteRole").value==="cliente";$("userInviteClientField").classList.toggle("hidden",!client);$("userInviteWorksField").classList.toggle("hidden",client);$("userInviteClient").required=client;if(!client)$("userInviteClient").value="";
+}
+
+function openUserInvite(role="funcionario"){
+  $("userInviteForm").reset();$("userInviteRole").value=["escritorio","encarregado","funcionario","cliente"].includes(role)?role:"funcionario";$("userInviteClient").innerHTML='<option value="">Selecionar cliente</option>'+store.clientes.map(row=>`<option value="${row.id}">${esc(row.nome||`Cliente ${row.id}`)}</option>`).join("");
+  $("userInviteWorks").innerHTML=store.obras.length?store.obras.map(row=>`<label><input type="checkbox" value="${row.id}"><span><strong>${esc(row.nome)}</strong><small>${esc(row.estado||"Sem estado")}</small></span></label>`).join(""):'<p class="crm-empty">Não existem obras para atribuição inicial.</p>';$("userInviteWarning").textContent="";renderInviteScope();$("userInviteDialog").showModal();$("userInviteName").focus();
+}
+
+async function submitUserInvite(event,refresh){
+  event.preventDefault();const role=$("userInviteRole").value,name=$("userInviteName").value.trim(),email=$("userInviteEmail").value.trim().toLowerCase(),clientId=$("userInviteClient").value,works=[...$("userInviteWorks").querySelectorAll('input[type="checkbox"]:checked')].map(input=>input.value),warning=$("userInviteWarning"),button=$("userInviteSend");warning.textContent="";
+  if(role==="cliente"&&!clientId){warning.textContent="Selecione o cliente que esta conta poderá consultar.";return}if(!$("userInviteConfirm").checked){warning.textContent="Confirme a revisão dos dados e acessos.";return}
+  const scope=role==="cliente"?"1 cliente associado":`${works.length} obra(s) atribuída(s)`;
+  if(!confirm(`Enviar um convite real para ${email}?\n\nPerfil: ${roleLabel(role)}\nAcesso inicial: ${scope}\n\nO destinatário receberá um e-mail para criar a palavra-passe.`))return;
+  button.disabled=true;try{const {data,error}=await db.functions.invoke("convidar-utilizador",{body:{nome:name,email,role,cliente_id:role==="cliente"?clientId:null,obra_ids:role==="cliente"?[]:works}});if(error)throw error;if(data?.error)throw new Error(data.error);$("userInviteDialog").close();await refresh();toast("Convite enviado e acessos iniciais preparados.")}catch(error){warning.textContent=error.message||"Não foi possível enviar o convite."}finally{button.disabled=false}
+}
+
 function fillSelectors(){
   const employee=$("funcionarioHorasFuncionario"),work=$("funcionarioHorasObra");if(!employee||!work)return;
   const selectedEmployee=employee.value,selectedWork=work.value;
@@ -120,6 +137,7 @@ function openHours(employeeId=""){fillSelectors();$("funcionarioHorasId").value=
 function calculateHours(){const start=$("funcionarioHorasEntrada").value,end=$("funcionarioHorasSaida").value;if(!start||!end)return;const [sh,sm]=start.split(":").map(Number),[eh,em]=end.split(":").map(Number);let minutes=(eh*60+em)-(sh*60+sm)-Number($("funcionarioHorasPausa").value||0);if(minutes<0)minutes+=1440;$("funcionarioHorasTotal").value=Math.max(0,minutes/60).toFixed(2)}
 
 export function initFuncionarios(refresh){
+  $("inviteUserNew")?.addEventListener("click",()=>openUserInvite());$("userInviteRole")?.addEventListener("change",renderInviteScope);$("userInviteForm")?.addEventListener("submit",event=>submitUserInvite(event,refresh));document.addEventListener("distak:open-user-invite",event=>openUserInvite(event.detail?.role));
   $("exportAccessAudit")?.addEventListener("click",exportAccessAudit);
   ["accessSearch","accessRoleFilter","accessStateFilter"].forEach(id=>$(id)?.addEventListener(id==="accessSearch"?"input":"change",renderAccessCenter));
   document.addEventListener("click",event=>{const health=event.target.closest("[data-health-account]")?.dataset.healthAccount;if(health){const account=document.querySelector(`[data-access-account="${health}"]`);account?.scrollIntoView({behavior:"smooth",block:"center"});account?.focus()}const assignment=event.target.closest("[data-review-assignment]")?.dataset.reviewAssignment;if(assignment){const card=document.querySelector(`[data-assignment-user="${assignment}"]`);card?.scrollIntoView({behavior:"smooth",block:"center"});card?.querySelector("input")?.focus()}if(event.target.closest("[data-review-client-access]")){document.querySelector('[data-view="portal-admin"]')?.click()}});
