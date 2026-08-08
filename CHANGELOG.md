@@ -30,6 +30,10 @@
 - Falhas na preparação do perfil, vínculos ou auditoria cancelam apenas a conta recém-criada no mesmo pedido, evitando acessos incompletos.
 - O botão de convite do Portal do Cliente encaminha para o fluxo central; nenhuma chave privilegiada ou operação administrativa foi exposta no frontend.
 - A publicação deste incremento não envia convites nem cria contas: a primeira validação real continua condicionada à autorização específica.
+- A revisão de acessos da equipa por obra passa a ser uma operação atómica protegida no servidor, substituindo o antigo ciclo de apagar e recriar vínculos no navegador.
+- A função aceita somente contas ativas de Escritório, Encarregado ou Funcionário, valida todas as obras, serializa alterações concorrentes e exige confirmação humana.
+- Vínculos removidos são desativados em vez de eliminados; o histórico anterior, as adições, remoções e o alcance final ficam registados na auditoria.
+- A migração foi aplicada sem alterar os seis vínculos ativos existentes, confirmados por contagem e assinatura antes/depois.
 
 ## v3.7 — publicada em 8 de agosto de 2026
 

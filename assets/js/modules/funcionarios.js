@@ -98,18 +98,12 @@ function renderAssignments(){
 
 async function saveAssignments(userId,refresh){
   const card=document.querySelector(`[data-assignment-user="${userId}"]`);if(!card)return;
-  const selected=[...card.querySelectorAll('input[type="checkbox"]:checked')].map(input=>input.value);
-  const previous=store.obraUtilizadores.filter(row=>String(row.user_id)===String(userId));
-  const {error:deleteError}=await db.from("obra_utilizadores").delete().eq("user_id",userId);if(deleteError)throw deleteError;
-  if(selected.length){
-    const payload=selected.map(obraId=>({obra_id:obraId,user_id:userId,atribuido_por:store.profile.id,ativo:true}));
-    const {error:insertError}=await db.from("obra_utilizadores").insert(payload);
-    if(insertError){
-      if(previous.length)await db.from("obra_utilizadores").insert(previous.map(({obra_id,user_id,atribuido_por,ativo})=>({obra_id,user_id,atribuido_por,ativo})));
-      throw insertError;
-    }
-  }
-  toast("Atribuições atualizadas.");await refresh();
+  const selected=[...card.querySelectorAll('input[type="checkbox"]:checked')].map(input=>input.value),previous=store.obraUtilizadores.filter(row=>String(row.user_id)===String(userId)&&row.ativo!==false).map(row=>String(row.obra_id)),profile=store.profiles.find(row=>String(row.id)===String(userId));
+  const before=new Set(previous),after=new Set(selected),added=selected.filter(id=>!before.has(id)),removed=previous.filter(id=>!after.has(id));
+  if(!added.length&&!removed.length)return toast("Não existem alterações para guardar.");
+  if(!confirm(`Rever os acessos por obra de ${profile?.nome||profile?.email||"esta conta"}?\n\nAdicionar: ${added.length}\nRemover: ${removed.length}\nTotal após a alteração: ${selected.length}\n\nA operação será atómica e registada na auditoria.`))return;
+  const button=card.querySelector(`[data-save-assignment="${userId}"]`);button.disabled=true;
+  try{const {data,error}=await db.rpc("gerir_atribuicoes_obras",{p_user_id:userId,p_obra_ids:selected,p_motivo:"Revisão administrativa dos acessos por obra"});if(error)throw error;if(!data?.ok)throw new Error("A alteração não foi confirmada pelo servidor.");toast(`Acessos atualizados: ${data.adicionadas} adicionado(s), ${data.removidas} removido(s).`);await refresh()}finally{button.disabled=false}
 }
 
 export function renderFuncionarios(){

@@ -29,6 +29,16 @@ Data: 8 de agosto de 2026
 - Se perfil, vínculos ou auditoria falharem, somente a conta recém-criada naquele pedido é cancelada para evitar um acesso parcial.
 - A implantação da função e da interface não envia convite nem cria conta; isso ocorre apenas após uma ação administrativa confirmada.
 
+## Evolucao v3.8 — acessos atomicos por obra
+
+- A interface não apaga nem insere diretamente em `obra_utilizadores`; envia a seleção completa para uma operação transacional no servidor.
+- Somente um administrador ativo pode rever uma conta ativa de Escritorio, Encarregado ou Funcionario.
+- Todas as obras são validadas antes da escrita e um bloqueio transacional impede revisões concorrentes da mesma conta.
+- Atribuições removidas ficam inativas para preservar o histórico; atribuições novas ou reativadas usam a restrição única obra/conta.
+- A auditoria regista o motivo, alcance anterior e final, adições e remoções, sem dados financeiros.
+- `anon` não executa a API; a superfície pública usa `SECURITY INVOKER` e delega para a implementação protegida no esquema privado.
+- A aplicação da migração conservou os seis vínculos ativos e a mesma assinatura de conteúdo antes e depois.
+
 ## Chaves do frontend
 
 - O navegador recebe somente a chave Supabase `sb_publishable_...`, apropriada para componentes publicos.
