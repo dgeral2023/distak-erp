@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="assets/css/accessibility.css?v=20260806-a11y-v2">
   <link rel="stylesheet" href="assets/css/backup.css?v=20260806-backup-v2">
   <link rel="stylesheet" href="assets/css/user-management.css?v=20260808-users-v1">
+  <link rel="stylesheet" href="assets/css/password-recovery.css?v=20260808-recovery-v1">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -49,9 +50,31 @@
     <label>Email<input id="loginEmail" type="email" required autocomplete="username"></label>
     <label>Palavra-passe<input id="loginPassword" type="password" required autocomplete="current-password"></label>
     <button class="btn primary" type="submit">Entrar</button>
+    <button id="forgotPasswordBtn" class="login-help" type="button">Esqueci a palavra-passe</button>
     <p id="loginError" class="error"></p>
   </form>
 </section>
+
+<dialog id="passwordRecoveryRequestDialog" aria-labelledby="passwordRecoveryRequestTitle">
+  <form id="passwordRecoveryRequestForm" class="recovery-card">
+    <header><div><small>RECUPERAÇÃO SEGURA</small><h2 id="passwordRecoveryRequestTitle">Recuperar acesso</h2></div><button type="button" data-close="passwordRecoveryRequestDialog" aria-label="Fechar">×</button></header>
+    <p>Introduza o e-mail da sua conta. Se estiver registado, receberá uma ligação segura para definir uma nova palavra-passe.</p>
+    <label>E-mail<input id="passwordRecoveryEmail" type="email" required autocomplete="email"></label>
+    <div id="passwordRecoveryRequestStatus" class="recovery-status" aria-live="polite"></div>
+    <footer><button class="btn light" type="button" data-close="passwordRecoveryRequestDialog">Cancelar</button><button class="btn primary" type="submit">Enviar ligação</button></footer>
+  </form>
+</dialog>
+
+<dialog id="passwordRecoveryUpdateDialog" aria-labelledby="passwordRecoveryUpdateTitle">
+  <form id="passwordRecoveryUpdateForm" class="recovery-card">
+    <header><div><small>LIGAÇÃO CONFIRMADA</small><h2 id="passwordRecoveryUpdateTitle">Definir nova palavra-passe</h2></div></header>
+    <p>Use pelo menos 10 caracteres, incluindo minúscula, maiúscula, número e símbolo.</p>
+    <label>Nova palavra-passe<input id="passwordRecoveryPassword" type="password" minlength="10" required autocomplete="new-password"></label>
+    <label>Confirmar palavra-passe<input id="passwordRecoveryConfirm" type="password" minlength="10" required autocomplete="new-password"></label>
+    <div id="passwordRecoveryUpdateStatus" class="recovery-status error" aria-live="assertive"></div>
+    <footer><button class="btn primary" type="submit">Guardar nova palavra-passe</button></footer>
+  </form>
+</dialog>
 
 <section id="appView" class="app hidden">
   <aside class="sidebar">
