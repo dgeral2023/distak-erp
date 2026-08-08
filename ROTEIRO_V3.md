@@ -26,19 +26,19 @@ Este documento mantém o plano de produção contínua do DISTAK ERP. Cada fase 
 
 ## v3.8 — Utilizadores, validação real e evolução visual
 
-Progresso: Centro de Acessos administrativo concluído com inventário, estados, cinco perfis válidos, obras atribuídas, vínculos de clientes, atividade recente, diagnóstico, notificações, relatório local e alteração protegida de perfil/estado com confirmação e auditoria. Recuperação segura de palavra-passe e histórico mínimo de entradas, saídas e recuperações concluídos. O fluxo central de convites de Equipa e Cliente está preparado com confirmação, limite, vínculos e auditoria; nenhum convite real foi enviado. A revisão de acessos por obra e de vínculos do Portal do Cliente é atómica, validada no servidor, preserva o histórico e regista antes/depois. A matriz de validação cobre os três perfis no computador e telemóvel, mas mantém a execução real explicitamente pendente. Fotografias, atualizações e documentos do portal passam por rascunho, HTTPS e confirmação antes da visibilidade. Execução de mudanças em contas reais e validação separada por perfil permanecem condicionadas à autorização específica.
+Progresso: Centro de Acessos administrativo concluído com inventário, estados, cinco perfis suportados, obras atribuídas, vínculos de clientes, atividade recente, diagnóstico, notificações, relatório local e alteração protegida de perfil/estado com confirmação e auditoria. Recuperação segura de palavra-passe e histórico mínimo de entradas, saídas e recuperações concluídos. O fluxo central de convites está preparado, mas nenhum convite real foi enviado. Para a versão atual, o escopo operacional aprovado é de uma conta Administrador e uma conta Funcionário. O perfil Cliente e a criação de contas para o portal ficam adiados, sem remover a funcionalidade já preparada. A execução real no computador e telemóvel continua registada separadamente da verificação automática.
 
 1. Gestão completa de utilizadores, convites, estados, perfis e acessos por obra.
-2. Validar os fluxos com contas reais separadas de administrador, equipa e cliente, somente após autorização específica para criar ou convidar esses utilizadores.
-3. Confirmar isolamento de dados, navegação, notificações e ações permitidas para cada perfil.
+2. Validar os fluxos com as contas reais existentes de Administrador e Funcionário; não criar nem convidar contas adicionais nesta fase.
+3. Confirmar isolamento de dados, navegação, notificações e ações permitidas para Administrador e Funcionário. A validação do Cliente fica para uma fase futura.
 4. Melhorar recuperação de acesso, histórico de sessões e registos administrativos.
 5. Evoluir notificações acionáveis, fotografias, documentos e relatórios.
 
 ## v3.8 — Fase visual Anime.js
 
-Esta fase começa somente depois da validação funcional dos perfis. Antes de integrar a biblioteca, serão apresentados exemplos visuais comparáveis para aprovação do estilo.
+Esta fase começa depois da confirmação das pré-condições dos perfis incluídos no escopo atual: Administrador e Funcionário. Antes de integrar a biblioteca, foram apresentados exemplos visuais comparáveis para aprovação do estilo.
 
-Progresso: as três intensidades foram apresentadas e o proprietário escolheu **Criativa avançada**. A implementação técnica local e reversível está preparada para validação, mas a publicação continua condicionada ao gate funcional dos perfis previsto neste roteiro.
+Progresso: as três intensidades foram apresentadas e o proprietário escolheu **Criativa avançada**. A implementação técnica local e reversível está preparada. O gate desta fase considera somente Administrador e Funcionário; Cliente foi adiado por decisão do proprietário e não bloqueia a publicação.
 
 1. Criar demonstrações do menu híbrido, cartões do dashboard, gráficos, notificações, modais e assistente DISTAK.
 2. Apresentar pelo menos três intensidades: discreta e profissional, dinâmica equilibrada e criativa avançada.
