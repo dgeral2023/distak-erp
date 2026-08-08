@@ -16,6 +16,9 @@
 - A entrada passa a oferecer recuperação segura de acesso iniciada pelo próprio utilizador, com resposta neutra para não revelar contas registadas.
 - A nova palavra-passe segue as regras fortes do projeto (10 caracteres, minúscula, maiúscula, número e símbolo) e a sessão de recuperação é encerrada depois da alteração.
 - O orçamento automatizado de JavaScript passa de 315 KB para 320 KB para acomodar a recuperação, mantendo o total real em 315,8 KB.
+- Entradas, saídas e recuperações de acesso passam a ficar registadas no histórico protegido existente, sem tokens, palavras-passe, IP, navegador ou identificação do dispositivo.
+- O Centro de Acessos apresenta ao administrador os eventos de autenticação dos últimos 30 dias e a auditoria local passa ao formato v2 com um resumo mínimo das sessões.
+- A migração adiciona apenas três ações ao controlo existente e um índice parcial, preservando as políticas RLS e todos os registos anteriores.
 
 ## v3.7 — publicada em 8 de agosto de 2026
 

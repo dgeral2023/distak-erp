@@ -1,13 +1,21 @@
 import {store} from "../core/store.js";
 import {$,esc,money,toast} from "../core/ui.js";
 import {db,save,remove} from "../core/supabase.js";
-import {analyzeAccessHealth,buildAccessAudit,filterAccessAccounts,isValidRole,latestActivityByUser,summarizeAccess} from "../core/access-management.js";
+import {analyzeAccessHealth,buildAccessAudit,filterAccessAccounts,isValidRole,latestActivityByUser,sessionHistory,summarizeAccess,summarizeSessions} from "../core/access-management.js";
 
 const currentMonth=()=>new Date().toISOString().slice(0,7);
 const hoursForMonth=(month=$("funcionarioMesFiltro")?.value||currentMonth())=>store.funcionarioHoras.filter(row=>String(row.data||"").startsWith(month));
 const formatDate=value=>value?new Date(`${value}T00:00:00`).toLocaleDateString("pt-PT"):"—";
 const badge=value=>`<span class="badge employee-${String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}">${esc(value)}</span>`;
 const roleLabel=role=>({admin:"Administrador",funcionario:"Equipa",cliente:"Cliente"}[role]||"Perfil inválido");
+const sessionActionLabel=action=>({entrou:"Entrada",saiu:"Saída",recuperou_acesso:"Recuperação de acesso"}[action]||"Autenticação");
+
+function renderSessionHistory(){
+  const host=$("sessionHistory"),summaryHost=$("sessionSummary");if(!host||!summaryHost||store.profile?.role!=="admin")return;
+  const rows=sessionHistory(store.atividades||[],20),summary=summarizeSessions(store.atividades||[]);
+  summaryHost.innerHTML=`<span><strong>${summary.signIns}</strong> entradas</span><span><strong>${summary.accounts}</strong> contas</span><span class="${summary.recoveries?"attention":""}"><strong>${summary.recoveries}</strong> recuperações</span>`;
+  host.innerHTML=rows.length?rows.map(row=>`<article><i class="session-${esc(row.acao)}" aria-hidden="true"></i><div><strong>${esc(sessionActionLabel(row.acao))}</strong><small>${esc(row.profiles?.nome||"Utilizador")} · ${new Date(row.criado_em).toLocaleString("pt-PT")}</small></div></article>`).join(""):'<div class="access-health-clear"><strong>Sem eventos de sessão registados</strong><small>As próximas entradas, saídas e recuperações ficarão disponíveis aqui.</small></div>';
+}
 
 function renderAccessCenter(){
   const host=$("accessAccounts");if(!host||store.profile?.role!=="admin")return;
@@ -25,7 +33,7 @@ function renderAccessCenter(){
     const scope=row.role==="admin"?"Acesso administrativo":row.role==="cliente"?`${portals.length} cliente(s) associado(s)`: `${assigned.length} obra(s) atribuída(s)`;
     const activity=latest.get(String(row.id)),activityLabel=activity?.criado_em?new Date(activity.criado_em).toLocaleString("pt-PT"):"Sem atividade registada";
     return `<article class="access-account ${isActive?"active":"inactive"}" data-access-account="${row.id}" tabindex="-1"><div class="access-avatar" aria-hidden="true">${esc((row.nome||row.email||"?").trim().charAt(0).toUpperCase())}</div><div class="access-identity"><strong>${esc(row.nome||"Nome não definido")}</strong><small>${esc(row.email||"E-mail não disponível")}</small><em>${esc(activityLabel)}</em></div><div class="access-role"><span>Perfil</span><strong class="${roleValid?"":"invalid"}">${esc(roleLabel(row.role))}</strong></div><div class="access-scope"><span>Alcance</span><strong>${esc(scope)}</strong></div><div class="access-status"><span class="${isActive?"enabled":"disabled"}">${isActive?"Ativo":"Desativado"}</span>${row.role==="funcionario"?`<button type="button" class="btn small light" data-review-assignment="${row.id}">Rever obras</button>`:row.role==="cliente"?'<button type="button" class="btn small light" data-review-client-access>Rever portal</button>':""}</div></article>`;
-  }).join(""):'<div class="crm-empty">Nenhuma conta corresponde aos filtros.</div>';
+  }).join(""):'<div class="crm-empty">Nenhuma conta corresponde aos filtros.</div>';renderSessionHistory();
 }
 
 function exportAccessAudit(){

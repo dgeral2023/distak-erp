@@ -40,12 +40,26 @@ export function latestActivityByUser(activities=[]){
   return latest;
 }
 
+export function sessionHistory(activities=[],limit=20){
+  return activities
+    .filter(row=>row.entidade==="sessao"&&["entrou","saiu","recuperou_acesso"].includes(row.acao))
+    .sort((a,b)=>String(b.criado_em||"").localeCompare(String(a.criado_em||"")))
+    .slice(0,Math.max(0,limit));
+}
+
+export function summarizeSessions(activities=[],now=new Date()){
+  const rows=sessionHistory(activities,Number.MAX_SAFE_INTEGER),since=new Date(now);
+  since.setDate(since.getDate()-30);
+  const recent=rows.filter(row=>new Date(row.criado_em)>=since);
+  return {events:recent.length,signIns:recent.filter(row=>row.acao==="entrou").length,recoveries:recent.filter(row=>row.acao==="recuperou_acesso").length,accounts:new Set(recent.map(row=>String(row.utilizador_id))).size};
+}
+
 export function buildAccessAudit({profiles=[],assignments=[],clientAccess=[],activities=[],generatedAt=new Date().toISOString()}={}){
   const activeAssignments=assignments.filter(row=>row.ativo!==false),activeClientAccess=clientAccess.filter(row=>row.ativo!==false),latest=latestActivityByUser(activities);
   return {
-    format:"distak-access-audit",version:1,generatedAt,source:"web-v3.8",summary:summarizeAccess({profiles,assignments,clientAccess}),
+    format:"distak-access-audit",version:2,generatedAt,source:"web-v3.8",summary:summarizeAccess({profiles,assignments,clientAccess}),sessionSummary:summarizeSessions(activities,new Date(generatedAt)),
     findings:analyzeAccessHealth({profiles,assignments,clientAccess}),
-    accounts:profiles.map(profile=>({
+    sessions:sessionHistory(activities,100).map(row=>({accountId:row.utilizador_id,action:row.acao,at:row.criado_em})),accounts:profiles.map(profile=>({
       id:profile.id,email:profile.email||null,name:profile.nome||null,role:profile.role||null,active:profile.ativo!==false,
       assignedWorks:activeAssignments.filter(row=>String(row.user_id)===String(profile.id)).map(row=>row.obra_id),
       clientLinks:activeClientAccess.filter(row=>String(row.user_id)===String(profile.id)).map(row=>row.cliente_id),
