@@ -26,12 +26,11 @@ A aplicação está funcional, com separação por papéis, RLS ativa em todas a
 - Nenhum campo sem rótulo acessível após a correção.
 - 14 validadores locais concluídos, incluindo segurança, desempenho, PWA, papéis, acessibilidade, backups e paginação.
 
-## Pendências que exigem autorização específica
+## Estado das melhorias de segurança
 
-1. Ativar a proteção contra palavras-passe comprometidas no Supabase Auth.
-2. Rever a política de leitura de `obras` para exigir `obra_utilizadores.ativo = true`, impedindo que uma atribuição desativada continue a listar a obra.
-3. Decidir se `public.is_admin()` deve permanecer exposta como RPC ou ser movida para um esquema privado; as políticas RLS atuais dependem desta função.
-4. Manter `responder_cliente_portal_aprovacao` executável por utilizadores autenticados, pois é o canal controlado de resposta do cliente, ou redesenhar a API.
-5. Validar fluxos completos com três contas reais separadas (administrador, equipa e cliente), sem criar ou convidar utilizadores sem autorização.
+1. Concluído: a política de leitura de `obras` exige agora `obra_utilizadores.ativo = true`.
+2. Concluído: as funções privilegiadas revogam execução para `public` e `anon`, mantendo apenas os papéis internos e autenticados necessários.
+3. Pendente de sessão administrativa: ativar a proteção contra palavras-passe comprometidas no Supabase Auth.
+4. Pendente de contas de teste: validar os fluxos completos de administrador, equipa e cliente.
 
 Os avisos de índices não utilizados são apenas informativos neste momento. Não foram removidos porque a base é recente e a ausência de utilização ainda não prova que sejam desnecessários.
