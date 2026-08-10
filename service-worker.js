@@ -1,4 +1,4 @@
-const CACHE='distak-shell-v3.8-controlled-content-20260808-human-validation-v2';
+const CACHE='distak-shell-v3.8-controlled-content-20260808-release-candidate-v1';
 const SHELL=[
   './','./index.html','./manifest.json','./icon.svg',
   './assets/css/accessibility.css','./assets/css/agenda.css','./assets/css/assistant.css','./assets/css/backup.css','./assets/css/campo.css','./assets/css/client-access-management.css','./assets/css/cliente-approvals.css','./assets/css/cliente-portal.css','./assets/css/cliente-role.css','./assets/css/compras.css','./assets/css/dashboard-executivo.css','./assets/css/diario.css','./assets/css/distak-ios.css','./assets/css/dossies.css','./assets/css/fotografias.css','./assets/css/hybrid-menu.css','./assets/css/inteligencia.css','./assets/css/medicoes.css','./assets/css/motion.css','./assets/css/obra-ficha.css','./assets/css/operacional.css','./assets/css/password-recovery.css','./assets/css/portal-content-management.css','./assets/css/previsoes.css','./assets/css/role-validation.css','./assets/css/style.css','./assets/css/user-management.css','./assets/css/v3.css','./assets/css/system-health.css',

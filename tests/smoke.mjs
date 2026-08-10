@@ -10,7 +10,7 @@ function check(condition, message) {
   if (!condition) failures.push(message);
 }
 
-check(index.includes("DISTAK ERP v3.7"), "A versão publicada visível deve ser v3.7.");
+check(index.includes("DISTAK ERP v3.8"), "A versão publicada visível deve ser v3.8.");
 
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {

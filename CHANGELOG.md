@@ -1,6 +1,6 @@
 # Histórico de versões
 
-## v3.8 — em desenvolvimento
+## v3.8 — candidata de produção em 8 de agosto de 2026
 
 - O menu do perfil passa a oferecer uma validação humana guiada, limitada ao perfil autenticado e ao dispositivo atual, para Administrador e Funcionário.
 - Cada cenário exige confirmação individual de todos os pontos e uma declaração explícita; os resultados ficam somente no dispositivo e podem ser exportados sem nomes, e-mails, dados operacionais ou financeiros.
@@ -132,3 +132,5 @@ As tabelas protegidas do Portal do Cliente e a função autenticada `convidar-cl
 
 - Portal da equipa em campo, registos móveis e fila offline.
 - Revisão administrativa e acesso operacional por obra.
+- A identidade da aplicação é alinhada como v3.8 no título, menu, diário, manifesto e documentação principal; a classificação continua “candidata” até à execução humana 4/4.
+- A automação de qualidade passa a usar versões oficiais atuais e fixadas por identificador imutável das ações de checkout e Node.js.
