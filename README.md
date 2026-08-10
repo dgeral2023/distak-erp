@@ -1,4 +1,4 @@
-# DISTAK ERP v3.7
+# DISTAK ERP v3.8
 
 Aplicação web de gestão comercial, financeira e operacional da DISTAK, otimizada para computador e telemóvel.
 
@@ -40,4 +40,4 @@ A versão de produção é publicada pelo GitHub Pages a partir do branch `main`
 
 https://dgeral2023.github.io/distak-erp/
 
-O resultado da revisão mais recente está em [`docs/AUDITORIA_V37.md`](docs/AUDITORIA_V37.md).
+O resultado da revisão mais recente está em [`docs/AUDITORIA_V38.md`](docs/AUDITORIA_V38.md).
