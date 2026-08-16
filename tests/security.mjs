@@ -17,6 +17,11 @@ const html=readFileSync(join(root,"index.html"),"utf8");
 for(const src of [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match=>match[1])){
   if(src.startsWith("http")&&!/^https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@\d+\.\d+\.\d+$/.test(src))failures.push(`Dependência externa não autorizada ou sem versão fixa: ${src}`);
 }
+const externalScripts=[...html.matchAll(/<script[^>]+src="https:\/\/[^\"]+"[^>]*>/g)].map(match=>match[0]);
+for(const tag of externalScripts)if(!/\sintegrity="sha384-[A-Za-z0-9+/=]+"/.test(tag)||!/\scrossorigin="anonymous"/.test(tag))failures.push("Dependência externa sem SRI SHA-384 e crossorigin anónimo.");
+for(const path of frontend.filter(path=>!path.includes(`${join("assets","vendor")}`))){const source=readFileSync(path,"utf8");if(/Math\.random\s*\(/.test(source))failures.push(`${path.slice(root.length+1)} usa Math.random em código do produto.`)}
+const backup=readFileSync(join(root,"assets","js","modules","backup.js"),"utf8");
+if(!backup.includes("constantTimeEqual")||/checksum\.toLowerCase\(\)\s*!==/.test(backup))failures.push("A verificação de integridade deve usar comparação de tempo constante.");
 for(const required of ["Content-Security-Policy","object-src 'none'","base-uri 'self'","form-action 'self'","strict-origin-when-cross-origin"])if(!html.includes(required))failures.push(`Proteção HTML em falta: ${required}`);
 const scriptPolicy=html.match(/script-src ([^;]+)/)?.[1]||"";
 if(scriptPolicy.includes("'unsafe-inline'"))failures.push("A política de scripts não deve permitir execução inline.");
