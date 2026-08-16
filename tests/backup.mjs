@@ -1,4 +1,4 @@
-import {createHash} from "node:crypto";
+import {createHash,timingSafeEqual} from "node:crypto";
 import {store} from "../assets/js/core/store.js";
 import {createSafetyBackup,inspectSafetyBackup} from "../assets/js/modules/backup.js";
 import {assessRecoveryReadiness} from "../assets/js/core/backup-readiness.js";
@@ -11,7 +11,7 @@ const exported=JSON.parse(await createSafetyBackup());
 if(exported.payload.format!=="distak-erp-backup"||exported.payload.version!==1)throw new Error("Formato de backup inválido.");
 if(exported.payload.recordCounts.clientes!==1||exported.payload.recordCounts.obras!==1)throw new Error("Contagens do backup inválidas.");
 const checksum=createHash("sha256").update(JSON.stringify(exported.payload)).digest("hex");
-if(checksum!==exported.integrity.checksum)throw new Error("Checksum do backup inválido.");
+if(!timingSafeEqual(Buffer.from(checksum,"hex"),Buffer.from(exported.integrity.checksum,"hex")))throw new Error("Checksum do backup inválido.");
 const stateBefore=JSON.stringify({clientes:store.clientes,obras:store.obras,custos:store.custos});
 const inspected=await inspectSafetyBackup(JSON.stringify(exported));
 if(!inspected.valid||inspected.totalRecords<3||inspected.counts.clientes!==1||inspected.readiness.status!=="ready"||inspected.readiness.automaticRestore!==false)throw new Error("A inspeção não confirmou o conteúdo e a prontidão da cópia.");

@@ -9,7 +9,7 @@ assert.equal(resolveMotionMode({preference:"creative",reduced:true}),"off");
 assert.equal(resolveMotionMode({preference:"creative",saveData:true}),"lite");
 assert.equal(resolveMotionMode({preference:"creative",hardwareConcurrency:4}),"lite");
 assert.equal(resolveMotionMode({preference:"off"}),"off");assert.equal(motionPreference("unexpected"),"creative");
-const vendor=readFileSync(resolve(root,"assets/vendor/animejs/anime.esm.min.js"));
+const vendor=read("assets/vendor/animejs/anime.esm.min.js").replace(/\r\n/g,"\n");
 assert.equal(createHash("sha256").update(vendor).digest("hex"),"f11a30625dd64df25bea297dc20c20cb22ac2e701a8196ecfe7a2ae5213fd5eb");
 const html=read("index.html"),motion=read("assets/js/modules/motion.js"),menu=read("assets/js/modules/hybrid-menu.js"),css=read("assets/css/motion.css"),worker=read("service-worker.js"),license=read("assets/vendor/animejs/LICENSE.md");
 for(const token of ["motionToggle","aria-pressed","assets/css/motion.css"])assert(html.includes(token),`Controlo visual em falta: ${token}`);
