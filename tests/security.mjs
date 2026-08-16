@@ -22,6 +22,8 @@ for(const tag of externalScripts)if(!/\sintegrity="sha384-[A-Za-z0-9+/=]+"/.test
 for(const path of frontend.filter(path=>!path.includes(`${join("assets","vendor")}`))){const source=readFileSync(path,"utf8");if(/Math\.random\s*\(/.test(source))failures.push(`${path.slice(root.length+1)} usa Math.random em código do produto.`)}
 const backup=readFileSync(join(root,"assets","js","modules","backup.js"),"utf8");
 if(!backup.includes("constantTimeEqual")||/checksum\.toLowerCase\(\)\s*!==/.test(backup))failures.push("A verificação de integridade deve usar comparação de tempo constante.");
+const backupTest=readFileSync(join(root,"tests","backup.mjs"),"utf8");
+if(!backupTest.includes("timingSafeEqual")||/checksum\s*!==\s*exported\.integrity\.checksum/.test(backupTest))failures.push("O teste do backup deve comparar checksums com timingSafeEqual.");
 for(const required of ["Content-Security-Policy","object-src 'none'","base-uri 'self'","form-action 'self'","strict-origin-when-cross-origin"])if(!html.includes(required))failures.push(`Proteção HTML em falta: ${required}`);
 const scriptPolicy=html.match(/script-src ([^;]+)/)?.[1]||"";
 if(scriptPolicy.includes("'unsafe-inline'"))failures.push("A política de scripts não deve permitir execução inline.");
