@@ -5,6 +5,11 @@ import {rehearseRecoveryInMemory} from "../core/recovery-rehearsal.js";
 
 const collections=["profiles","obraUtilizadores","clientes","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra","clientePortalAcessos","clientePortalObras","clientePortalAtualizacoes","clientePortalFicheiros","clientePortalAprovacoes"];
 const hex=buffer=>[...new Uint8Array(buffer)].map(value=>value.toString(16).padStart(2,"0")).join("");
+const constantTimeEqual=(left,right)=>{
+  if(typeof left!=="string"||typeof right!=="string"||left.length!==right.length)return false;
+  let difference=0;for(let index=0;index<left.length;index++)difference|=left.charCodeAt(index)^right.charCodeAt(index);
+  return difference===0;
+};
 const fail=message=>{throw new Error(message)};
 
 export async function createSafetyBackup(){
@@ -26,7 +31,7 @@ export async function inspectSafetyBackup(content){
   const unexpected=Object.keys(payload.data).filter(key=>!collections.includes(key));if(unexpected.length)fail("A cópia contém coleções desconhecidas.");
   const counts={};for(const key of collections){const rows=payload.data[key];if(!Array.isArray(rows))fail(`Coleção inválida: ${key}.`);counts[key]=rows.length;if(payload.recordCounts[key]!==rows.length)fail(`Contagem inconsistente: ${key}.`)}
   const checksum=hex(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(JSON.stringify(payload))));
-  if(checksum.toLowerCase()!==integrity.checksum.toLowerCase())fail("A cópia foi alterada ou está danificada.");
+  if(!constantTimeEqual(checksum.toLowerCase(),integrity.checksum.toLowerCase()))fail("A cópia foi alterada ou está danificada.");
   const readiness=assessRecoveryReadiness(payload);
   return {valid:true,version:payload.version,createdAt:payload.createdAt,source:payload.source||"desconhecida",checksum,totalRecords:Object.values(counts).reduce((sum,value)=>sum+value,0),counts,readiness};
 }
