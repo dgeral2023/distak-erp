@@ -20,7 +20,7 @@ function walk(directory) {
 }
 
 const requiredIds = [
-  "loginForm", "mainNav", "view-dashboard", "view-clientes", "view-obras",
+  "loginForm", "mainNav", "view-dashboard", "view-leads", "leadsTable", "view-clientes", "view-obras",
   "view-orcamentos", "view-custos", "view-pagamentos", "view-funcionarios",
   "funcionarioForm", "funcionarioHorasForm", "dashboardTeam", "workDocumentList",
   "obraAssignments", "assignmentSummary"
@@ -187,7 +187,7 @@ const serviceWorker = readFileSync(join(root, "service-worker.js"), "utf8");
 for (const required of ["serviceWorker.register", "updatefound"]){
   check(pwaModule.includes(required), `Aplicação instalável incompleta: ${required}`);
 }
-for (const required of ["distak-shell-v3.8-controlled-content-20260808", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/client-access-management.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/css/password-recovery.css", "assets/css/portal-content-management.css", "assets/css/role-validation.css", "assets/css/user-management.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/access-management.js", "assets/js/core/accessibility.js", "assets/js/core/assistant-local.js", "assets/js/core/backup-readiness.js", "assets/js/core/bootstrap-errors.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/core/intelligence-actions.js", "assets/js/core/portal-publication.js", "assets/js/core/role-validation.js", "assets/js/core/supabase.js", "assets/js/core/workload-analysis.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/portal-content-admin.js", "assets/js/modules/cliente-portal.js"]){
+for (const required of ["distak-shell-v3.8-leads-site-20260819", "request.mode==='navigate'", "url.origin!==self.location.origin", "ignoreSearch:true", "assets/css/accessibility.css", "assets/css/client-access-management.css", "assets/css/cliente-approvals.css", "assets/css/backup.css", "assets/css/password-recovery.css", "assets/css/portal-content-management.css", "assets/css/role-validation.css", "assets/css/user-management.css", "assets/js/config.js", "assets/js/app.js", "assets/js/core/access-management.js", "assets/js/core/accessibility.js", "assets/js/core/assistant-local.js", "assets/js/core/backup-readiness.js", "assets/js/core/bootstrap-errors.js", "assets/js/core/dossier-quality.js", "assets/js/core/field-queue.js", "assets/js/core/intelligence-actions.js", "assets/js/core/portal-publication.js", "assets/js/core/role-validation.js", "assets/js/core/supabase.js", "assets/js/core/workload-analysis.js", "assets/js/modules/backup.js", "assets/js/modules/campo.js", "assets/js/modules/inteligencia.js", "assets/js/modules/portal-content-admin.js", "assets/js/modules/cliente-portal.js"]){
   check(serviceWorker.includes(required), `Service worker incompleto: ${required}`);
 }
 

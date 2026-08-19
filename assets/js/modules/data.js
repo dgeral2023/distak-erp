@@ -13,9 +13,10 @@ export async function refreshData(){
     store.clientePortalAtualizacoes=await query("cliente_portal_atualizacoes");
     store.clientePortalFicheiros=await query("cliente_portal_ficheiros");
     store.clientePortalAprovacoes=await query("cliente_portal_aprovacoes");
-    ["obraUtilizadores","clientes","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra"].forEach(key=>store[key]=[]);
+    ["obraUtilizadores","leads","clientes","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra"].forEach(key=>store[key]=[]);
     return;
   }
+  store.leads = isAdmin ? await query("leads_site") : [];
   store.profiles = isAdmin ? await query("profiles") : [store.profile];
   store.obraUtilizadores = await query("obra_utilizadores");
   store.clientes = await query("clientes");
