@@ -64,6 +64,8 @@ export function renderDashboard(){
   const totalTeamHours=monthHours.reduce((sum,row)=>sum+num(row.horas),0);
   const teamCost=monthHours.reduce((sum,row)=>sum+num(row.horas)*num(row.funcionarios?.custo_hora),0);
   const overdueCosts=custos.filter(c=>c.estado_pagamento!=="pago"&&c.data_vencimento&&new Date(`${c.data_vencimento}T23:59:59`)<new Date());
+  const todayLocal=new Date();todayLocal.setMinutes(todayLocal.getMinutes()-todayLocal.getTimezoneOffset());const todayKey=todayLocal.toISOString().slice(0,10);
+  const overdueTasks=(store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo<todayKey);
 
   $("statValorContratado").textContent=money(contratado);
   $("statPagamentos").textContent=money(recebido);
@@ -88,6 +90,14 @@ export function renderDashboard(){
   $("statCustoEquipaMes").textContent=money(teamCost);
   $("statCustosVencidos").textContent=money(overdueCosts.reduce((sum,c)=>sum+num(c.valor||c.valor_sem_iva),0));
   $("statCustosVencidosQtd").textContent=`${overdueCosts.length} documento(s)`;
+  $("option5ActiveWorks").textContent=obras.filter(isActive).length;
+  $("option5ExecutionValue").textContent=money(contratado);
+  $("option5Income").textContent=money(recebido);
+  $("option5Alerts").textContent=obras.filter(isAlert).length+overdueCosts.length+overdueTasks.length;
+  $("option5ActiveTrend").textContent=`${obras.length} obras registadas`;
+  $("option5ExecutionTrend").textContent=`Margem estimada ${margem.toFixed(1)}%`;
+  $("option5IncomeTrend").textContent=`${contratado?((recebido/contratado)*100).toFixed(1):0}% do contratado`;
+  $("option5AlertTrend").textContent=overdueTasks.length?`${overdueTasks.length} tarefa(s) atrasada(s)`:overdueCosts.length?`${overdueCosts.length} custo(s) vencido(s)`:"Sem alertas vencidos";
 
   renderFinanceChart(custos,pagamentos);
   renderStatusChart(obras);
@@ -106,16 +116,19 @@ function renderFinanceChart(custos,pagamentos){
     custos:custos.filter(x=>monthKey(x.data||x.created_at)===m.key).reduce((s,x)=>s+num(x.valor||x.valor_sem_iva),0),
     pagamentos:pagamentos.filter(x=>monthKey(x.data||x.created_at)===m.key).reduce((s,x)=>s+num(x.valor),0)
   }));
-  const max=Math.max(1,...rows.flatMap(x=>[x.custos,x.pagamentos]));
-  $("dashboardFinanceChart").innerHTML=`
-    <div class="chart-legend"><span><i class="legend-received"></i>Recebimentos</span><span><i class="legend-cost"></i>Custos</span></div>
-    <div class="finance-bars">${rows.map(r=>`<div class="finance-month">
-      <div class="finance-columns">
-        <span class="bar-received" style="height:${Math.max(3,r.pagamentos/max*100)}%" title="Recebido: ${money(r.pagamentos)}"></span>
-        <span class="bar-cost" style="height:${Math.max(3,r.custos/max*100)}%" title="Custos: ${money(r.custos)}"></span>
-      </div>
-      <small>${esc(r.label)}</small>
-    </div>`).join("")}</div>`;
+  const host=$("dashboardFinanceChart");
+  const totalCosts=rows.reduce((sum,row)=>sum+row.custos,0),totalIncome=rows.reduce((sum,row)=>sum+row.pagamentos,0);
+  host.innerHTML=`<div class="chart-legend premium-chart-legend"><span><i class="legend-received"></i>Recebimentos <b>${money(totalIncome)}</b></span><span><i class="legend-cost"></i>Custos <b>${money(totalCosts)}</b></span></div><canvas class="finance-line-chart" width="900" height="250" role="img" aria-label="Evolução financeira dos últimos seis meses. Recebimentos: ${money(totalIncome)}. Custos: ${money(totalCosts)}."></canvas><div class="line-chart-labels">${rows.map(r=>`<span>${esc(r.label)}</span>`).join("")}</div>`;
+  const canvas=host.querySelector("canvas"),ctx=canvas.getContext("2d"),width=900,height=250,max=Math.max(1,...rows.flatMap(row=>[row.custos,row.pagamentos])),left=72,right=880,top=25,bottom=218;
+  const short=value=>value>=1e6?`${(value/1e6).toFixed(value%1e6?1:0)}M €`:value>=1e3?`${Math.round(value/1e3)}k €`:`${Math.round(value)} €`;
+  ctx.clearRect(0,0,width,height);ctx.font="11px system-ui, sans-serif";ctx.textAlign="right";ctx.textBaseline="middle";
+  for(let i=0;i<5;i++){const y=top+i*((bottom-top)/4),value=max*(1-i/4);ctx.strokeStyle=i===4?"#cbd5e1":"#e8edf4";ctx.lineWidth=1;ctx.setLineDash(i===4?[]:[3,4]);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();ctx.fillStyle="#718096";ctx.fillText(short(value),left-12,y)}
+  ctx.setLineDash([]);
+  const points=values=>values.map((value,index)=>({x:left+index*((right-left)/(values.length-1)),y:bottom-(value/max)*(bottom-top)}));
+  const curve=pts=>{ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(let i=0;i<pts.length-1;i++){const current=pts[i],next=pts[i+1],mid=(current.x+next.x)/2;ctx.bezierCurveTo(mid,current.y,mid,next.y,next.x,next.y)}};
+  const costs=points(rows.map(row=>row.custos)),income=points(rows.map(row=>row.pagamentos)),fill=ctx.createLinearGradient(0,top,0,bottom);fill.addColorStop(0,"rgba(49,91,145,.24)");fill.addColorStop(1,"rgba(49,91,145,.015)");curve(costs);ctx.lineTo(costs.at(-1).x,bottom);ctx.lineTo(costs[0].x,bottom);ctx.closePath();ctx.fillStyle=fill;ctx.fill();
+  const draw=(pts,color,dashed=false)=>{curve(pts);ctx.strokeStyle=color;ctx.lineWidth=3;ctx.setLineDash(dashed?[7,6]:[]);ctx.stroke();ctx.setLineDash([]);pts.forEach((point,index)=>{ctx.fillStyle="#fff";ctx.strokeStyle=color;ctx.lineWidth=index===pts.length-1?3:2;ctx.beginPath();ctx.arc(point.x,point.y,index===pts.length-1?5:3.5,0,Math.PI*2);ctx.fill();ctx.stroke()})};
+  draw(costs,"#294e7f",true);draw(income,"#dfa91f");
 }
 
 function renderStatusChart(obras){
@@ -126,26 +139,27 @@ function renderStatusChart(obras){
     ["Alerta",obras.filter(isAlert).length],
     ["Outras",obras.filter(o=>!isActive(o)&&!isBudget(o)&&!isCompleted(o)&&!isAlert(o)).length]
   ];
-  const max=Math.max(1,...groups.map(x=>x[1]));
-  $("dashboardStatusChart").innerHTML=groups.map(([label,value])=>`<div class="status-row">
-    <div><span>${label}</span><strong>${value}</strong></div>
-    <div class="status-track"><span style="width:${value/max*100}%"></span></div>
-  </div>`).join("");
+  const total=Math.max(1,groups.reduce((sum,row)=>sum+row[1],0)),colors=["#315b91","#59b99d","#93a8c4","#e1ad38","#e5eaf1"];
+  let cursor=0;const stops=groups.map((row,index)=>{const start=cursor;cursor+=row[1]/total*100;return `${colors[index]} ${start}% ${cursor}%`}).join(",");
+  $("dashboardStatusChart").innerHTML=`<div class="donut-shell"><div class="donut-chart" role="img" aria-label="Distribuição de ${groups.reduce((sum,row)=>sum+row[1],0)} obras por estado" style="background:conic-gradient(${stops})"><div><strong>${groups.reduce((sum,row)=>sum+row[1],0)}</strong><span>Total de obras</span></div></div></div><div class="donut-legend">${groups.map(([label,value],index)=>`<div><i style="background:${colors[index]}"></i><span>${esc(label)}</span><strong>${value} <small>${(value/total*100).toFixed(0)}%</small></strong></div>`).join("")}</div>`;
 }
 
 function renderTopWorks(obras,custos,pagamentos){
   const top=[...obras].sort((a,b)=>obraValor(b)-obraValor(a)).slice(0,6);
-  $("dashboardObras").innerHTML=top.length?`<table class="dashboard-table"><thead><tr><th>Obra</th><th>Estado</th><th>Valor</th><th>Recebido</th><th>Margem</th></tr></thead><tbody>${top.map(o=>{
+  $("dashboardObras").innerHTML=top.length?`<div class="table-scroll"><table class="dashboard-table option5-work-table"><thead><tr><th>Obra</th><th>Estado</th><th>Progresso</th><th>Valor em execução</th><th>Recebido</th><th></th></tr></thead><tbody>${top.map(o=>{
     const c=custos.filter(x=>String(x.obra_id)===String(o.id)).reduce((s,x)=>s+num(x.valor||x.valor_sem_iva),0);
     const p=pagamentos.filter(x=>String(x.obra_id)===String(o.id)).reduce((s,x)=>s+num(x.valor),0);
     const v=obraValor(o);
     const m=v?((v-c)/v*100):0;
+    const photo=store.fotografias.find(item=>String(item.obra_id)===String(o.id)&&item.url);
+    const image=photo?`<img src="${esc(photo.url)}" alt="Fotografia de ${esc(o.nome)}" loading="lazy">`:`<span class="work-photo-fallback">▥</span>`;
     return `<tr>
-      <td><button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button><small>${esc(o.clientes?.nome||"")}</small></td>
+      <td><div class="work-identity">${image}<div><button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button><small>${esc(o.clientes?.nome||o.morada||"")}</small></div></div></td>
       <td><span class="badge">${esc(o.estado||"")}</span></td>
-      <td>${money(v)}</td><td>${money(p)}</td><td>${m.toFixed(1)}%</td>
+      <td><div class="table-progress"><span><i style="width:${Math.min(100,Math.max(0,num(o.progresso)))}%"></i></span><strong>${num(o.progresso).toFixed(0)}%</strong></div></td>
+      <td>${money(v)}<small>Margem ${m.toFixed(1)}%</small></td><td>${money(p)}</td><td><button class="table-more" data-view-obra="${o.id}" aria-label="Abrir obra">⋮</button></td>
     </tr>`;
-  }).join("")}</tbody></table>`:'<div class="dashboard-empty">Ainda não existem obras registadas.</div>';
+  }).join("")}</tbody></table></div>`:'<div class="dashboard-empty">Ainda não existem obras registadas.</div>';
 }
 
 function renderAlerts(obras,orcamentos,pagamentos,overdueCosts=[]){
@@ -154,6 +168,9 @@ function renderAlerts(obras,orcamentos,pagamentos,overdueCosts=[]){
   obras.filter(o=>obraValor(o)>0&&!pagamentos.some(p=>String(p.obra_id)===String(o.id))).forEach(o=>alerts.push({level:"warning",title:o.nome,text:"Obra com valor contratado e sem pagamentos registados."}));
   obras.filter(o=>num(o.progresso)>=100&&!isCompleted(o)).forEach(o=>alerts.push({level:"warning",title:o.nome,text:"Progresso a 100%, mas o estado ainda não está concluído."}));
   overdueCosts.forEach(c=>alerts.push({level:"danger",title:c.nome_empresa||c.descricao||"Custo vencido",text:`Pagamento vencido em ${fmtDate(c.data_vencimento)} · ${money(c.valor||c.valor_sem_iva)}`}));
+  const today=new Date().toISOString().slice(0,10);
+  (store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo<today).forEach(task=>alerts.push({level:"danger",title:task.titulo,text:`Tarefa em atraso desde ${fmtDate(task.prazo)}`}));
+  (store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo===today).forEach(task=>alerts.push({level:"warning",title:task.titulo,text:"Tarefa com prazo hoje."}));
   if(!orcamentos.length) alerts.push({level:"info",title:"Orçamentos",text:"Ainda não existem orçamentos registados."});
   $("dashboardAlerts").innerHTML=alerts.length?alerts.slice(0,8).map(a=>`<article class="dashboard-alert ${a.level}">
     <span class="alert-dot"></span><div><strong>${esc(a.title)}</strong><p>${esc(a.text)}</p></div>

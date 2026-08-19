@@ -1,8 +1,14 @@
 {
-  "name": "DISTAK ERP",
-  "short_name": "DISTAK",
+  "name": "DISTAK ERP v3.8",
+  "short_name": "DISTAK v3.8",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "any",
+  "lang": "pt-PT",
+  "description": "Gestão comercial, financeira e operacional da DISTAK.",
+  "categories": ["business", "productivity", "finance"],
   "theme_color": "#0f172a",
-  "background_color": "#0f172a"
+  "background_color": "#0f172a",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }

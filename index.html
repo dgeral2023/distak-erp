@@ -5,21 +5,46 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>DISTAK ERP v2.8</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://usaaiubvynxyfviwgogs.supabase.co wss://usaaiubvynxyfviwgogs.supabase.co; img-src 'self' data: blob: https:; font-src 'self' data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'">
+  <title>DISTAK ERP v3.8</title>
 
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/obra-ficha.css">
-  <link rel="stylesheet" href="assets/css/dashboard-executivo.css">
+  <link rel="stylesheet" href="assets/css/dashboard-executivo.css?v=20260804-mobile-fix">
   <link rel="stylesheet" href="assets/css/fotografias.css">
   <link rel="stylesheet" href="assets/css/diario.css">
 
   <!-- DISTAK UI 2026 -->
   <link rel="stylesheet" href="assets/css/distak-ios.css">
+  <link rel="stylesheet" href="assets/css/v3.css">
+  <link rel="stylesheet" href="assets/css/hybrid-menu.css?v=20260804-top-right">
+  <link rel="stylesheet" href="assets/css/assistant.css?v=20260804-ai-v2">
+  <link rel="stylesheet" href="assets/css/agenda.css?v=20260806-workload-v2">
+  <link rel="stylesheet" href="assets/css/previsoes.css?v=20260804-finance-v1">
+  <link rel="stylesheet" href="assets/css/dossies.css?v=20260806-dossiers-quality-v2">
+  <link rel="stylesheet" href="assets/css/operacional.css?v=20260805-operational-v1">
+  <link rel="stylesheet" href="assets/css/compras.css?v=20260805-purchases-v1">
+  <link rel="stylesheet" href="assets/css/medicoes.css?v=20260805-measurements-v1">
+  <link rel="stylesheet" href="assets/css/campo.css?v=20260805-field-v1">
+  <link rel="stylesheet" href="assets/css/inteligencia.css?v=20260806-intelligence-v2">
+  <link rel="stylesheet" href="assets/css/cliente-portal.css?v=20260805-client-v1">
+  <link rel="stylesheet" href="assets/css/client-access-management.css?v=20260808-client-access-v1">
+  <link rel="stylesheet" href="assets/css/cliente-role.css?v=20260805-client-v1">
+  <link rel="stylesheet" href="assets/css/cliente-approvals.css?v=20260805-client-v1">
+  <link rel="stylesheet" href="assets/css/accessibility.css?v=20260806-a11y-v2">
+  <link rel="stylesheet" href="assets/css/backup.css?v=20260806-backup-v2">
+  <link rel="stylesheet" href="assets/css/system-health.css?v=20260808-readiness-v1">
+  <link rel="stylesheet" href="assets/css/motion.css?v=20260808-anime-v1">
+  <link rel="stylesheet" href="assets/css/user-management.css?v=20260808-users-v1">
+  <link rel="stylesheet" href="assets/css/role-validation.css?v=20260808-validation-v1">
+  <link rel="stylesheet" href="assets/css/portal-content-management.css?v=20260808-portal-content-v1">
+  <link rel="stylesheet" href="assets/css/password-recovery.css?v=20260808-recovery-v1">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
 </head>
 <body>
+<a class="skip-link" href="#mainContent">Saltar para o conteúdo principal</a>
 <div id="toast" class="toast" aria-live="polite"></div>
 
 <section id="loginView" class="login-shell">
@@ -30,24 +55,45 @@
     <label>Email<input id="loginEmail" type="email" required autocomplete="username"></label>
     <label>Palavra-passe<input id="loginPassword" type="password" required autocomplete="current-password"></label>
     <button class="btn primary" type="submit">Entrar</button>
+    <button id="forgotPasswordBtn" class="login-help" type="button">Esqueci a palavra-passe</button>
     <p id="loginError" class="error"></p>
   </form>
 </section>
 
+<dialog id="passwordRecoveryRequestDialog" aria-labelledby="passwordRecoveryRequestTitle">
+  <form id="passwordRecoveryRequestForm" class="recovery-card">
+    <header><div><small>RECUPERAÇÃO SEGURA</small><h2 id="passwordRecoveryRequestTitle">Recuperar acesso</h2></div><button type="button" data-close="passwordRecoveryRequestDialog" aria-label="Fechar">×</button></header>
+    <p>Introduza o e-mail da sua conta. Se estiver registado, receberá uma ligação segura para definir uma nova palavra-passe.</p>
+    <label>E-mail<input id="passwordRecoveryEmail" type="email" required autocomplete="email"></label>
+    <div id="passwordRecoveryRequestStatus" class="recovery-status" aria-live="polite"></div>
+    <footer><button class="btn light" type="button" data-close="passwordRecoveryRequestDialog">Cancelar</button><button class="btn primary" type="submit">Enviar ligação</button></footer>
+  </form>
+</dialog>
+
+<dialog id="passwordRecoveryUpdateDialog" aria-labelledby="passwordRecoveryUpdateTitle">
+  <form id="passwordRecoveryUpdateForm" class="recovery-card">
+    <header><div><small>LIGAÇÃO CONFIRMADA</small><h2 id="passwordRecoveryUpdateTitle">Definir nova palavra-passe</h2></div></header>
+    <p>Use pelo menos 10 caracteres, incluindo minúscula, maiúscula, número e símbolo.</p>
+    <label>Nova palavra-passe<input id="passwordRecoveryPassword" type="password" minlength="10" required autocomplete="new-password"></label>
+    <label>Confirmar palavra-passe<input id="passwordRecoveryConfirm" type="password" minlength="10" required autocomplete="new-password"></label>
+    <div id="passwordRecoveryUpdateStatus" class="recovery-status error" aria-live="assertive"></div>
+    <footer><button class="btn primary" type="submit">Guardar nova palavra-passe</button></footer>
+  </form>
+</dialog>
+
 <section id="appView" class="app hidden">
   <aside class="sidebar">
-    <div class="brand">DISTAK ERP <small>v2.8</small></div>
+    <div class="sidebar-brand"><button id="sidebarToggle" type="button" aria-label="Recolher menu" title="Recolher menu">☰</button><div class="brand">DISTAK ERP <small>v3.8</small></div><span class="brand-chevron">‹</span></div>
     <nav id="mainNav">
-      <button class="nav active" data-view="dashboard">Dashboard</button>
-      <button class="nav admin-only" data-view="empresa">Empresa</button>
-      <button class="nav admin-only" data-view="leads">Pedidos do site <span id="leadNavBadge" class="nav-badge hidden">0</span></button>
-      <button class="nav admin-only" data-view="clientes">Clientes</button>
-      <button class="nav" data-view="obras">Obras</button>
-      <button class="nav admin-only" data-view="orcamentos">Orçamentos</button>
-      <button class="nav admin-only" data-view="custos">Custos</button>
-      <button class="nav admin-only" data-view="pagamentos">Pagamentos</button>
-      <button class="nav admin-only" data-view="funcionarios">Funcionários</button>
-      <button class="nav funcionario-only" data-view="funcionario">Meu painel</button>
+      <div class="nav-group client-only hidden"><button class="nav" data-view="cliente-portal"><i data-erp-icon="client"></i><span>Minhas obras</span></button></div>
+      <div class="nav-group admin-only"><button class="nav" data-view="portal-admin"><i data-erp-icon="client"></i><span>Portal do cliente</span></button></div>
+      <div class="nav-group non-client-only"><button class="nav active" data-view="dashboard"><i data-erp-icon="home"></i><span>Dashboard</span></button></div>
+      <div class="nav-group admin-only" data-menu-group="comercial"><button class="nav-group-title" type="button" data-toggle-menu-group="comercial"><span>Comercial</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="leads"><i data-erp-icon="lead"></i><span>Pedidos do site</span><b id="leadNavBadge" class="nav-badge hidden">0</b></button><button class="nav" data-view="clientes"><i data-erp-icon="clients"></i><span>Clientes</span></button><button class="nav" data-view="orcamentos"><i data-erp-icon="file"></i><span>Propostas e orçamentos</span></button></div></div>
+      <div class="nav-group" data-menu-group="obras"><button class="nav-group-title" type="button" data-toggle-menu-group="obras"><span>Obras</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="obras"><i data-erp-icon="works"></i><span>Dashboard de obras</span><b id="navWorkCount">0</b></button><button class="nav" data-view="operacional"><i data-erp-icon="operational"></i><span>Centro Operacional</span></button><button class="nav" data-view="agenda"><i data-erp-icon="calendar"></i><span>Agenda e tarefas</span><b id="navTaskCount">0</b></button><button class="nav" data-view="dossies"><i data-erp-icon="folder"></i><span>Dossiê digital</span></button><button class="nav" data-view="funcionario"><i data-erp-icon="field"></i><span>Portal de campo</span></button></div></div>
+      <div class="nav-group admin-only" data-menu-group="financeiro"><button class="nav-group-title" type="button" data-toggle-menu-group="financeiro"><span>Financeiro</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="inteligencia"><i data-erp-icon="intelligence"></i><span>Inteligência de gestão</span></button><button class="nav" data-view="compras"><i data-erp-icon="shopping"></i><span>Compras e fornecedores</span></button><button class="nav" data-view="medicoes"><i data-erp-icon="percent"></i><span>Medições e faturação</span></button><button class="nav" data-view="custos"><i data-erp-icon="receipt"></i><span>Custos e faturas</span></button><button class="nav" data-view="pagamentos"><i data-erp-icon="euro"></i><span>Pagamentos</span></button><button class="nav" data-view="previsoes"><i data-erp-icon="trend"></i><span>Previsões e cobranças</span></button><button class="nav" data-view="relatorios"><i data-erp-icon="chart"></i><span>Relatórios</span></button></div></div>
+      <div class="nav-group admin-only" data-menu-group="equipa"><button class="nav-group-title" type="button" data-toggle-menu-group="equipa"><span>Equipa</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="funcionarios"><i data-erp-icon="team"></i><span>Recursos humanos</span></button><button class="nav" data-view="empresa"><i data-erp-icon="settings"></i><span>Empresa</span></button></div></div>
+      <div id="favoriteNavGroup" class="nav-group utility-nav-group"><button class="nav-group-title" type="button" data-toggle-menu-group="favoritos"><span>☆ Favoritos</span><i>⌄</i></button><div id="favoriteNav" class="nav-group-items"></div></div>
+      <div id="recentNavGroup" class="nav-group utility-nav-group"><button class="nav-group-title" type="button" data-toggle-menu-group="recentes"><span>◷ Recentes</span><i>⌄</i></button><div id="recentNav" class="nav-group-items"></div></div>
     </nav>
     <div class="sidebar-bottom">
       <div id="userInfo"></div>
@@ -55,15 +101,51 @@
     </div>
   </aside>
 
-  <main class="content">
+  <nav id="mobileNav" class="mobile-nav" aria-label="Navegação principal móvel">
+    <button id="mobileHome" class="active" data-mobile-view="dashboard"><i data-erp-icon="home"></i><span>Início</span></button>
+    <button id="mobileWorks" data-mobile-view="obras"><i data-erp-icon="works"></i><span>Obras</span></button>
+    <button id="mobileRegister" class="mobile-register" type="button"><i data-erp-icon="plus"></i><span>Registar</span></button>
+    <button id="mobileAlerts" type="button"><i data-erp-icon="bell"></i><span>Alertas</span><b id="mobileAlertCount">0</b></button>
+    <button id="mobileMore" type="button"><i data-erp-icon="menu"></i><span>Mais</span></button>
+  </nav>
+  <div id="mobileSheetBackdrop" class="mobile-sheet-backdrop hidden"></div>
+  <section id="mobileMoreSheet" class="mobile-sheet hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Mais opções"><header><div><span>Navegação</span><h3>Mais opções</h3></div><button data-close-mobile-sheet type="button" aria-label="Fechar mais opções">×</button></header><div id="mobileMoreLinks" class="mobile-sheet-grid"></div></section>
+  <section id="mobileRegisterSheet" class="mobile-sheet hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Registo rápido"><header><div><span>Ação rápida</span><h3>O que deseja registar?</h3></div><button data-close-mobile-sheet type="button" aria-label="Fechar registo rápido">×</button></header><div class="mobile-register-grid"><button data-quick-action="operacional"><i>◉</i><strong>Registo de obra</strong><small>Diário, material ou ocorrência</small></button><button data-quick-action="tarefa"><i>◫</i><strong>Tarefa</strong><small>Novo prazo</small></button><button class="admin-only" data-quick-action="cliente"><i>♙</i><strong>Cliente</strong><small>Novo contacto</small></button><button class="admin-only" data-quick-action="obra"><i>▥</i><strong>Obra</strong><small>Novo projeto</small></button><button class="admin-only" data-quick-action="orcamento"><i>▤</i><strong>Orçamento</strong><small>Nova proposta</small></button><button class="admin-only" data-quick-action="custo"><i>↘</i><strong>Custo</strong><small>Nova despesa</small></button><button class="admin-only" data-quick-action="pagamento"><i>€</i><strong>Pagamento</strong><small>Novo recebimento</small></button><button class="admin-only" data-quick-action="previsao"><i>↗</i><strong>Previsão</strong><small>Fluxo futuro</small></button><button data-quick-action="diario"><i>✓</i><strong>Diário de obra</strong><small>Abrir minhas obras</small></button></div></section>
+
+  <main id="mainContent" class="content" tabindex="-1">
     <header class="topbar">
       <div>
         <h2 id="pageTitle">Dashboard</h2>
         <p id="pageSubtitle">Visão geral comercial e financeira</p>
       </div>
+      <div class="v3-top-actions">
+        <label class="global-search"><span>⌕</span><input id="globalSearch" type="search" placeholder="Pesquisar comandos, obras, clientes..." autocomplete="off"><kbd>Ctrl + K</kbd></label>
+        <button id="notificationBtn" class="notification-button" type="button" aria-label="Abrir alertas" aria-controls="notificationPanel" aria-expanded="false">🔔<span id="notificationCount">0</span></button>
+        <button id="topUserMenu" class="top-user-menu" type="button" aria-label="Conta do utilizador" aria-controls="accountPanel" aria-expanded="false"><span id="topUserInitial">D</span><i>⌄</i></button>
+      </div>
     </header>
+    <div id="globalSearchResults" class="global-search-results hidden"></div>
+    <aside id="notificationPanel" class="notification-panel hidden" role="dialog" aria-label="Centro de atenção" aria-hidden="true"><header><div><span>Centro de atenção</span><h3>Alertas e próximos passos</h3></div><button id="notificationClose" type="button" aria-label="Fechar">×</button></header><div id="notificationList"></div></aside>
+    <aside id="accountPanel" class="account-panel hidden" aria-label="Menu da conta" aria-hidden="true"><div id="accountPanelUser"></div><button id="motionToggle" data-motion-toggle type="button" aria-pressed="true"><span aria-hidden="true">✦</span><span><strong>Movimento criativo</strong><small data-motion-state>Criativa avançada</small></span></button><button id="openDeviceValidation" class="account-validation non-client-only" type="button"><span aria-hidden="true">✓</span><span><strong>Validar este dispositivo</strong><small>Roteiro do meu perfil</small></span></button><button id="accountLogout" type="button">Sair da conta</button></aside>
 
-    <section id="view-dashboard" class="view">
+    <button id="aiAssistantButton" class="ai-assistant-button" type="button" aria-label="Abrir Assistente DISTAK" aria-controls="aiAssistantPanel" aria-expanded="false"><span class="ai-button-mark">D</span><span>Assistente</span><b>IA</b></button>
+    <div id="aiAssistantBackdrop" class="ai-assistant-backdrop hidden"></div>
+    <aside id="aiAssistantPanel" class="ai-assistant-panel hidden" aria-label="Assistente DISTAK" aria-hidden="true">
+      <header><div class="ai-assistant-title"><span class="ai-assistant-logo">D</span><div><small>INTELIGÊNCIA DISTAK</small><h3>Assistente de gestão</h3></div></div><button id="aiAssistantClose" type="button" aria-label="Fechar assistente">×</button></header>
+      <div id="aiAssistantMessages" class="ai-assistant-messages" aria-live="polite"></div>
+      <div id="aiAssistantSuggestions" class="ai-assistant-suggestions"><button type="button">Como está a carga da equipa?</button><button type="button">Qual é a próxima melhor ação?</button><button type="button">Que dossiês precisam de documentos ou fotografias?</button><button type="button">Quais obras precisam de atenção?</button><button type="button">Existem compras ou entregas atrasadas?</button><button type="button">Como está a atividade operacional de hoje?</button><button type="button">Como está o fluxo de caixa previsto?</button><button type="button">Quanto falta receber?</button><button type="button">Resume a situação financeira.</button><button type="button">Existem custos vencidos?</button></div>
+      <form id="aiAssistantForm" class="ai-assistant-form"><label for="aiAssistantInput">Pergunte sobre a gestão da DISTAK</label><div><textarea id="aiAssistantInput" rows="2" maxlength="1500" placeholder="Ex.: Que obras exigem atenção esta semana?" required></textarea><button id="aiAssistantSend" type="submit" aria-label="Enviar pergunta">➜</button></div><small>Análises operacionais locais no dispositivo. Restantes consultas são seguras e somente leitura. Confirme decisões financeiras importantes.</small></form>
+    </aside>
+
+    <section id="view-dashboard" class="view non-client-only">
+      <div class="option5-dashboard-head"><div><h1>Dashboard de Obras</h1><p>Visão geral do estado das obras e indicadores principais.</p></div><div class="option5-head-actions"><button class="btn light" type="button">⚙ Personalizar</button><span>Este mês⌄</span></div></div>
+      <section id="aiPriorityCard" class="ai-priority-card" aria-label="Prioridades inteligentes do dia"><div class="ai-priority-heading"><span class="ai-priority-icon">D</span><div><small>ASSISTENTE DISTAK</small><h2>Prioridades de hoje</h2></div></div><div id="aiPrioritySummary" class="ai-priority-summary">A preparar a análise dos dados atuais…</div><button id="aiPriorityAction" type="button">Analisar comigo <span>→</span></button></section>
+      <div class="option5-kpis">
+        <article><div><span>Obras ativas</span><strong id="option5ActiveWorks">0</strong><small id="option5ActiveTrend">Situação atual</small></div><i class="blue kpi-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 12h4M10 8h4M14 21v-3a2 2 0 0 0-4 0v3M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/></svg></i></article>
+        <article><div><span>Valor em execução</span><strong id="option5ExecutionValue">0,00 €</strong><small id="option5ExecutionTrend">Valor contratado</small></div><i class="gold kpi-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16v5M16 14v7M20 10v11m2-18-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15M4 18v3M8 14v7"/></svg></i></article>
+        <article><div><span>Recebimentos</span><strong id="option5Income">0,00 €</strong><small id="option5IncomeTrend">Total recebido</small></div><i class="green kpi-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2M3 11h3c.8 0 1.6.3 2.1.9l1.1.9c1.6 1.6 4.1 1.6 5.7 0l1.1-.9c.5-.5 1.3-.9 2.1-.9H21"/></svg></i></article>
+        <article><div><span>Alertas</span><strong id="option5Alerts">0</strong><small id="option5AlertTrend">Pontos de atenção</small></div><i class="red kpi-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0M22 8c0-2.3-.8-4.3-2-6M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326M4 2C2.8 3.7 2 5.7 2 8"/></svg></i></article>
+      </div>
       <div class="executive-head">
         <div>
           <span class="executive-kicker">Centro de controlo</span>
@@ -128,14 +210,14 @@
       <div class="executive-main-grid">
         <section class="panel executive-chart-panel">
           <div class="panel-title">
-            <div><h3>Fluxo financeiro mensal</h3><p>Custos e recebimentos dos últimos 6 meses</p></div>
+            <div><h3>Evolução financeira</h3><p>Planeado e realizado nos últimos 6 meses</p></div>
           </div>
           <div id="dashboardFinanceChart" class="finance-chart"></div>
         </section>
 
         <section class="panel">
           <div class="panel-title">
-            <div><h3>Estado das obras</h3><p>Distribuição operacional atual</p></div>
+            <div><h3>Distribuição por estado</h3><p>Quantidade de obras em cada fase</p></div>
           </div>
           <div id="dashboardStatusChart" class="status-chart"></div>
         </section>
@@ -144,7 +226,7 @@
       <div class="executive-main-grid">
         <section class="panel">
           <div class="panel-title">
-            <div><h3>Obras com maior valor</h3><p>Visão rápida das principais obras</p></div>
+            <div><h3>Obras em destaque</h3><p>Fotografia, progresso e situação financeira</p></div>
             <button class="btn small light" data-dashboard-view="obras">Ver todas</button>
           </div>
           <div id="dashboardObras"></div>
@@ -178,6 +260,51 @@
         <section class="panel"><div class="panel-title"><div><h3>Pipeline de orçamentos</h3><p>Valor e quantidade por estado comercial</p></div><button class="btn small light" data-dashboard-view="orcamentos">Ver orçamentos</button></div><div id="dashboardBudgetPipeline" class="dashboard-pipeline"></div></section>
         <section class="panel"><div class="panel-title"><div><h3>Equipa neste mês</h3><p>Horas e custo estimado por funcionário</p></div><button class="btn small light" data-dashboard-view="funcionarios">Ver equipa</button></div><div id="dashboardTeam" class="dashboard-team"></div></section>
       </div>
+      <section class="panel v3-activity-panel"><div class="panel-title"><div><h3>Atividade recente</h3><p>Histórico das principais alterações realizadas no ERP</p></div><span class="badge">v3</span></div><div id="activityTimeline"></div></section>
+    </section>
+
+    <section id="view-agenda" class="view hidden">
+      <div class="agenda-head"><div><span class="agenda-kicker">PLANEAMENTO AVANÇADO</span><h1>Agenda e cronograma</h1><p>Etapas, dependências, responsáveis e prazos de todas as obras.</p></div><button id="novaTarefaBtn" class="btn primary" type="button">＋ Nova etapa</button></div>
+      <div class="agenda-kpis"><article><span>Para hoje</span><strong id="agendaTodayCount">0</strong><small>Tarefas com prazo hoje</small></article><article><span>Em atraso</span><strong id="agendaOverdueCount">0</strong><small>Precisam de atenção</small></article><article><span>Próximos 7 dias</span><strong id="agendaWeekCount">0</strong><small>Planeamento imediato</small></article><article><span>Concluídas</span><strong id="agendaDoneCount">0</strong><small id="agendaDoneRate">0% do total</small></article></div>
+      <div class="agenda-command-grid">
+        <section class="panel agenda-focus-panel"><div class="panel-title"><div><span class="agenda-kicker">COMANDO DO DIA</span><h3>Prioridades recomendadas</h3><p>Ordenadas por atraso, bloqueio, urgência e proximidade do prazo.</p></div><button id="agendaFocusAll" class="btn light" type="button">Ver lista completa</button></div><div id="agendaFocusList" class="agenda-focus-list"></div></section>
+        <section class="panel agenda-workload-panel"><div class="panel-title"><div><span class="agenda-kicker">CAPACIDADE</span><h3>Carga da equipa</h3><p>Tarefas abertas por responsável.</p></div><span id="agendaUnassignedCount" class="badge">0 sem responsável</span></div><div id="agendaWorkload" class="agenda-workload"></div></section>
+      </div>
+      <nav id="agendaQuickFilters" class="agenda-quick-filters" aria-label="Filtros rápidos da agenda"><button type="button" class="active" data-agenda-quick="all">Todas <b id="agendaQuickAll">0</b></button><button type="button" data-agenda-quick="today">Hoje <b id="agendaQuickToday">0</b></button><button type="button" data-agenda-quick="late">Atrasadas <b id="agendaQuickLate">0</b></button><button type="button" data-agenda-quick="blocked">Bloqueadas <b id="agendaQuickBlocked">0</b></button><button type="button" data-agenda-quick="unassigned">Sem responsável <b id="agendaQuickUnassigned">0</b></button></nav>
+      <section class="panel planning-panel"><div class="panel-title"><div><h3>Cronograma das obras</h3><p>Visão temporal das etapas e dependências</p></div><div class="planning-controls"><select id="planningWorkFilter" aria-label="Filtrar cronograma por obra"><option value="">Todas as obras</option></select><button id="planningToday" class="btn small light" type="button">Hoje</button></div></div><div id="planningHealth" class="planning-health"></div><div id="planningTimeline" class="planning-timeline"></div></section>
+      <section class="panel agenda-calendar-panel"><div class="agenda-toolbar"><div class="agenda-week-nav"><button id="agendaPrevWeek" type="button" aria-label="Semana anterior">‹</button><strong id="agendaWeekLabel">Semana atual</strong><button id="agendaNextWeek" type="button" aria-label="Semana seguinte">›</button><button id="agendaCurrentWeek" type="button">Hoje</button></div><div class="agenda-filters"><input id="agendaSearch" type="search" placeholder="Pesquisar tarefa ou obra…"><select id="agendaStateFilter"><option value="">Todos os estados</option><option value="pendente">Pendente</option><option value="em_curso">Em curso</option><option value="bloqueada">Bloqueada</option><option value="concluida">Concluída</option></select><select id="agendaPriorityFilter"><option value="">Todas as prioridades</option><option value="urgente">Urgente</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div></div><div id="agendaWeekGrid" class="agenda-week-grid"></div></section>
+      <section class="panel"><div class="panel-title"><div><h3>Lista de tarefas</h3><p>Ordenada por prazo e prioridade</p></div><span id="agendaResultCount" class="badge">0 tarefas</span></div><div id="agendaTaskList" class="agenda-task-list"></div></section>
+    </section>
+
+    <section id="view-operacional" class="view hidden">
+      <div class="operational-head"><div><span>ACOMPANHAMENTO EM TEMPO REAL</span><h1>Centro Operacional</h1><p>Diários, checklists, equipa, materiais, horas e ocorrências das obras.</p></div><button id="newOperationalRecord" class="btn primary" type="button">＋ Registo rápido</button></div>
+      <div id="operationalKpis" class="operational-kpis"></div>
+      <div class="operational-toolbar"><input id="operationalSearch" type="search" placeholder="Pesquisar obra, cliente ou morada…"><input id="operationalDate" type="date" aria-label="Data do acompanhamento"><select id="operationalStateFilter"><option value="active">Obras em curso</option><option value="">Todas as obras</option><option value="closed">Concluídas ou canceladas</option></select><span id="operationalResultCount" class="badge">0 obras</span></div>
+      <div class="operational-layout"><div id="operationalWorkGrid" class="operational-work-grid"></div><section class="panel"><div class="panel-title"><div><h3>Atividade do dia</h3><p>Movimentos operacionais registados</p></div></div><div id="operationalTimeline" class="operational-timeline"></div></section></div>
+    </section>
+
+    <section id="view-compras" class="view hidden admin-only">
+      <div class="purchase-head"><div><span>APROVISIONAMENTO E FORNECEDORES</span><h1>Central de Compras</h1><p>Pedidos, comparação de propostas, adjudicações e entregas por obra.</p></div><button id="newPurchaseBtn" class="btn primary" type="button">＋ Novo pedido</button></div>
+      <div id="purchaseKpis" class="purchase-kpis"></div>
+      <div class="purchase-note"><strong>Controlo seguro:</strong> selecionar uma proposta ou marcar uma entrega não cria custos, faturas nem pagamentos. Esses movimentos continuam a exigir registo nos módulos financeiros.</div>
+      <div class="purchase-toolbar"><input id="purchaseSearch" type="search" placeholder="Pesquisar pedido ou fornecedor…"><select id="purchaseWorkFilter"><option value="">Todas as obras</option></select><select id="purchaseStateFilter"><option value="">Todos os estados</option><option value="rascunho">Rascunho</option><option value="cotacao">Em cotação</option><option value="aprovado">Aprovado</option><option value="encomendado">Encomendado</option><option value="parcial">Entrega parcial</option><option value="recebido">Recebido</option><option value="cancelado">Cancelado</option></select><span id="purchaseResultCount" class="badge">0 pedidos</span></div>
+      <div id="purchaseList" class="purchase-list"></div>
+    </section>
+
+    <section id="view-medicoes" class="view hidden admin-only">
+      <div class="measurement-head"><div><span>EXECUÇÃO E FATURAÇÃO</span><h1>Autos de Medição</h1><p>Trabalhos executados, aprovações, retenções e referências de faturação.</p></div><button id="newMeasurementBtn" class="btn primary" type="button">＋ Novo auto</button></div>
+      <div id="measurementKpis" class="measurement-kpis"></div>
+      <div class="measurement-note"><strong>Separação financeira:</strong> um auto faturado não é um recebimento. Só o módulo Pagamentos confirma dinheiro recebido.</div>
+      <div class="measurement-toolbar"><input id="measurementSearch" type="search" placeholder="Pesquisar auto ou fatura…"><select id="measurementWorkFilter"><option value="">Todas as obras</option></select><select id="measurementStateFilter"><option value="">Todos os estados</option><option value="rascunho">Rascunho</option><option value="submetido">Submetido</option><option value="aprovado">Aprovado</option><option value="faturado">Faturado</option><option value="cancelado">Cancelado</option></select><span id="measurementResultCount" class="badge">0 autos</span></div>
+      <div id="measurementList" class="measurement-list"></div>
+    </section>
+
+    <section id="view-dossies" class="view hidden">
+      <div class="dossier-head"><div><span>ARQUIVO CENTRAL DAS OBRAS</span><h1>Dossiê digital</h1><p>Documentos, fotografias e pendências organizados por obra.</p></div><button id="dossierPrintAll" class="btn light" type="button">Imprimir resumo</button></div>
+      <div id="dossierKpis" class="dossier-kpis"></div>
+      <section id="dossierPriority" class="dossier-priority" aria-label="Pendências documentais prioritárias"></section>
+      <div class="dossier-toolbar"><input id="dossierSearch" type="search" placeholder="Pesquisar obra, cliente ou morada…"><select id="dossierStatusFilter"><option value="">Todos os níveis</option><option value="attention">Precisa de atenção</option><option value="progress">Em organização</option><option value="complete">Completo</option></select><span id="dossierResultCount" class="badge">0 obras</span></div>
+      <div id="dossierGrid" class="dossier-grid"></div>
     </section>
 
 
@@ -326,16 +453,84 @@
       <div class="panel"><div id="pagamentosTable"></div></div>
     </section>
 
+    <section id="view-inteligencia" class="view hidden admin-only">
+      <div class="intelligence-hero"><div><span>INTELIGÊNCIA INTERNA E EXPLICÁVEL</span><h1>Previsões de gestão</h1><p>Antecipe atrasos, custo final, margem e cobranças sem alterar os movimentos reais.</p></div><div class="intelligence-controls"><label>Obra<select id="intelligenceWork"><option value="">Todas as obras</option></select></label><label>Reserva de risco<input id="intelligenceReserve" type="range" min="0" max="20" step="1" value="5"></label><output id="intelligenceReserveValue">5%</output></div></div>
+      <div id="intelligenceKpis" class="intelligence-kpis"></div>
+      <div class="intelligence-grid"><section class="panel"><h3>Mapa de risco da carteira</h3><div id="intelligencePortfolio" class="intelligence-portfolio"></div><div class="intelligence-disclaimer"><strong>Apoio à decisão:</strong> estas previsões são cálculos internos baseados nos dados registados. Não criam custos, pagamentos, cobranças ou alterações de prazo.</div></section><section><div id="intelligenceCards" class="intelligence-cards"></div></section></div>
+      <section class="panel intelligence-history-panel"><div class="panel-title"><div><h3>Histórico de análises</h3><p>Cada cenário guardado exige confirmação ou descarte humano</p></div></div><div id="intelligenceHistory" class="intelligence-history"></div></section>
+    </section>
+
+    <section id="view-previsoes" class="view hidden admin-only">
+      <div class="forecast-head"><div><span>PLANEAMENTO FINANCEIRO</span><h1>Previsões e cobranças</h1><p>Antecipe entradas, despesas e riscos sem alterar os movimentos financeiros reais.</p></div><button id="newForecastBtn" class="btn primary" type="button">＋ Nova previsão</button></div>
+      <div id="forecastKpis" class="forecast-kpis"></div>
+      <div class="forecast-main-grid">
+        <section class="panel"><div class="panel-title"><div><h3>Fluxo previsto · 8 semanas</h3><p>Variação futura ponderada pela probabilidade</p></div></div><div id="forecastChart"></div></section>
+        <section class="panel"><div class="panel-title"><div><h3>Riscos de cobrança</h3><p>Saldos e evolução de cada obra</p></div></div><div id="collectionRiskList"></div></section>
+      </div>
+      <div class="forecast-note"><strong>Importante:</strong> uma previsão é apenas planeamento. Marcar como realizada não cria um pagamento nem um custo; os movimentos reais continuam a ser registados nos módulos respetivos.</div>
+      <div class="forecast-toolbar"><input id="forecastSearch" type="search" placeholder="Pesquisar previsão ou obra…"><select id="forecastTypeFilter"><option value="">Entradas e despesas</option><option value="recebimento">Recebimentos</option><option value="despesa">Despesas</option></select><select id="forecastStateFilter"><option value="">Todos os estados</option><option value="previsto">Previsto</option><option value="confirmado">Confirmado</option><option value="realizado">Realizado</option><option value="cancelado">Cancelado</option></select><span id="forecastResultCount" class="badge">0 previsões</span></div>
+      <section class="panel"><div id="forecastList" class="forecast-list"></div></section>
+    </section>
+
     <section id="view-funcionario" class="view hidden">
-      <div class="panel"><h3>Obras atribuídas</h3><div id="funcionarioObras"></div></div>
+      <div class="field-hero"><div><span>PORTAL DA EQUIPA EM CAMPO</span><h1 id="fieldPortalTitle">O meu dia em obra</h1><p id="fieldPortalSubtitle">Registe progresso, horas, materiais, ocorrências e fotografias.</p></div><div class="field-hero-actions"><div id="fieldOfflineState" class="field-connectivity online" aria-live="polite"><i></i><span>Ligado</span><small>Tudo sincronizado</small></div><button id="fieldSyncNow" class="btn light" type="button">Sincronizar</button><button id="fieldNewRecord" class="btn primary" type="button">＋ Novo registo</button></div></div>
+      <div id="fieldSummary" class="field-summary"></div>
+      <div class="field-grid">
+        <section class="panel"><h3>As minhas tarefas</h3><div id="fieldTasks" class="field-task-list"></div><div class="field-safety-note">Apenas são apresentadas obras atribuídas à sua conta. Valores financeiros e dados de clientes permanecem reservados à administração.</div></section>
+        <section class="panel"><div class="field-record-head"><div><h3>Registos recentes</h3><p>Envios do dispositivo e revisão administrativa</p></div><span id="fieldRecordCount" class="badge">0 registos</span></div><div id="fieldRecords" class="field-record-list"></div></section>
+      </div>
     </section>
 
     <section id="view-funcionarios" class="view hidden">
       <div class="employee-head"><div><span>Gestão da equipa</span><h2>Funcionários</h2><p>Cadastro, horas trabalhadas e custo operacional por obra.</p></div><div class="employee-head-actions"><button id="novoRegistoHorasBtn" class="btn light">Registar horas</button><button id="novoFuncionarioBtn" class="btn primary">Novo funcionário</button></div></div>
       <div id="funcionariosResumo" class="employee-summary"></div>
+      <section class="panel access-center" aria-labelledby="accessCenterTitle">
+        <div class="access-center-head"><div><span>V3.8 · CONTROLO DE ACESSOS</span><h3 id="accessCenterTitle">Contas e permissões</h3><p>Consulte perfis, estados e alcance dos acessos antes de efetuar qualquer alteração.</p></div><div class="access-center-actions"><button id="openRoleValidation" class="btn light" type="button">Plano de validação</button><button id="inviteUserNew" class="btn primary" type="button">Convidar utilizador</button><button id="exportAccessAudit" class="btn light" type="button">Exportar auditoria</button><div id="accessSecurityState" class="access-security-state" aria-live="polite"></div></div></div>
+        <div id="accessSummary" class="access-summary"></div>
+        <div id="accessHealth" class="access-health" aria-live="polite"></div>
+        <div class="access-toolbar"><label>Pesquisar conta<input id="accessSearch" type="search" placeholder="Nome ou e-mail"></label><label>Perfil<select id="accessRoleFilter"><option value="">Todos</option><option value="admin">Administrador</option><option value="escritorio">Escritório</option><option value="encarregado">Encarregado</option><option value="funcionario">Funcionário</option><option value="cliente">Cliente</option></select></label><label>Estado<select id="accessStateFilter"><option value="">Todos</option><option value="active">Ativos</option><option value="inactive">Desativados</option></select></label></div>
+        <div id="accessAccounts" class="access-accounts" aria-live="polite"></div>
+        <section class="session-history" aria-labelledby="sessionHistoryTitle"><div class="session-history-head"><div><h4 id="sessionHistoryTitle">Histórico de sessões</h4><p>Eventos mínimos de autenticação dos últimos 30 dias, sem tokens, IP ou identificação do dispositivo.</p></div><div id="sessionSummary" class="session-summary"></div></div><div id="sessionHistory" class="session-history-list" aria-live="polite"></div></section>
+        <p class="access-safety-note">Esta vista é apenas de verificação. Convites, mudança de perfil, suspensão e reativação exigem confirmação administrativa específica.</p>
+      </section>
+      <dialog id="accountManagementDialog" aria-labelledby="accountManagementTitle"><form id="accountManagementForm" class="modal-form account-management-form"><header class="full"><div><small>ALTERAÇÃO ADMINISTRATIVA</small><h3 id="accountManagementTitle">Rever conta</h3></div><button type="button" data-close="accountManagementDialog" aria-label="Fechar">×</button></header><input id="accountManagementId" type="hidden"><div id="accountManagementIdentity" class="account-management-identity full"></div><label>Perfil<select id="accountManagementRole" required><option value="admin">Administrador</option><option value="escritorio">Escritório</option><option value="encarregado">Encarregado</option><option value="funcionario">Funcionário</option><option value="cliente">Cliente</option></select></label><label class="account-management-state"><input id="accountManagementActive" type="checkbox"> Conta ativa</label><label class="full">Motivo da alteração<textarea id="accountManagementReason" rows="3" minlength="10" maxlength="500" required placeholder="Explique por que esta alteração é necessária"></textarea></label><div id="accountManagementWarning" class="account-management-warning full" aria-live="assertive"></div><p class="access-safety-note full">A alteração será registada na auditoria. Contas não podem alterar o próprio perfil e o último administrador ativo é protegido.</p><div class="actions full"><button class="btn light" type="button" data-close="accountManagementDialog">Cancelar</button><button id="accountManagementSave" class="btn primary" type="submit">Rever e confirmar</button></div></form></dialog>
+      <dialog id="roleValidationDialog" class="validation-plan" aria-labelledby="roleValidationTitle"><div><header><div><small>VALIDAÇÃO CONTROLADA</small><h3 id="roleValidationTitle">Matriz de validação por perfil</h3><p>Preparação somente de leitura para computador e telemóvel.</p></div><button type="button" data-close="roleValidationDialog" aria-label="Fechar">×</button></header><div id="roleValidationSummary" class="validation-plan-summary"></div><div id="roleValidationRoles" class="validation-role-list"></div><p class="validation-plan-note">“Pronto” confirma apenas as pré-condições. Importe as evidências dos dispositivos e gere o relatório somente depois dos quatro cenários.</p><footer><input id="validationEvidenceFile" type="file" accept="application/json,.json" hidden><button id="importValidationEvidence" class="btn light" type="button">Importar evidência</button><button id="exportFinalValidation" class="btn light" type="button">Relatório final</button><button id="exportRoleValidation" class="btn light" type="button">Exportar plano JSON</button><button class="btn primary" type="button" data-close="roleValidationDialog">Concluir revisão</button></footer></div></dialog>
+      <dialog id="deviceValidationDialog" class="validation-plan device-validation" aria-labelledby="deviceValidationTitle"><div><header><div><small>VALIDAÇÃO HUMANA</small><h3 id="deviceValidationTitle">Validar este dispositivo</h3><p id="deviceValidationLead"></p></div><button type="button" data-close="deviceValidationDialog" aria-label="Fechar">×</button></header><div id="deviceValidationStatus" class="device-validation-status" aria-live="polite"></div><form id="deviceValidationForm"><div id="deviceValidationChecks" class="device-validation-checks"></div><label class="device-validation-attestation"><input id="deviceValidationAttestation" type="checkbox"> Confirmo que executei pessoalmente estas verificações nesta conta e neste dispositivo.</label><p class="validation-plan-note">A evidência fica apenas neste dispositivo e não contém nomes, e-mails, valores ou conteúdo das obras.</p><footer><button id="exportDeviceValidation" class="btn light" type="button">Exportar evidência</button><button id="completeDeviceValidation" class="btn primary" type="submit">Confirmar validação</button></footer></form></div></dialog>
+      <dialog id="userInviteDialog" aria-labelledby="userInviteTitle"><form id="userInviteForm" class="modal-form user-invite-form"><header class="full"><div><small>CONVITE CONTROLADO</small><h3 id="userInviteTitle">Convidar utilizador</h3></div><button type="button" data-close="userInviteDialog" aria-label="Fechar">×</button></header><label>Nome<input id="userInviteName" maxlength="120" required autocomplete="off"></label><label>E-mail<input id="userInviteEmail" type="email" required autocomplete="off"></label><label class="full">Perfil<select id="userInviteRole" required><option value="funcionario">Funcionário</option><option value="encarregado">Encarregado</option><option value="escritorio">Escritório</option><option value="cliente">Cliente</option></select></label><label id="userInviteClientField" class="full hidden">Cliente associado<select id="userInviteClient"></select></label><fieldset id="userInviteWorksField" class="user-invite-works full"><legend>Obras atribuídas inicialmente</legend><p>Opcional. Poderá rever as atribuições depois do convite.</p><div id="userInviteWorks"></div></fieldset><label class="user-invite-confirm full"><input id="userInviteConfirm" type="checkbox" required> Confirmo que verifiquei o e-mail, o perfil e os acessos. O envio criará uma conta real e enviará uma mensagem.</label><div id="userInviteWarning" class="account-management-warning full" aria-live="assertive"></div><p class="access-safety-note full">Administradores não podem ser convidados por este fluxo. O limite é de cinco convites por administrador a cada hora.</p><div class="actions full"><button class="btn light" type="button" data-close="userInviteDialog">Cancelar</button><button id="userInviteSend" class="btn primary" type="submit">Rever e enviar convite</button></div></form></dialog>
       <div class="toolbar employee-toolbar"><input id="funcionarioSearch" placeholder="Pesquisar nome, função ou contacto"><select id="funcionarioEstadoFiltro"><option value="">Todos os estados</option><option>Ativo</option><option>Férias</option><option>Inativo</option></select><input id="funcionarioMesFiltro" type="month" aria-label="Mês das horas"></div>
       <div class="panel"><div id="funcionariosTable"></div></div>
+      <div class="panel employee-assignments-panel">
+        <div class="assignment-head"><div><h3>Acesso às obras</h3><p>Atribua a cada utilizador operacional apenas as obras que deve consultar.</p></div><span id="assignmentSummary" class="badge"></span></div>
+        <div id="obraAssignments" class="assignment-list"></div>
+      </div>
       <div class="panel employee-hours-panel"><h3>Horas registadas</h3><div id="funcionarioHorasTable"></div></div>
+    </section>
+
+    <section id="view-relatorios" class="view hidden">
+      <div class="v3-section-head"><div><span>Centro documental</span><h2>Relatórios e exportações</h2><p>Documentos prontos para acompanhamento, reunião e arquivo.</p></div><div class="actions"><button id="inspectSafetyBackup" class="btn light admin-only" type="button">Verificar cópia</button><input id="safetyBackupFile" class="hidden" type="file" accept="application/json,.json"><button id="exportSafetyBackup" class="btn light admin-only" type="button">Exportar cópia de segurança</button><button id="printExecutiveReport" class="btn primary" type="button">Imprimir relatório executivo</button></div></div>
+      <section id="systemHealth" class="system-health admin-only" aria-live="polite" aria-label="Prontidão operacional"></section>
+      <div id="reportKpis" class="report-kpis"></div>
+      <div class="report-grid">
+        <article class="panel"><h3>Rentabilidade por obra</h3><div id="profitabilityReport"></div></article>
+        <article class="panel"><h3>Vencimentos e cobranças</h3><div id="maturityReport"></div></article>
+      </div>
+      <article class="panel report-guide"><h3>Dossiê completo da obra</h3><p>Abra a ficha de uma obra para imprimir o resumo financeiro, consultar o diário, organizar documentos e gerar o relatório fotográfico.</p><button class="btn light" type="button" data-report-open-works>Escolher obra</button></article>
+    </section>
+    <dialog id="safetyBackupDialog" aria-labelledby="safetyBackupTitle"><div class="backup-inspection"><header><div><small>RECUPERAÇÃO CONTROLADA</small><h3 id="safetyBackupTitle">Verificação da cópia de segurança</h3></div><button type="button" data-close="safetyBackupDialog" aria-label="Fechar">×</button></header><div id="safetyBackupSummary" aria-live="polite"></div><p class="backup-inspection-warning">Esta verificação não restaura, substitui ou elimina qualquer dado.</p><footer><button class="btn primary" type="button" data-close="safetyBackupDialog">Concluir verificação</button></footer></div></dialog>
+    <section id="view-portal-admin" class="view hidden admin-only">
+      <div class="client-admin-head"><div><small>PUBLICAÇÃO CONTROLADA</small><h1>Portal do Cliente</h1><p>Escolha exatamente o que cada cliente poderá consultar.</p></div><div class="actions"><button id="clientInviteNew" class="btn light" type="button">Convidar cliente</button><button id="clientPublishNew" class="btn primary" type="button">Preparar obra</button></div></div>
+      <div class="client-admin-grid"><section class="panel" aria-labelledby="clientAdminWorksTitle"><h2 id="clientAdminWorksTitle">Obras preparadas</h2><div id="clientAdminWorks" aria-live="polite"></div><div class="panel-title"><h2>Pedidos de aprovação</h2><button id="clientApprovalNew" class="btn small light" type="button">Novo pedido</button></div><div id="clientAdminApprovals" aria-live="polite"></div></section><section class="panel" aria-labelledby="clientAdminAccessTitle"><h2 id="clientAdminAccessTitle">Acessos autorizados</h2><div id="clientAdminAccess" aria-live="polite"></div><p class="client-admin-note">A criação e associação de contas será ativada apenas depois da autorização das novas permissões.</p></section></div><section class="panel client-content-panel" aria-labelledby="clientAdminContentTitle"><div class="panel-title"><div><h2 id="clientAdminContentTitle">Conteúdo selecionado</h2><p>Prepare atualizações e documentos como rascunho antes de os tornar visíveis.</p></div></div><div id="clientAdminContent" class="client-admin-content" aria-live="polite"></div><p class="portal-publication-note">Nenhum conteúdo é publicado automaticamente. Confirme sempre que não inclui custos, margens, dados internos ou documentos destinados apenas à equipa.</p></section>
+    </section>
+
+    <dialog id="clientPublishDialog" aria-labelledby="clientPublishTitle"><form id="clientPublishForm" class="modal-form"><header class="full"><h3 id="clientPublishTitle">Publicar obra no portal</h3><button type="button" data-close="clientPublishDialog" aria-label="Fechar">×</button></header><input id="clientPublishId" type="hidden"><label>Obra<select id="clientPublishWork" required></select></label><label>Nome apresentado<input id="clientPublishName" required maxlength="120"></label><label>Localidade<input id="clientPublishLocation" maxlength="120"></label><div class="grid-2 full"><label>Estado<input id="clientPublishState" value="Em acompanhamento" maxlength="80"></label><label>Progresso (%)<input id="clientPublishProgress" type="number" min="0" max="100" step="1" value="0"></label></div><label class="full">Resumo<textarea id="clientPublishSummary" rows="3" maxlength="1000"></textarea></label><label>Próxima etapa<input id="clientPublishNext" maxlength="180"></label><label>Data prevista<input id="clientPublishDate" type="date"></label><label class="full">Escolher fotografia existente<select id="clientPublishPhotoChoice"><option value="">Sem fotografia selecionada</option></select></label><label class="full">URL HTTPS da fotografia<input id="clientPublishPhoto" type="url" inputmode="url" placeholder="https://..."></label><label class="check full"><input id="clientPublishVisible" type="checkbox"> Visível para o cliente</label><footer class="actions"><button type="button" class="btn light" data-close="clientPublishDialog">Cancelar</button><button class="btn primary" type="submit">Guardar publicação</button></footer></form></dialog>
+
+    <dialog id="clientApprovalDialog" aria-labelledby="clientApprovalTitle"><form id="clientApprovalForm" class="modal-form"><h3 id="clientApprovalTitle">Novo pedido de aprovação</h3><label class="full">Obra publicada<select id="clientApprovalWork" required></select></label><label class="full">Título<input id="clientApprovalName" maxlength="160" required></label><label class="full">Descrição<textarea id="clientApprovalDescription" rows="4" maxlength="1500"></textarea></label><label>Data limite<input id="clientApprovalDue" type="date"></label><div class="actions"><button type="button" class="btn light" data-close="clientApprovalDialog">Cancelar</button><button class="btn primary" type="submit">Enviar pedido</button></div></form></dialog>
+    <dialog id="clientUpdateDialog" aria-labelledby="clientUpdateDialogTitle"><form id="clientUpdateForm" class="modal-form"><h3 id="clientUpdateDialogTitle">Atualização do cliente</h3><input id="clientUpdateId" type="hidden"><label class="full">Obra preparada<select id="clientUpdateWork" required></select></label><label class="full">Título<input id="clientUpdateTitle" maxlength="160" required></label><label class="full">Mensagem<textarea id="clientUpdateMessage" rows="4" maxlength="1500"></textarea></label><label>Data<input id="clientUpdateDate" type="date" required></label><label class="check"><input id="clientUpdateVisible" type="checkbox"> Publicar para o cliente</label><div class="actions"><button type="button" class="btn light" data-close="clientUpdateDialog">Cancelar</button><button class="btn primary" type="submit">Guardar atualização</button></div></form></dialog>
+    <dialog id="clientFileDialog" aria-labelledby="clientFileTitle"><form id="clientFileForm" class="modal-form"><h3 id="clientFileTitle">Documento do cliente</h3><input id="clientFileId" type="hidden"><label class="full">Obra preparada<select id="clientFileWork" required></select></label><label class="full">Nome apresentado<input id="clientFileName" maxlength="180" required></label><label>Categoria<select id="clientFileCategory"><option>Contrato</option><option>Projeto</option><option>Relatório</option><option>Garantia</option><option>Outro</option></select></label><label class="full">URL HTTPS do documento<input id="clientFileUrl" type="url" inputmode="url" maxlength="2048" required placeholder="https://..."></label><label class="check full"><input id="clientFileVisible" type="checkbox"> Publicar para o cliente</label><p class="portal-publication-note full">Partilhe apenas documentos aprovados para o cliente. Não introduza ligações com utilizador, palavra-passe ou dados financeiros internos.</p><div class="actions"><button type="button" class="btn light" data-close="clientFileDialog">Cancelar</button><button class="btn primary" type="submit">Guardar documento</button></div></form></dialog>
+
+    <section id="view-cliente-portal" class="view hidden client-only">
+      <div class="client-portal-hero"><div><small>ÁREA RESERVADA</small><h1>Acompanhe as suas obras</h1><p>Informação selecionada e publicada pela equipa DISTAK.</p></div><div class="client-portal-stats"><span><strong id="clientPortalWorkCount">0</strong><small>Obras</small></span><span><strong id="clientPortalProgress">0%</strong><small>Progresso médio</small></span><span><strong id="clientPortalUpdateCount">0</strong><small>Atualizações</small></span></div></div>
+      <div id="clientPortalContent" class="client-portal-content"></div>
     </section>
   </main>
 </section>
@@ -684,7 +879,7 @@
         <div id="mobileWorkModule" class="mobile-work-module"></div>
         <section class="diario-v28">
           <header class="diario-header">
-            <div><span class="diario-kicker">DISTAK ERP v2.8</span><h3>Diário de obra</h3><p>Registe o trabalho diário e mantenha o histórico completo da obra.</p></div>
+            <div><span class="diario-kicker">DISTAK ERP v3.8</span><h3>Diário de obra</h3><p>Registe o trabalho diário e mantenha o histórico completo da obra.</p></div>
             <button id="diarioNovo" class="btn primary" type="button">Novo registo</button>
           </header>
           <form id="diarioForm" class="diario-form">
@@ -811,18 +1006,69 @@
   <div class="actions"><button type="button" class="btn light" data-close="pagamentoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
 </form></dialog>
 
-<script>
-window.addEventListener("error",event=>{
-  const target=document.getElementById("loginError");
-  if(target&&!document.getElementById("loginView")?.classList.contains("hidden")) target.textContent=`Erro ao iniciar: ${event.message} (${event.filename||"ficheiro desconhecido"}:${event.lineno||0}:${event.colno||0})`;
-});
-window.addEventListener("unhandledrejection",event=>{
-  const target=document.getElementById("loginError");
-  if(target&&!document.getElementById("loginView")?.classList.contains("hidden")) target.textContent=`Erro ao iniciar: ${event.reason?.message||event.reason}`;
-});
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
+<dialog id="agendaTaskDialog"><form id="agendaTaskForm" class="modal-form agenda-task-form">
+  <h3 id="agendaTaskDialogTitle">Nova etapa</h3><input type="hidden" id="agendaTaskId">
+  <label class="full">Título<input id="agendaTaskTitle" maxlength="180" required placeholder="Ex.: Confirmar entrega de materiais"></label>
+  <label>Obra<select id="agendaTaskWork" required></select></label><label>Prioridade<select id="agendaTaskPriority"><option value="baixa">Baixa</option><option value="media" selected>Média</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></label>
+  <label>Início<input id="agendaTaskStart" type="date" required></label><label>Prazo<input id="agendaTaskDue" type="date" required></label>
+  <label>Hora<input id="agendaTaskTime" type="time"></label><label>Estado<select id="agendaTaskState"><option value="pendente">Pendente</option><option value="em_curso">Em curso</option><option value="bloqueada">Bloqueada</option><option value="concluida">Concluída</option></select></label>
+  <div id="agendaBlockFields" class="agenda-block-fields full hidden"><label>Motivo do bloqueio<textarea id="agendaTaskBlockReason" rows="2" maxlength="1000" placeholder="Indique o impedimento e o que é necessário para avançar"></textarea></label><label>Resolução prevista<input id="agendaTaskResolution" type="date"></label></div>
+  <label>Fase<select id="agendaTaskPhase"><option value="preparacao">Preparação</option><option value="demolicao">Demolição</option><option value="estrutura">Estrutura</option><option value="instalacoes">Instalações</option><option value="acabamentos">Acabamentos</option><option value="entrega">Entrega</option><option value="execucao">Execução geral</option></select></label><label>Progresso<input id="agendaTaskProgress" type="number" min="0" max="100" step="5" value="0"></label>
+  <label>Depende de<select id="agendaTaskDependency"><option value="">Sem dependência</option></select></label><label class="agenda-milestone"><input id="agendaTaskMilestone" type="checkbox"> É um marco da obra</label>
+  <label>Responsável no ERP<select id="agendaTaskResponsible"></select></label><label class="admin-only">Funcionário associado<select id="agendaTaskEmployee"></select></label>
+  <label class="full">Descrição<textarea id="agendaTaskDescription" rows="3" placeholder="Informações necessárias para executar a tarefa"></textarea></label>
+  <div class="actions"><button type="button" class="btn light" data-close="agendaTaskDialog">Cancelar</button><button id="agendaTaskSave" class="btn primary">Guardar tarefa</button></div>
+</form></dialog>
+
+<dialog id="forecastDialog"><form id="forecastForm" class="modal-form forecast-form">
+  <h3 id="forecastDialogTitle">Nova previsão</h3><input id="forecastId" type="hidden">
+  <label>Obra<select id="forecastWork"></select></label><label>Tipo<select id="forecastKind"><option value="recebimento">Recebimento previsto</option><option value="despesa">Despesa prevista</option></select></label>
+  <label class="full">Descrição<input id="forecastDescription" maxlength="180" required placeholder="Ex.: 2.ª tranche da obra"></label>
+  <label>Valor<input id="forecastValue" type="number" min="0.01" step="0.01" required></label><label>Data prevista<input id="forecastDate" type="date" required></label>
+  <label class="forecast-probability">Probabilidade<input id="forecastProbability" type="range" min="0" max="100" step="5" value="80"><output id="forecastProbabilityOutput">80%</output></label><label>Estado<select id="forecastState"><option value="previsto">Previsto</option><option value="confirmado">Confirmado</option><option value="realizado">Realizado</option><option value="cancelado">Cancelado</option></select></label>
+  <label class="full">Observações<textarea id="forecastNotes" rows="3" maxlength="2000"></textarea></label>
+  <div class="actions"><button type="button" class="btn light" data-close="forecastDialog">Cancelar</button><button id="forecastSave" class="btn primary">Guardar previsão</button></div>
+</form></dialog>
+
+<dialog id="operationalQuickDialog"><form id="operationalQuickForm" class="modal-form operational-quick-form">
+  <h3 id="operationalQuickTitle">Registo operacional</h3>
+  <label>Obra<select id="operationalQuickWork" required></select></label><label>Tipo de registo<select id="operationalQuickType"><option value="diario">Diário da obra</option><option value="ocorrencia">Ocorrência / bloqueio</option><option value="material">Material</option><option value="horas">Horas</option><option value="equipa">Presença da equipa</option></select></label>
+  <label>Data<input id="operationalQuickDate" type="date" required></label><label><span id="operationalQuickNameText">Título</span><input id="operationalQuickName" maxlength="180" required></label>
+  <label class="full"><span id="operationalQuickDetailText">Descrição</span><textarea id="operationalQuickDetail" rows="4" maxlength="2000" required></textarea></label>
+  <label class="full">Observações adicionais<textarea id="operationalQuickNotes" rows="2" maxlength="1000"></textarea></label>
+  <div class="actions"><button type="button" class="btn light" data-close="operationalQuickDialog">Cancelar</button><button id="operationalQuickSave" class="btn primary">Guardar registo</button></div>
+</form></dialog>
+
+<dialog id="fieldRecordDialog"><form id="fieldRecordForm" class="modal-form field-record-form">
+  <h3>Novo registo de campo</h3>
+  <label>Obra<select id="fieldWork" required></select></label><label>Data<input id="fieldDate" type="date" required></label>
+  <label>Tipo<select id="fieldType"><option value="diario">Diário e progresso</option><option value="horas">Horas trabalhadas</option><option value="material">Material</option><option value="ocorrencia">Ocorrência ou bloqueio</option><option value="fotografia">Fotografia da obra</option></select></label>
+  <label id="fieldHoursLabel" class="hidden">Total de horas<input id="fieldHours" type="number" min="0.25" max="24" step="0.25" value="8"></label>
+  <label class="full"><span id="fieldTitleText">Resumo do dia</span><input id="fieldTitle" maxlength="180" required></label>
+  <label class="full">Detalhes<textarea id="fieldDetail" rows="5" maxlength="3000" required></textarea></label>
+  <label id="fieldPhotoLabel" class="full field-photo-input hidden">Fotografia<input id="fieldPhoto" type="file" accept="image/jpeg,image/png,image/webp,image/heic" capture="environment"></label>
+  <label class="full">Observações adicionais<textarea id="fieldNotes" rows="2" maxlength="1500"></textarea></label>
+  <div class="actions"><button type="button" class="btn light" data-close="fieldRecordDialog">Cancelar</button><button id="fieldRecordSave" class="btn primary">Guardar e sincronizar</button></div>
+</form></dialog>
+
+<dialog id="purchaseDialog"><form id="purchaseForm" class="modal-form purchase-form">
+  <h3 id="purchaseDialogTitle">Novo pedido de compra</h3><input id="purchaseId" type="hidden">
+  <label>Obra<select id="purchaseWork" required></select></label><label>Número<input id="purchaseNumber" maxlength="40" required></label>
+  <label class="full">Produto ou serviço<input id="purchaseTitle" maxlength="180" required></label>
+  <label>Categoria<select id="purchaseCategory"><option>Materiais</option><option>Subempreitada</option><option>Equipamento</option><option>Ferramentas</option><option>Segurança</option><option>Transporte</option><option>Outros</option></select></label><label>Estado<select id="purchaseState"><option value="rascunho">Rascunho</option><option value="cotacao">Em cotação</option><option value="aprovado">Aprovado</option><option value="encomendado">Encomendado</option><option value="parcial">Entrega parcial</option><option value="recebido">Recebido</option><option value="cancelado">Cancelado</option></select></label>
+  <label>Quantidade<input id="purchaseQuantity" type="number" min="0.001" step="0.001" required></label><label>Unidade<input id="purchaseUnit" maxlength="20" required></label>
+  <label>Data necessária<input id="purchaseNeedDate" type="date" required></label><label>Entrega prevista<input id="purchaseDelivery" type="date"></label>
+  <label>Valor orçamentado<input id="purchaseBudget" type="number" min="0" step="0.01"></label><label class="full">Notas<textarea id="purchaseNotes" rows="3" maxlength="2000"></textarea></label>
+  <div class="actions"><button type="button" class="btn light" data-close="purchaseDialog">Cancelar</button><button class="btn primary">Guardar pedido</button></div>
+</form></dialog>
+
+<dialog id="quoteDialog"><div class="modal-form"><h3 id="quoteComparisonTitle">Propostas</h3><form id="quoteForm" class="quote-form"><input id="quotePurchaseId" type="hidden"><label>Fornecedor<input id="quoteSupplier" maxlength="180" required></label><label>NIF<input id="quoteNif" maxlength="30"></label><label>Contacto<input id="quoteContact" maxlength="180"></label><label>Valor<input id="quoteValue" type="number" min="0" step="0.01" required></label><label>Prazo em dias<input id="quoteDays" type="number" min="0"></label><label>Validade<input id="quoteValidity" type="date"></label><label class="wide">Condições<input id="quoteConditions" maxlength="500"></label><button class="btn primary">Adicionar proposta</button></form><div id="quoteComparison" class="quote-comparison"></div><div class="actions"><button type="button" class="btn light" data-close="quoteDialog">Fechar</button></div></div></dialog>
+
+<dialog id="measurementDialog"><form id="measurementForm" class="modal-form measurement-form"><h3 id="measurementDialogTitle">Novo auto de medição</h3><input id="measurementId" type="hidden"><label>Obra<select id="measurementWork" required></select></label><label>Número<input id="measurementNumber" maxlength="40" required></label><label>Período inicial<input id="measurementStart" type="date" required></label><label>Período final<input id="measurementEnd" type="date" required></label><label>Estado<select id="measurementState"><option value="rascunho">Rascunho</option><option value="submetido">Submetido</option><option value="aprovado">Aprovado</option><option value="faturado">Faturado</option><option value="cancelado">Cancelado</option></select></label><label>Retenção %<input id="measurementRetention" type="number" min="0" max="100" step="0.01" value="0"></label><label>IVA %<input id="measurementVat" type="number" min="0" max="100" step="0.01" value="23"></label><label>Número da fatura<input id="measurementInvoiceNumber" maxlength="80"></label><label>Data da fatura<input id="measurementInvoiceDate" type="date"></label><label>Vencimento<input id="measurementDue" type="date"></label><section class="full"><div class="panel-title"><div><strong>Linhas de medição</strong><p>Descrição, unidade, contratado, anterior, atual, preço e total</p></div><button id="addMeasurementItem" class="btn small light" type="button">＋ Linha</button></div><div id="measurementItems" class="measurement-items"></div></section><div class="full measurement-preview"><span>Subtotal<strong id="measurementSubtotalPreview">0,00 €</strong></span><span>Retenção<strong id="measurementRetentionPreview">0,00 €</strong></span><span>Total com IVA<strong id="measurementTotalPreview">0,00 €</strong></span></div><label class="full">Observações<textarea id="measurementNotes" rows="3" maxlength="2000"></textarea></label><div class="actions"><button type="button" class="btn light" data-close="measurementDialog">Cancelar</button><button class="btn primary">Guardar auto</button></div></form></dialog>
+
+<script src="assets/js/core/bootstrap-errors.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9" integrity="sha384-XtYxyIfxexJVTROWK0+c5T8tJ2ItsVLcdgR5nJIoo6WzQqaBZoTPGgbS7XvkRNBZ" crossorigin="anonymous"></script>
 <script src="assets/js/config.js"></script>
-<script type="module" src="assets/js/app.js?v=20260803-audit-1" onerror="document.getElementById('loginError').textContent='Erro ao carregar a aplicação.'"></script>
+<script type="module" src="assets/js/app.js?v=20260808-v37-audit-v1"></script>
 </body>
 </html>

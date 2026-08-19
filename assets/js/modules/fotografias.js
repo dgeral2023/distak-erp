@@ -159,7 +159,8 @@ async function uploadPhotos(event){
     let completed=0;
     for(const originalFile of files){
       const file=await compressImage(originalFile);
-      const unique=`${Date.now()}-${crypto.randomUUID?.()||Math.random().toString(36).slice(2)}`;
+      const randomId=crypto.randomUUID?.()||[...crypto.getRandomValues(new Uint32Array(4))].map(value=>value.toString(16).padStart(8,"0")).join("");
+      const unique=`${Date.now()}-${randomId}`;
       const path=`obras/${obraAtual.id}/${slug($("photoCategoria").value)}/${unique}-${cleanName(file.name)}`;
 
       $("photoUploadProgressText").textContent=`A carregar ${completed+1} de ${files.length}: ${originalFile.name}`;

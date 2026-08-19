@@ -1,5 +1,6 @@
 import {db} from "../core/supabase.js";
 import {$,esc,toast} from "../core/ui.js";
+import {store} from "../core/store.js";
 
 const BUCKET="distak-documentos";
 let obraAtual=null;
@@ -30,6 +31,7 @@ export async function renderObraDocumentos(obra){
   const {data,error}=await db.from("obra_documentos").select("*").eq("obra_id",obra.id).order("criado_em",{ascending:false});
   if(error){h.innerHTML=`<p class="error">${esc(error.message)}</p>`;return}
   documentos=data||[];
+  store.documentosObra=[...(store.documentosObra||[]).filter(row=>String(row.obra_id)!==String(obra.id)),...documentos];
   draw();
 }
 
