@@ -18,7 +18,7 @@ function walk(directory) {
 }
 
 const requiredIds = [
-  "loginForm", "mainNav", "view-dashboard", "view-clientes", "view-obras",
+  "loginForm", "mainNav", "view-dashboard", "view-leads", "leadsTable", "view-clientes", "view-obras",
   "view-orcamentos", "view-custos", "view-pagamentos", "view-funcionarios",
   "funcionarioForm", "funcionarioHorasForm", "dashboardTeam", "workDocumentList"
 ];

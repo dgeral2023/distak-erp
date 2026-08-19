@@ -40,6 +40,7 @@
     <nav id="mainNav">
       <button class="nav active" data-view="dashboard">Dashboard</button>
       <button class="nav admin-only" data-view="empresa">Empresa</button>
+      <button class="nav admin-only" data-view="leads">Pedidos do site <span id="leadNavBadge" class="nav-badge hidden">0</span></button>
       <button class="nav admin-only" data-view="clientes">Clientes</button>
       <button class="nav" data-view="obras">Obras</button>
       <button class="nav admin-only" data-view="orcamentos">Orçamentos</button>
@@ -281,6 +282,11 @@
       </div>
     </section>
 
+    <section id="view-leads" class="view hidden">
+      <div class="section-head"><div><h2>Pedidos do site</h2><p>Novos contactos enviados através do formulário em distaklda.com.</p></div><button id="atualizarLeadsBtn" class="btn light" type="button">Atualizar</button></div>
+      <div class="lead-summary"><article><span>Novos</span><strong id="leadStatNovos">0</strong></article><article><span>Em acompanhamento</span><strong id="leadStatAcompanhamento">0</strong></article><article><span>Convertidos</span><strong id="leadStatConvertidos">0</strong></article></div>
+      <section class="panel"><div class="panel-title lead-toolbar"><div><h3>Pipeline comercial</h3><p>Contacte, qualifique e converta cada oportunidade em cliente.</p></div><div class="toolbar"><input id="leadSearch" type="search" placeholder="Pesquisar nome, telefone ou localidade"><select id="leadEstadoFiltro"><option value="">Todos os estados</option><option>Novo</option><option>Contactado</option><option>Qualificado</option><option>Convertido</option><option>Arquivado</option></select></div></div><div id="leadsTable"></div></section>
+    </section>
     <section id="view-clientes" class="view hidden">
       <div class="toolbar"><input id="clienteSearch" placeholder="Pesquisar cliente"><button id="novoClienteBtn" class="btn primary">Novo cliente</button></div>
       <div class="panel"><div id="clientesTable"></div></div>
