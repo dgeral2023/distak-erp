@@ -5,11 +5,13 @@ import {assessRecoveryReadiness} from "../assets/js/core/backup-readiness.js";
 
 store.profile={role:"admin",id:"admin-test"};
 store.clientes=[{id:1,nome:"Cliente de teste"}];
+store.clienteContactos=[{id:6,cliente_id:1,nome:"Contacto de teste"}];
+store.leads=[{id:5,cliente_id:1,nome:"Pedido de teste"}];
 store.obras=[{id:2,cliente_id:1,nome:"Obra de teste"}];
 store.custos=[{id:3,obra_id:2,valor:100}];
 const exported=JSON.parse(await createSafetyBackup());
 if(exported.payload.format!=="distak-erp-backup"||exported.payload.version!==1)throw new Error("Formato de backup inválido.");
-if(exported.payload.recordCounts.clientes!==1||exported.payload.recordCounts.obras!==1)throw new Error("Contagens do backup inválidas.");
+if(exported.payload.recordCounts.clientes!==1||exported.payload.recordCounts.obras!==1||exported.payload.recordCounts.leads!==1||exported.payload.recordCounts.clienteContactos!==1)throw new Error("Contagens do backup inválidas.");
 const checksum=createHash("sha256").update(JSON.stringify(exported.payload)).digest("hex");
 if(!timingSafeEqual(Buffer.from(checksum,"hex"),Buffer.from(exported.integrity.checksum,"hex")))throw new Error("Checksum do backup inválido.");
 const stateBefore=JSON.stringify({clientes:store.clientes,obras:store.obras,custos:store.custos});
@@ -19,6 +21,10 @@ if(JSON.stringify({clientes:store.clientes,obras:store.obras,custos:store.custos
 const tampered=structuredClone(exported);tampered.payload.data.clientes[0].nome="Alterado";
 let damagedAccepted=false;try{await inspectSafetyBackup(JSON.stringify(tampered));damagedAccepted=true}catch{}
 if(damagedAccepted)throw new Error("Uma cópia alterada passou na verificação de integridade.");
+store.profile={role:"admin"};
+store.dataWarnings=["fotografias"];
+let incompleteAccepted=false;try{await createSafetyBackup();incompleteAccepted=true}catch{}
+if(incompleteAccepted)throw new Error("Uma cópia incompleta foi exportada apesar dos avisos de carregamento.");store.dataWarnings=[];
 store.profile={role:"funcionario"};
 let exportDenied=false;try{await createSafetyBackup()}catch{exportDenied=true}
 let inspectDenied=false;try{await inspectSafetyBackup(JSON.stringify(exported))}catch{inspectDenied=true}
