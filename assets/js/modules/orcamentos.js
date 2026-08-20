@@ -1,6 +1,6 @@
 import {store} from "../core/store.js";
 import {$,esc,money,toast} from "../core/ui.js";
-import {db,saveReturning,remove} from "../core/supabase.js";
+import {saveBudgetWithItems,remove} from "../core/supabase.js";
 
 const numberValue=value=>Number(value||0);
 const sortedItems=o=>[...(o.orcamento_itens||[])].sort((a,b)=>numberValue(a.ordem)-numberValue(b.ordem));
@@ -85,17 +85,11 @@ export async function submitOrcamento(event,refresh){
   if(!items.length||items.some(i=>!i.descricao||i.quantidade<=0))return toast("Preencha pelo menos uma linha válida.","error");
   button.disabled=true;
   try{
-    const subtotalValue=items.reduce((sum,item)=>sum+item.quantidade*item.preco_unitario,0);
-    const discount=Math.min(subtotalValue,Math.max(0,numberValue($("orcamentoDesconto").value)));
+    const subtotalValue=Math.round((items.reduce((sum,item)=>sum+item.quantidade*item.preco_unitario,0)+Number.EPSILON)*100)/100;
+    const discount=Math.round((Math.min(subtotalValue,Math.max(0,numberValue($("orcamentoDesconto").value)))+Number.EPSILON)*100)/100;
     const id=$("orcamentoId").value||null;
-    const budget=await saveReturning("orcamentos",{cliente_id:$("orcamentoClienteId").value,obra_id:$("orcamentoObraId").value||null,numero:$("orcamentoNumero").value.trim(),referencia:$("orcamentoReferencia").value.trim()||null,data_emissao:$("orcamentoDataEmissao").value,validade_dias:numberValue($("orcamentoValidadeDias").value)||15,descricao:$("orcamentoDescricao").value.trim(),valor_sem_iva:subtotalValue-discount,desconto:discount,iva:numberValue($("orcamentoIva").value),total:(subtotalValue-discount)*(1+numberValue($("orcamentoIva").value)/100),estado:$("orcamentoEstado").value,condicoes:$("orcamentoCondicoes").value.trim()||null,notas:$("orcamentoNotas").value.trim()||null,aprovado_em:$("orcamentoEstado").value==="Aprovado"?(id?store.orcamentos.find(o=>String(o.id)===id)?.aprovado_em:null)||new Date().toISOString():null},id);
-    const existingIds=new Set(id?sortedItems(store.orcamentos.find(o=>String(o.id)===id)||{}).map(item=>String(item.id)):[]);
-    const kept=[];
-    for(const item of items){
-      const payload={orcamento_id:budget.id,ordem:item.ordem,descricao:item.descricao,unidade:item.unidade,quantidade:item.quantidade,preco_unitario:item.preco_unitario,atualizado_em:new Date().toISOString()};
-      const saved=await saveReturning("orcamento_itens",payload,item.id);kept.push(saved.id);
-    }
-    for(const removedId of [...existingIds].filter(itemId=>!kept.map(String).includes(itemId)))await remove("orcamento_itens",removedId);
+    const payload={cliente_id:$("orcamentoClienteId").value,obra_id:$("orcamentoObraId").value||null,numero:$("orcamentoNumero").value.trim(),referencia:$("orcamentoReferencia").value.trim()||null,data_emissao:$("orcamentoDataEmissao").value,validade_dias:numberValue($("orcamentoValidadeDias").value)||15,descricao:$("orcamentoDescricao").value.trim(),desconto:discount,iva:numberValue($("orcamentoIva").value),estado:$("orcamentoEstado").value,condicoes:$("orcamentoCondicoes").value.trim()||null,notas:$("orcamentoNotas").value.trim()||null};
+    await saveBudgetWithItems(payload,items.map(({id:itemId,...item})=>item),id);
     $("orcamentoDialog").close();toast("Orçamento guardado.");await refresh();
   }catch(err){toast(err.message,"error")}finally{button.disabled=false}
 }

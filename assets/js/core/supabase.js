@@ -19,9 +19,11 @@ export async function query(table,select="*"){
 
 export async function save(table,payload,id){
   const q=id?db.from(table).update(payload).eq("id",id):db.from(table).insert(payload);
-  const {error}=await q;
+  const {data,error}=await q.select("id").maybeSingle();
   if(error)throw error;
-  await audit(table,id,id?"atualizou":"criou",payload);
+  if(!data?.id)throw new Error(id?"O registo já não existe ou não pode ser alterado.":"O registo não foi criado.");
+  await audit(table,data.id,id?"atualizou":"criou",payload);
+  return data;
 }
 
 export async function saveReturning(table,payload,id){
@@ -34,9 +36,25 @@ export async function saveReturning(table,payload,id){
   return data;
 }
 
+export async function saveBudgetWithItems(payload,items,id){
+  const {data,error}=await db.rpc("guardar_orcamento_com_itens",{
+    p_orcamento:payload,
+    p_itens:items,
+    p_orcamento_id:id||null
+  });
+  if(error){
+    if(error.code==="23505")throw new Error("Já existe um orçamento com este número.");
+    throw error;
+  }
+  if(!data)throw new Error("O orçamento não foi guardado.");
+  await audit("orcamentos",data,id?"atualizou":"criou",payload);
+  return {id:data};
+}
+
 export async function remove(table,id){
-  const {error}=await db.from(table).delete().eq("id",id);
+  const {data,error}=await db.from(table).delete().eq("id",id).select("id").maybeSingle();
   if(error)throw error;
+  if(!data?.id)throw new Error("O registo já não existe ou não pode ser eliminado.");
   await audit(table,id,"eliminou",{});
 }
 
@@ -69,8 +87,14 @@ export async function uploadStorage(bucket,path,file){
   return data;
 }
 
-export function publicStorageUrl(bucket,path){
-  return db.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+export async function signStorageRows(bucket,rows,pathKey,urlKey="url",expiresIn=3600){
+  const source=Array.isArray(rows)?rows:[];
+  const paths=[...new Set(source.map(row=>row?.[pathKey]).filter(Boolean))];
+  if(!paths.length)return source.map(row=>({...row,[urlKey]:null}));
+  const {data,error}=await db.storage.from(bucket).createSignedUrls(paths,expiresIn);
+  if(error)throw error;
+  const urls=new Map((data||[]).map(item=>[item.path,item.signedUrl||item.signedURL||null]));
+  return source.map(row=>({...row,[urlKey]:row?.[pathKey]?urls.get(row[pathKey])||null:null}));
 }
 
 export async function removeStorage(bucket,paths){

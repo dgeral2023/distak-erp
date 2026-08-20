@@ -1,5 +1,11 @@
 const relationRules=[
   ["obras","cliente_id","clientes","cliente"],
+  ["clienteContactos","cliente_id","clientes","cliente"],
+  ["clienteMoradas","cliente_id","clientes","cliente"],
+  ["clienteNotas","cliente_id","clientes","cliente"],
+  ["clienteComunicacoes","cliente_id","clientes","cliente"],
+  ["clienteDocumentos","cliente_id","clientes","cliente"],
+  ["leads","cliente_id","clientes","cliente"],
   ["custos","obra_id","obras","obra"],
   ["pagamentos","obra_id","obras","obra"],
   ["fotografias","obra_id","obras","obra"],

@@ -3,7 +3,7 @@ import {store} from "../core/store.js";
 import {assessRecoveryReadiness} from "../core/backup-readiness.js";
 import {rehearseRecoveryInMemory} from "../core/recovery-rehearsal.js";
 
-const collections=["profiles","obraUtilizadores","clientes","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra","clientePortalAcessos","clientePortalObras","clientePortalAtualizacoes","clientePortalFicheiros","clientePortalAprovacoes"];
+const collections=["profiles","leads","obraUtilizadores","clientes","clienteContactos","clienteMoradas","clienteNotas","clienteComunicacoes","clienteDocumentos","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra","clientePortalAcessos","clientePortalObras","clientePortalAtualizacoes","clientePortalFicheiros","clientePortalAprovacoes"];
 const hex=buffer=>[...new Uint8Array(buffer)].map(value=>value.toString(16).padStart(2,"0")).join("");
 const constantTimeEqual=(left,right)=>{
   if(typeof left!=="string"||typeof right!=="string"||left.length!==right.length)return false;
@@ -14,6 +14,7 @@ const fail=message=>{throw new Error(message)};
 
 export async function createSafetyBackup(){
   if(store.profile?.role!=="admin")throw new Error("Apenas um administrador pode exportar a cópia de segurança.");
+  if((store.dataWarnings||[]).length)throw new Error(`A cópia foi bloqueada porque existem módulos incompletos: ${store.dataWarnings.join(", ")}. Atualize os dados e tente novamente.`);
   const data=Object.fromEntries(collections.map(key=>[key,Array.isArray(store[key])?store[key]:[]]));
   const payload={format:"distak-erp-backup",version:1,createdAt:new Date().toISOString(),source:"web-v3",recordCounts:Object.fromEntries(collections.map(key=>[key,data[key].length])),data};
   const canonical=JSON.stringify(payload),checksum=hex(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(canonical)));

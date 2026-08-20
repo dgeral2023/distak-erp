@@ -1,6 +1,6 @@
 import {store} from "../core/store.js";
 import {$,esc,toast} from "../core/ui.js";
-import {db,query,saveReturning,remove,uploadStorage,publicStorageUrl,removeStorage} from "../core/supabase.js";
+import {db,query,saveReturning,remove,uploadStorage,signStorageRows,removeStorage} from "../core/supabase.js";
 
 const BUCKET="distak-obras";
 let obraAtual=null;
@@ -165,7 +165,6 @@ async function uploadPhotos(event){
 
       $("photoUploadProgressText").textContent=`A carregar ${completed+1} de ${files.length}: ${originalFile.name}`;
       await uploadStorage(BUCKET,path,file);
-      const url=publicStorageUrl(BUCKET,path);
 
       const lat=$("photoLatitude").value;
       const lng=$("photoLongitude").value;
@@ -183,7 +182,7 @@ async function uploadPhotos(event){
           descricao:fullDescription||null,
           zona:$("photoZona").value.trim()||null,
           ficheiro:path,
-          url,
+          url:path,
           data_foto:$("photoData").value||null,
           created_by:store.profile?.id||null
         });
@@ -198,7 +197,7 @@ async function uploadPhotos(event){
       $("photoUploadProgressText").textContent=`${completed} de ${files.length} fotografias carregadas`;
     }
 
-    store.fotografias=await query("obra_fotografias");
+    store.fotografias=await signStorageRows(BUCKET,await query("obra_fotografias"),"ficheiro","url");
     renderCounts();
     renderGallery();
     resetUploadForm();
@@ -236,7 +235,7 @@ async function saveEdit(event){
       descricao:$("photoEditDescricao").value.trim()||null
     }).eq("id",id);
     if(error)throw error;
-    store.fotografias=await query("obra_fotografias");
+    store.fotografias=await signStorageRows(BUCKET,await query("obra_fotografias"),"ficheiro","url");
     $("photoEditDialog").close();
     renderCounts();renderGallery();
     toast("Fotografia atualizada.");
