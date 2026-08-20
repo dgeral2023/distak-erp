@@ -4,6 +4,13 @@ import {$,esc,money} from "../core/ui.js";
 const num=v=>Number(v||0);
 const norm=v=>String(v||"").trim().toLowerCase();
 const fmtDate=v=>v?new Date(v).toLocaleDateString("pt-PT"):"—";
+const detailPreference="distakDashboardDetailed";
+
+function applyDashboardPreference(){
+  const detailed=localStorage.getItem(detailPreference)==="true",view=$("view-dashboard"),button=$("dashboardCustomize");
+  view?.classList.toggle("dashboard-detailed",detailed);
+  if(button){button.setAttribute("aria-pressed",String(detailed));button.textContent=detailed?"⚙ Vista resumida":"⚙ Vista detalhada"}
+}
 
 function obraValor(o){return num(o.valor_contratado||o.valor)}
 function orcamentoTotal(o){
@@ -217,8 +224,15 @@ function renderMovements(custos,pagamentos){
 }
 
 document.addEventListener("click",e=>{
+  if(e.target.closest("#dashboardCustomize")){
+    localStorage.setItem(detailPreference,String(!$("view-dashboard")?.classList.contains("dashboard-detailed")));
+    applyDashboardPreference();
+    return;
+  }
   const view=e.target.closest("[data-dashboard-view]")?.dataset.dashboardView;
   if(view){
     document.querySelector(`[data-view="${view}"]`)?.click();
   }
 });
+
+applyDashboardPreference();

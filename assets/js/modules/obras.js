@@ -1,5 +1,5 @@
 import {store} from "../core/store.js";
-import {$,esc,money,toast} from "../core/ui.js";
+import {$,esc,money,toast,friendlyError} from "../core/ui.js";
 import {db,save,remove} from "../core/supabase.js";
 import {renderObraFotografias} from "./fotografias.js";
 import {renderObraDocumentos} from "./documentos.js";
@@ -69,7 +69,7 @@ export async function submitObra(e,refresh){
 export async function deleteObra(id,refresh){
   if(!confirm("Confirmar eliminação?"))return;
   try{await remove("obras",id);toast("Obra apagada.");await refresh()}
-  catch(err){toast(err.message,"error")}
+  catch(err){toast(friendlyError(err,"Não foi possível apagar a obra."),"error")}
 }
 
 export function openObraFicha(id){

@@ -51,6 +51,21 @@ export async function saveBudgetWithItems(payload,items,id){
   return {id:data};
 }
 
+export async function saveMeasurementWithItems(payload,items,id){
+  const {data,error}=await db.rpc("guardar_auto_medicao_com_itens",{
+    p_auto:payload,
+    p_itens:items,
+    p_auto_id:id||null
+  });
+  if(error){
+    if(error.code==="23505")throw new Error("Já existe um auto de medição com este número.");
+    throw error;
+  }
+  if(!data)throw new Error("O auto de medição não foi guardado.");
+  await audit("medicoes_autos",data,id?"atualizou":"criou",payload);
+  return {id:data};
+}
+
 export async function remove(table,id){
   const {data,error}=await db.from(table).delete().eq("id",id).select("id").maybeSingle();
   if(error)throw error;

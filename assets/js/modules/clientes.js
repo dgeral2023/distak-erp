@@ -1,5 +1,5 @@
 import {store} from "../core/store.js";
-import {$,esc,toast,money} from "../core/ui.js";
+import {$,esc,toast,money,friendlyError} from "../core/ui.js";
 import {save,remove,db} from "../core/supabase.js";
 
 let crmClienteId=null;
@@ -61,7 +61,7 @@ export async function submitCliente(e,refresh){
 export async function deleteCliente(id,refresh){
   if(!confirm("Confirmar eliminação?"))return;
   try{await remove("clientes",id);toast("Cliente apagado.");await refresh()}
-  catch(err){toast(err.message,"error")}
+  catch(err){toast(friendlyError(err,"Não foi possível apagar o cliente."),"error")}
 }
 
 async function selectRows(table,foreignKey,id,select="*"){
