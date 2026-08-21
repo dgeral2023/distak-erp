@@ -1,6 +1,7 @@
 import {store} from "../core/store.js";
 import {$,esc,toast,money,friendlyError} from "../core/ui.js";
 import {save,remove,db} from "../core/supabase.js";
+import {findDuplicateClient,normalizeEmail,normalizeNif} from "../core/data-quality.js";
 
 let crmClienteId=null;
 let crmData={};
@@ -36,11 +37,15 @@ export function openCliente(c={}){
 export async function submitCliente(e,refresh){
   e.preventDefault();
   try{
+    const nif=normalizeNif(clienteNif.value);
+    const email=normalizeEmail(clienteEmail.value);
+    const duplicate=findDuplicateClient(store.clientes,{nif,email},clienteId.value||null);
+    if(duplicate)throw new Error(`Já existe um cliente com o mesmo ${nif&&normalizeNif(duplicate.nif)===nif?"NIF":"e-mail"}: ${duplicate.nome}.`);
     await save("clientes",{
       nome:clienteNome.value.trim(),
-      nif:clienteNif.value||null,
+      nif:nif||null,
       morada:clienteMorada.value||null,
-      email:clienteEmail.value||null,
+      email:email||null,
       telefone:clienteTelefone.value||null,
       tipo:clienteTipo.value,
       estado:clienteEstado.value,
@@ -55,7 +60,7 @@ export async function submitCliente(e,refresh){
       observacoes:clienteObservacoes.value||null
     },clienteId.value||null);
     clienteDialog.close();toast("Cliente guardado.");await refresh();
-  }catch(err){toast(err.message,"error")}
+  }catch(err){toast(err.code==="23505"?"Já existe um cliente com este NIF.":err.message,"error")}
 }
 
 export async function deleteCliente(id,refresh){
