@@ -16,21 +16,25 @@ export async function refreshData(){
     ["obraUtilizadores","leads","clientes","clienteContactos","clienteMoradas","clienteNotas","clienteComunicacoes","clienteDocumentos","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra"].forEach(key=>store[key]=[]);
     return;
   }
-  store.leads = isAdmin ? await query("leads_site") : [];
-  store.profiles = isAdmin ? await query("profiles") : [store.profile];
-  store.obraUtilizadores = await query("obra_utilizadores");
-  store.clientes = await query("clientes");
-  store.obras = await query("obras", "*,clientes(nome)");
-
-  store.orcamentos = await query("orcamentos", "*,obras(nome),clientes(nome,nif,email,telefone,morada,codigo_postal,localidade),orcamento_itens(*)");
-
-  store.custos = await query("custos", "*,obras(nome),custo_pagamentos(*)");
+  [
+    store.leads,store.profiles,store.obraUtilizadores,store.clientes,store.obras,
+    store.orcamentos,store.custos,store.pagamentos,store.funcionarios,
+    store.funcionarioHoras,store.agendaTarefas
+  ]=await Promise.all([
+    isAdmin?query("leads_site"):Promise.resolve([]),
+    isAdmin?query("profiles"):Promise.resolve([store.profile]),
+    query("obra_utilizadores"),
+    query("clientes"),
+    query("obras", "*,clientes(nome)"),
+    query("orcamentos", "*,obras(nome),clientes(nome,nif,email,telefone,morada,codigo_postal,localidade),orcamento_itens(*)"),
+    query("custos", "*,obras(nome),custo_pagamentos(*)"),
+    query("pagamentos", "*,obras(nome)"),
+    query("funcionarios"),
+    query("funcionario_horas", "*,funcionarios(nome,funcao,custo_hora),obras(nome)"),
+    query("agenda_tarefas")
+  ]);
   if(isAdmin){try{[store.clienteContactos,store.clienteMoradas,store.clienteNotas,store.clienteComunicacoes,store.clienteDocumentos]=await Promise.all([query("cliente_contactos"),query("cliente_moradas"),query("cliente_notas"),query("cliente_comunicacoes"),query("cliente_documentos")])}catch(err){console.error("Não foi possível carregar o CRM para a cópia de segurança:",err);warn("CRM de clientes");store.clienteContactos=[];store.clienteMoradas=[];store.clienteNotas=[];store.clienteComunicacoes=[];store.clienteDocumentos=[]}}
   else{store.clienteContactos=[];store.clienteMoradas=[];store.clienteNotas=[];store.clienteComunicacoes=[];store.clienteDocumentos=[]}
-  store.pagamentos = await query("pagamentos", "*,obras(nome)");
-  store.funcionarios = await query("funcionarios");
-  store.funcionarioHoras = await query("funcionario_horas", "*,funcionarios(nome,funcao,custo_hora),obras(nome)");
-  store.agendaTarefas = await query("agenda_tarefas");
   try{store.campoRegistos=await signStorageRows("distak-obras",await query("campo_registos"),"foto_path","foto_url")}catch(err){console.error("Não foi possível carregar os registos de campo:",err);warn("registos de campo");store.campoRegistos=[]}
   store.previsoesFinanceiras = isAdmin ? await query("financeiro_previsoes") : [];
   if(isAdmin){try{[store.pedidosCompra,store.propostasCompra]=await Promise.all([query("compras_pedidos"),query("compras_propostas")])}catch(err){console.error("Não foi possível carregar as compras:",err);warn("compras");store.pedidosCompra=[];store.propostasCompra=[]}}else{store.pedidosCompra=[];store.propostasCompra=[]}
