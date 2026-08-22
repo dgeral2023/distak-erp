@@ -1,6 +1,7 @@
 const CACHE='distak-shell-v3.8-real-data-readiness-20260821-v1';
 const SHELL=[
   './','./index.html','./manifest.json','./icon.svg',
+  './assets/fragments/cliente-dialog.html',
   './assets/css/accessibility.css','./assets/css/agenda.css','./assets/css/assistant.css','./assets/css/backup.css','./assets/css/campo.css','./assets/css/client-access-management.css','./assets/css/cliente-approvals.css','./assets/css/cliente-portal.css','./assets/css/cliente-role.css','./assets/css/compras.css','./assets/css/dashboard-executivo.css','./assets/css/diario.css','./assets/css/distak-ios.css','./assets/css/dossies.css','./assets/css/fotografias.css','./assets/css/hybrid-menu.css','./assets/css/inteligencia.css','./assets/css/medicoes.css','./assets/css/motion.css','./assets/css/obra-ficha.css','./assets/css/operacional.css','./assets/css/password-recovery.css','./assets/css/portal-content-management.css','./assets/css/previsoes.css','./assets/css/role-validation.css','./assets/css/style.css','./assets/css/user-management.css','./assets/css/v3.css','./assets/css/system-health.css',
   './assets/js/app.js','./assets/js/config.js','./assets/js/data.js',
   './assets/js/core/access-management.js','./assets/js/core/accessibility.js','./assets/js/core/assistant-local.js','./assets/js/core/auth.js','./assets/js/core/backup-readiness.js','./assets/js/core/bootstrap-errors.js','./assets/js/core/data-quality.js','./assets/js/core/dossier-quality.js','./assets/js/core/field-queue.js','./assets/js/core/human-validation.js','./assets/js/core/iconography.js','./assets/js/core/intelligence-actions.js','./assets/js/core/motion-policy.js','./assets/js/core/portal-publication.js','./assets/js/core/pwa.js','./assets/js/core/recovery-rehearsal.js','./assets/js/core/role-validation.js','./assets/js/core/store.js','./assets/js/core/supabase.js','./assets/js/core/support-diagnostics.js','./assets/js/core/ui.js','./assets/js/core/workload-analysis.js','./assets/js/core/operational-readiness.js',
@@ -23,9 +24,10 @@ self.addEventListener('fetch',event=>{
     event.respondWith(fetch(request).then(async response=>{if(response.ok){const cache=await caches.open(CACHE);await cache.put('./index.html',response.clone())}return response}).catch(()=>caches.match('./index.html')));
     return;
   }
-  if(!['style','script','image','font','manifest'].includes(request.destination))return;
+  const clientFragment=url.pathname.endsWith('/assets/fragments/cliente-dialog.html');
+  if(!clientFragment&&!['style','script','image','font','manifest'].includes(request.destination))return;
   const updateCache=async response=>{if(response.ok){const cache=await caches.open(CACHE);await cache.put(request,response.clone())}return response};
-  if(['style','script','manifest'].includes(request.destination)){
+  if(clientFragment||['style','script','manifest'].includes(request.destination)){
     event.respondWith(fetch(request,{cache:'no-store'}).then(updateCache).catch(()=>caches.match(request,{ignoreSearch:true})));
     return;
   }

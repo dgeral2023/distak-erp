@@ -66,7 +66,7 @@ check(
   "A versão exata e aprovada de supabase-js não está fixada."
 );
 
-const sourceFiles = [indexPath, ...walk(join(root, "assets", "js"))]
+const sourceFiles = [indexPath, ...walk(join(root, "assets", "fragments")), ...walk(join(root, "assets", "js"))]
   .filter((path) => [".html", ".js"].includes(extname(path)));
 const source = sourceFiles.map((path) => readFileSync(path, "utf8")).join("\n");
 
