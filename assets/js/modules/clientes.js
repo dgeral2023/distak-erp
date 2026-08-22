@@ -170,6 +170,7 @@ async function loadCrm(id){
   if(obrasResult.error)throw obrasResult.error;
 
   const obras=obrasResult.data||[];
+  store.clienteMoradas=[...store.clienteMoradas.filter(row=>String(row.cliente_id)!==String(id)),...moradas];
   const obraIds=obras.map(o=>o.id);
   let orcamentos=[],pagamentos=[];
   if(obraIds.length){

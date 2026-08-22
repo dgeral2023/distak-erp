@@ -1,12 +1,13 @@
 import {store} from "../core/store.js";
 import {$,esc,money,toast,friendlyError,parseEuroValue} from "../core/ui.js";
 import {calculateWorkFinancialValuesFromRate,normalizeWorkVatRate,workFinancialValues} from "../core/work-finance.js";
+import {clientAddressKey,clientAddressSuggestions} from "../core/client-addresses.js";
 import {db,save,remove} from "../core/supabase.js";
 import {renderObraFotografias} from "./fotografias.js";
 import {renderObraDocumentos} from "./documentos.js";
 import {renderObraDiario} from "./diario.js";
 
-let obraFichaAtual=null;
+let obraFichaAtual=null,suggestedAddressKeys=new Set();
 
 export function fillObraSelects(){
   const c=store.clientes.map(x=>`<option value="${x.id}">${esc(x.nome)}</option>`).join("");
@@ -34,6 +35,7 @@ export function renderObras(rows=store.obras){
 
 export function openObra(o={}){
   fillObraSelects();
+  suggestedAddressKeys=new Set();
   obraId.value=o.id||"";
   obraClienteId.value=o.cliente_id||"";
   obraNome.value=o.nome||"";
@@ -46,6 +48,8 @@ export function openObra(o={}){
   obraPrazo.value=o.prazo||"";
   obraResponsavel.value=o.responsavel||"";
   obraNotas.value=o.notas||"";
+  configureObraAddressInputs();
+  renderObraAddressSuggestions();
   configureObraFinancialInputs();
   renderObraTotalPreview();
   obraDialog.showModal();
@@ -77,6 +81,27 @@ export async function submitObra(e,refresh){
     },obraId.value||null);
     obraDialog.close();toast("Obra guardada.");await refresh();
   }catch(err){toast(err.message,"error")}
+}
+
+function renderObraAddressSuggestions(){
+  const currentKey=clientAddressKey(obraMorada.value);
+  const canSuggest=!currentKey||suggestedAddressKeys.has(currentKey);
+  const client=store.clientes.find(row=>String(row.id)===String(obraClienteId.value));
+  const suggestions=client?clientAddressSuggestions(client,store.clienteMoradas):[];
+  obraMoradaSuggestions.innerHTML=suggestions.map(item=>`<option value="${esc(item.value)}" label="${esc(item.label)}"></option>`).join("");
+  suggestedAddressKeys=new Set(suggestions.map(item=>clientAddressKey(item.value)));
+  obraMoradaHelp.textContent=!client
+    ?"Selecione primeiro o cliente para ver as moradas associadas."
+    :suggestions.length
+      ?`${suggestions.length===1?"1 morada associada":`${suggestions.length} moradas associadas`}. Pode escolher uma sugestão ou escrever outra.`
+      :"Este cliente ainda não tem moradas associadas. Pode escrever uma morada livremente.";
+  if(canSuggest&&suggestions[0])obraMorada.value=suggestions[0].value;
+}
+
+function configureObraAddressInputs(){
+  if(obraClienteId.dataset.addressSuggestionsReady)return;
+  obraClienteId.dataset.addressSuggestionsReady="true";
+  obraClienteId.addEventListener("change",renderObraAddressSuggestions);
 }
 
 function renderObraTotalPreview(){

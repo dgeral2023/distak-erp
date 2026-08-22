@@ -683,7 +683,7 @@
   <h3>Nova / editar obra</h3><input type="hidden" id="obraId">
   <label>Cliente<select id="obraClienteId" required></select></label>
   <label>Nome<input id="obraNome" required></label>
-  <label>Morada<input id="obraMorada"></label>
+  <label>Morada<input id="obraMorada" list="obraMoradaSuggestions" autocomplete="off" aria-describedby="obraMoradaHelp" placeholder="Selecione uma morada ou escreva outra"><datalist id="obraMoradaSuggestions"></datalist><small id="obraMoradaHelp" class="field-help">Selecione primeiro o cliente para ver as moradas associadas.</small></label>
   <label>Estado<select id="obraEstado"><option>Orçamento</option><option>Aguardando adjudicação</option><option>Adjudicada</option><option>Em preparação</option><option>Em execução</option><option>Suspensa</option><option>Pagamento em atraso</option><option>Concluída</option><option>Em garantia</option><option>Arquivada</option></select></label>
   <label>Valor da obra sem IVA<input id="obraValor" type="text" inputmode="decimal" maxlength="24" autocomplete="off" placeholder="Ex.: 5.822,15 €" aria-describedby="obraValorHelp"><small id="obraValorHelp" class="field-help">Valor base contratado, sem imposto.</small></label>
   <label>Taxa de IVA<select id="obraIvaTaxa" required aria-describedby="obraIvaTaxaHelp"><option value="23">23%</option><option value="6">6%</option></select><small id="obraIvaTaxaHelp" class="field-help">Escolha a taxa aplicável; o valor do IVA é calculado automaticamente.</small></label>
