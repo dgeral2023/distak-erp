@@ -1,0 +1,29 @@
+<dialog id="clienteDialog" aria-labelledby="clienteDialogTitle"><form id="clienteForm" class="modal-form crm-client-form" novalidate>
+  <header class="client-form-head full"><div><small>FICHA COMERCIAL</small><h3 id="clienteDialogTitle">Novo cliente</h3><p>Os campos assinalados com * são obrigatórios.</p></div><button type="button" data-close="clienteDialog" aria-label="Fechar formulário de cliente">×</button></header><input type="hidden" id="clienteId">
+  <fieldset class="client-form-section full"><legend>Identificação</legend><div class="client-form-grid">
+    <label>Nome *<input id="clienteNome" required maxlength="160" autocomplete="name"></label>
+    <label>Tipo<select id="clienteTipo"><option>Particular</option><option>Empresa</option><option>Condomínio</option></select></label>
+    <label>NIF<input id="clienteNif" inputmode="numeric" maxlength="9" pattern="[0-9]{9}" autocomplete="off" aria-describedby="clienteNifHelp"><small id="clienteNifHelp" class="field-help">9 algarismos. O ERP avisa se o NIF for inválido ou repetido.</small></label>
+    <label>Estado<select id="clienteEstado" aria-describedby="clienteEstadoHelp"><option>Potencial</option><option>Ativo</option><option>Inativo</option></select><small id="clienteEstadoHelp" class="field-help">Potencial: ainda sem contratação · Ativo: relação atual · Inativo: fica preservado no histórico.</small></label>
+  </div></fieldset>
+  <fieldset class="client-form-section full"><legend>Contactos</legend><div class="client-form-grid">
+    <label>Email<input id="clienteEmail" type="email" maxlength="254" autocomplete="email"></label>
+    <label>Telefone<input id="clienteTelefone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="912 345 678"></label>
+    <label>Telefone alternativo<input id="clienteTelefoneAlternativo" type="tel" inputmode="tel" maxlength="20"></label>
+  </div></fieldset>
+  <fieldset class="client-form-section full"><legend>Morada</legend><div class="client-form-grid">
+    <label class="full">Morada<input id="clienteMorada" maxlength="240" autocomplete="street-address"></label>
+    <label>Código postal<input id="clienteCodigoPostal" inputmode="numeric" maxlength="8" pattern="[0-9]{4}-?[0-9]{3}" autocomplete="postal-code" placeholder="0000-000"></label>
+    <label>Localidade<input id="clienteLocalidade" maxlength="120" autocomplete="address-level2"></label>
+    <label>País<input id="clientePais" value="Portugal" maxlength="80" autocomplete="country-name"></label>
+  </div></fieldset>
+  <details id="clienteCommercialDetails" class="client-form-details full"><summary>Informações comerciais e adicionais <span>Opcional</span></summary><div class="client-form-grid">
+    <label>Website<input id="clienteWebsite" type="url" inputmode="url" maxlength="2048" placeholder="https://..."></label>
+    <label>CAE<input id="clienteCae" aria-describedby="clienteCaeHelp"><small id="clienteCaeHelp" class="field-help">Campo opcional para empresas. O valor será guardado exatamente como for introduzido, sem validação.</small></label>
+    <label>Condições de pagamento<input id="clienteCondicoesPagamento" maxlength="180" placeholder="Ex.: 50% adjudicação, 50% conclusão"></label>
+    <label>Limite de crédito (€)<input id="clienteLimiteCredito" type="number" min="0" step="0.01" inputmode="decimal"></label>
+    <label class="full">Observações<textarea id="clienteObservacoes" rows="4" maxlength="2000"></textarea></label>
+  </div></details>
+  <div id="clienteFormStatus" class="form-status full" role="alert" aria-live="assertive"></div>
+  <div class="actions"><button type="button" class="btn light" data-close="clienteDialog">Cancelar</button><button id="clienteGuardarBtn" class="btn primary" type="submit">Guardar cliente</button></div>
+</form></dialog>

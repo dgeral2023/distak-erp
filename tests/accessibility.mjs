@@ -1,7 +1,7 @@
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 
-const root=resolve(import.meta.dirname,".."),html=readFileSync(resolve(root,"index.html"),"utf8"),css=readFileSync(resolve(root,"assets/css/accessibility.css"),"utf8"),baseCss=readFileSync(resolve(root,"assets/css/style.css"),"utf8"),runtime=readFileSync(resolve(root,"assets/js/core/accessibility.js"),"utf8"),v3=readFileSync(resolve(root,"assets/js/modules/v3.js"),"utf8"),menu=readFileSync(resolve(root,"assets/js/modules/hybrid-menu.js"),"utf8");
+const root=resolve(import.meta.dirname,".."),html=[readFileSync(resolve(root,"index.html"),"utf8"),readFileSync(resolve(root,"assets/fragments/cliente-dialog.html"),"utf8")].join("\n"),css=readFileSync(resolve(root,"assets/css/accessibility.css"),"utf8"),baseCss=readFileSync(resolve(root,"assets/css/style.css"),"utf8"),runtime=readFileSync(resolve(root,"assets/js/core/accessibility.js"),"utf8"),v3=readFileSync(resolve(root,"assets/js/modules/v3.js"),"utf8"),menu=readFileSync(resolve(root,"assets/js/modules/hybrid-menu.js"),"utf8");
 const check=(condition,message)=>{if(!condition){console.error(`FALHA: ${message}`);process.exit(1)}};
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(match=>match[1]),duplicates=ids.filter((id,index)=>ids.indexOf(id)!==index);
 
@@ -15,5 +15,12 @@ for(const required of ["aria-hidden","mobileRegisterSheet","querySelector(\"butt
 for(const required of ["prefers-reduced-motion:reduce","pointer:coarse","forced-colors:active",":focus-visible"])check(css.includes(required),`estilo de acessibilidade em falta: ${required}`);
 check(baseCss.includes(".login-card .btn{min-height:44px}"),"o botão de entrada deve cumprir o alvo tátil mínimo de 44 px");
 check(css.includes(".pwa-update-notice button")&&css.includes("min-height:44px"),"a atualização PWA deve ser acessível ao toque");
+for(const id of ["agendaSearch","operationalSearch","purchaseSearch","measurementSearch","dossierSearch","leadSearch","clienteSearch","obraSearch","orcamentoSearch","custoSearch","pagamentoSearch","forecastSearch","funcionarioSearch"]){
+  const element=html.match(new RegExp(`<[^>]+id="${id}"[^>]*>`))?.[0]||"";
+  check(element.includes("aria-label=")||html.includes(`for="${id}"`),`o campo ${id} precisa de nome acessível`);
+}
+for(const required of ['aria-labelledby="clienteDialogTitle"','id="clienteFormStatus"','aria-describedby="clienteNifHelp"','aria-describedby="clienteCaeHelp"'])check(html.includes(required),`orientação acessível do formulário de clientes incompleta: ${required}`);
+const caeField=html.match(/<input[^>]+id="clienteCae"[^>]*>/)?.[0]||"";
+check(caeField&&!caeField.includes("pattern=")&&!caeField.includes("required"),"o CAE deve permanecer opcional e sem validação de formato");
 
 console.log(`Acessibilidade aprovada: ${ids.length} IDs únicos, diálogos rotulados, foco restaurado e modos reduzido/tátil/alto contraste verificados.`);

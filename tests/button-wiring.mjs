@@ -1,7 +1,7 @@
 import {readFileSync,readdirSync} from "node:fs";
 import {join,resolve} from "node:path";
 
-const root=resolve(import.meta.dirname,".."),html=readFileSync(join(root,"index.html"),"utf8"),failures=[];
+const root=resolve(import.meta.dirname,".."),html=[readFileSync(join(root,"index.html"),"utf8"),readFileSync(join(root,"assets","fragments","cliente-dialog.html"),"utf8")].join("\n"),failures=[];
 const js=readdirSync(join(root,"assets","js","modules"),{withFileTypes:true})
   .filter(entry=>entry.isFile()&&entry.name.endsWith(".js"))
   .map(entry=>readFileSync(join(root,"assets","js","modules",entry.name),"utf8"))

@@ -1,7 +1,7 @@
 import {$,setView} from "../core/ui.js";
 import {store} from "../core/store.js";
 
-const meta={dashboard:["⌂","Início"],leads:["◎","Pedidos do site"],"portal-admin":["◉","Portal do cliente"],empresa:["⚙","Empresa"],clientes:["♙","Clientes"],obras:["▥","Obras"],operacional:["◉","Operacional"],agenda:["◫","Agenda"],dossies:["▧","Dossiês"],orcamentos:["▤","Orçamentos"],compras:["▦","Compras"],medicoes:["％","Medições"],custos:["↘","Custos"],pagamentos:["€","Pagamentos"],previsoes:["↗","Previsões"],inteligencia:["◆","Inteligência"],funcionarios:["♟","Equipa"],relatorios:["▥","Relatórios"],funcionario:["✓","Portal de campo"]};
+const meta={dashboard:["⌂","Início"],leads:["◎","Pedidos do site"],"portal-admin":["◉","Portal do cliente"],empresa:["⚙","Empresa"],clientes:["♙","Clientes"],obras:["▥","Obras"],operacional:["◉","Operacional"],agenda:["◫","Agenda"],dossies:["▧","Dossiês"],orcamentos:["▤","Orçamentos"],compras:["▦","Compras"],medicoes:["％","Medições"],custos:["↘","Custos"],pagamentos:["€","Recebimentos"],previsoes:["↗","Previsões"],inteligencia:["◆","Inteligência"],funcionarios:["♟","Equipa"],relatorios:["▥","Relatórios"],funcionario:["✓","Portal de campo"]};
 const adminViews=["leads","portal-admin","clientes","orcamentos","compras","medicoes","custos","pagamentos","previsoes","inteligencia","relatorios","funcionarios","empresa"];
 let actions={};
 

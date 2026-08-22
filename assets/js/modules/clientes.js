@@ -1,19 +1,44 @@
 import {store} from "../core/store.js";
 import {$,esc,toast,money,friendlyError} from "../core/ui.js";
 import {save,remove,db} from "../core/supabase.js";
-import {findDuplicateClient,normalizeEmail,normalizeNif} from "../core/data-quality.js";
+import {findDuplicateClient,normalizeEmail,normalizeNif,normalizePostalCode,validateClientData} from "../core/data-quality.js";
 
 let crmClienteId=null;
 let crmData={};
+let refreshClientes=async()=>{},clientUiReady=false;
+let clienteForm,clienteDialog,clienteId,clienteNome,clienteNif,clienteMorada,clienteEmail,clienteTelefone,clienteTipo,clienteEstado,clienteTelefoneAlternativo,clienteWebsite,clienteCae,clienteCodigoPostal,clienteLocalidade,clientePais,clienteCondicoesPagamento,clienteLimiteCredito,clienteObservacoes,clienteDialogTitle,clienteCommercialDetails;
 const CLIENT_DOCUMENT_BUCKET="distak-documentos";
 const safeFileName=name=>name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9._-]+/g,"-");
 const fileSize=value=>Number(value||0)<1048576?`${(Number(value||0)/1024).toFixed(1)} KB`:`${(Number(value||0)/1048576).toFixed(1)} MB`;
 
 export function renderClientes(rows=store.clientes){
-  $("clientesTable").innerHTML=rows.length?`<table><thead><tr><th>Nome</th><th>NIF</th><th>Email</th><th>Telefone</th><th>Tipo</th><th>Estado</th><th>Ações</th></tr></thead><tbody>${rows.map(c=>`<tr><td><button class="crm-client-link" data-view-cliente="${c.id}">${esc(c.nome)}</button></td><td>${esc(c.nif||"")}</td><td>${esc(c.email||"")}</td><td>${esc(c.telefone||"")}</td><td>${esc(c.tipo||"")}</td><td><span class="badge">${esc(c.estado||"Ativo")}</span></td><td><button class="btn small primary" data-view-cliente="${c.id}">Ficha</button> <button class="btn small light" data-edit-cliente="${c.id}">Editar</button> <button class="btn small danger" data-del-cliente="${c.id}">Apagar</button></td></tr>`).join("")}</tbody></table>`:"<p>Sem clientes.</p>";
+  const query=$("clienteSearch")?.value.trim().toLowerCase()||"",state=$("clienteEstadoFiltro")?.value||"";
+  const filtered=(rows||[]).filter(client=>(!state||(client.estado||"Ativo")===state)&&(!query||[client.nome,client.nif,client.email,client.telefone,client.localidade].some(value=>String(value||"").toLowerCase().includes(query))));
+  if($("clienteResultCount"))$("clienteResultCount").textContent=`${filtered.length} ${filtered.length===1?"cliente":"clientes"}`;
+  $("clientesTable").innerHTML=filtered.length?`<div class="table-scroll client-table-scroll"><table class="client-table"><caption class="sr-only">Lista de clientes</caption><thead><tr><th>Nome</th><th>NIF</th><th>Email</th><th>Telefone</th><th>Tipo</th><th>Estado</th><th>Ações</th></tr></thead><tbody>${filtered.map(c=>{const name=esc(c.nome),inactive=(c.estado||"Ativo")==="Inativo";return `<tr class="${inactive?"is-inactive":""}"><td data-label="Nome"><button class="crm-client-link" type="button" data-view-cliente="${c.id}">${name}</button></td><td data-label="NIF">${esc(c.nif||"—")}</td><td data-label="Email">${esc(c.email||"—")}</td><td data-label="Telefone">${esc(c.telefone||"—")}</td><td data-label="Tipo">${esc(c.tipo||"—")}</td><td data-label="Estado"><span class="badge client-state-${String(c.estado||"Ativo").toLowerCase()}">${esc(c.estado||"Ativo")}</span></td><td data-label="Ações"><div class="row-actions"><button class="btn small primary" type="button" data-view-cliente="${c.id}" aria-label="Abrir ficha de ${name}">Ficha</button><button class="btn small light" type="button" data-edit-cliente="${c.id}" aria-label="Editar ${name}">Editar</button>${inactive?`<button class="btn small danger" type="button" data-del-cliente="${c.id}" aria-label="Apagar definitivamente ${name}">Apagar definitivamente</button>`:`<button class="btn small light" type="button" data-deactivate-cliente="${c.id}" aria-label="Desativar ${name}">Desativar</button>`}</div></td></tr>`}).join("")}</tbody></table></div>`:`<div class="client-empty"><strong>${query||state?"Nenhum cliente corresponde aos filtros.":"Ainda não existem clientes."}</strong><p>${query||state?"Altere ou limpe os filtros para voltar a ver a lista.":"Registe o primeiro cliente para depois criar obras e orçamentos associados."}</p>${query||state?`<button class="btn light" type="button" data-clear-client-filters>Limpar filtros</button>`:`<button class="btn primary" type="button" data-new-cliente>Novo cliente</button>`}</div>`;
 }
 
-export function openCliente(c={}){
+async function ensureClientDialog(){
+  if(clientUiReady)return true;
+  try{
+    const response=await fetch("assets/fragments/cliente-dialog.html");
+    if(!response.ok)throw new Error(`HTTP ${response.status}`);
+    $("clienteDialogHost").innerHTML=await response.text();
+    [clienteForm,clienteDialog,clienteId,clienteNome,clienteNif,clienteMorada,clienteEmail,clienteTelefone,clienteTipo,clienteEstado,clienteTelefoneAlternativo,clienteWebsite,clienteCae,clienteCodigoPostal,clienteLocalidade,clientePais,clienteCondicoesPagamento,clienteLimiteCredito,clienteObservacoes,clienteDialogTitle,clienteCommercialDetails]=["clienteForm","clienteDialog","clienteId","clienteNome","clienteNif","clienteMorada","clienteEmail","clienteTelefone","clienteTipo","clienteEstado","clienteTelefoneAlternativo","clienteWebsite","clienteCae","clienteCodigoPostal","clienteLocalidade","clientePais","clienteCondicoesPagamento","clienteLimiteCredito","clienteObservacoes","clienteDialogTitle","clienteCommercialDetails"].map($);
+    $("clienteForm").onsubmit=e=>submitCliente(e,refreshClientes);
+    document.querySelectorAll("#clienteDialog [data-close]").forEach(button=>button.onclick=()=>$(button.dataset.close).close());
+    $("clienteTipo").onchange=()=>{if($("clienteTipo").value!=="Particular")$("clienteCommercialDetails").open=true};
+    $("clienteNif").oninput=()=>{$("clienteNif").value=normalizeNif($("clienteNif").value);$("clienteNif").removeAttribute("aria-invalid");$("clienteNif").setCustomValidity("")};
+    $("clienteCodigoPostal").onblur=()=>{$("clienteCodigoPostal").value=normalizePostalCode($("clienteCodigoPostal").value)};
+    clientUiReady=true;
+    return true;
+  }catch(err){toast("Não foi possível abrir o formulário de cliente. Atualize a página e tente novamente.","error");console.error("Formulário de cliente indisponível:",err);return false}
+}
+
+export async function openCliente(c={}){
+  if(!await ensureClientDialog())return;
+  clienteForm.reset();
+  clearClientErrors();
   clienteId.value=c.id||"";
   clienteNome.value=c.nome||"";
   clienteNif.value=c.nif||"";
@@ -31,41 +56,89 @@ export function openCliente(c={}){
   clienteCondicoesPagamento.value=c.condicoes_pagamento||"";
   clienteLimiteCredito.value=c.limite_credito||0;
   clienteObservacoes.value=c.observacoes||"";
+  clienteDialogTitle.textContent=c.id?"Editar cliente":"Novo cliente";
+  clienteCommercialDetails.open=c.tipo==="Empresa"||c.tipo==="Condomínio"||[c.website,c.cae,c.condicoes_pagamento,c.limite_credito,c.observacoes].some(Boolean);
   clienteDialog.showModal();
+  clienteNome.focus();
+}
+
+const clientFieldIds={nome:"clienteNome",nif:"clienteNif",email:"clienteEmail",telefone:"clienteTelefone",telefone_alternativo:"clienteTelefoneAlternativo",codigo_postal:"clienteCodigoPostal",limite_credito:"clienteLimiteCredito"};
+function clearClientErrors(){
+  if($("clienteFormStatus"))$("clienteFormStatus").textContent="";
+  Object.values(clientFieldIds).forEach(id=>{const field=$(id);field?.removeAttribute("aria-invalid");field?.setCustomValidity("")});
+}
+function showClientErrors(errors){
+  clearClientErrors();
+  const entries=Object.entries(errors);
+  entries.forEach(([key,message])=>{const field=$(clientFieldIds[key]);field?.setAttribute("aria-invalid","true");field?.setCustomValidity(message)});
+  if(entries.length){
+    $("clienteFormStatus").textContent=entries[0][1];
+    $(clientFieldIds[entries[0][0]])?.focus();
+    $(clientFieldIds[entries[0][0]])?.reportValidity();
+  }
+  return !entries.length;
+}
+
+export function initClientes(refresh){
+  refreshClientes=refresh||refreshClientes;
+  $("clienteSearch").oninput=()=>renderClientes();
+  $("clienteEstadoFiltro").onchange=()=>renderClientes();
+  $("clienteLimparFiltros").onclick=()=>{$("clienteSearch").value="";$("clienteEstadoFiltro").value="";renderClientes()};
 }
 
 export async function submitCliente(e,refresh){
   e.preventDefault();
+  const button=$("clienteGuardarBtn");
+  clearClientErrors();
   try{
     const nif=normalizeNif(clienteNif.value);
     const email=normalizeEmail(clienteEmail.value);
+    const candidate={nome:clienteNome.value,nif,email,telefone:clienteTelefone.value,telefone_alternativo:clienteTelefoneAlternativo.value,codigo_postal:normalizePostalCode(clienteCodigoPostal.value),pais:clientePais.value,limite_credito:clienteLimiteCredito.value};
+    if(!showClientErrors(validateClientData(candidate)))return;
+    if(!clienteForm.checkValidity()){clienteForm.reportValidity();return}
     const duplicate=findDuplicateClient(store.clientes,{nif,email},clienteId.value||null);
-    if(duplicate)throw new Error(`Já existe um cliente com o mesmo ${nif&&normalizeNif(duplicate.nif)===nif?"NIF":"e-mail"}: ${duplicate.nome}.`);
+    if(duplicate){
+      const key=nif&&normalizeNif(duplicate.nif)===nif?"nif":"email";
+      if(key==="nif")showClientErrors({nif:`Já existe um cliente com este NIF: ${duplicate.nome}.`});
+      else{$("clienteEmail").setAttribute("aria-invalid","true");$("clienteEmail").setCustomValidity(`Já existe um cliente com este e-mail: ${duplicate.nome}.`);$("clienteFormStatus").textContent=$("clienteEmail").validationMessage;$("clienteEmail").focus();$("clienteEmail").reportValidity()}
+      return;
+    }
+    button.disabled=true;button.textContent="A guardar…";
     await save("clientes",{
       nome:clienteNome.value.trim(),
       nif:nif||null,
       morada:clienteMorada.value||null,
       email:email||null,
-      telefone:clienteTelefone.value||null,
+      telefone:clienteTelefone.value.trim()||null,
       tipo:clienteTipo.value,
       estado:clienteEstado.value,
-      telefone_alternativo:clienteTelefoneAlternativo.value||null,
+      telefone_alternativo:clienteTelefoneAlternativo.value.trim()||null,
       website:clienteWebsite.value||null,
       cae:clienteCae.value||null,
-      codigo_postal:clienteCodigoPostal.value||null,
+      codigo_postal:candidate.codigo_postal||null,
       localidade:clienteLocalidade.value||null,
       pais:clientePais.value||"Portugal",
       condicoes_pagamento:clienteCondicoesPagamento.value||null,
       limite_credito:Number(clienteLimiteCredito.value||0),
       observacoes:clienteObservacoes.value||null
     },clienteId.value||null);
-    clienteDialog.close();toast("Cliente guardado.");await refresh();
-  }catch(err){toast(err.code==="23505"?"Já existe um cliente com este NIF.":err.message,"error")}
+    clienteDialog.close();toast("Cliente guardado. Já pode associar obras, orçamentos e contactos.");await refresh();
+  }catch(err){$("clienteFormStatus").textContent=err.code==="23505"?"Já existe um cliente com este NIF.":err.message||"Não foi possível guardar o cliente.";toast($("clienteFormStatus").textContent,"error")}
+  finally{button.disabled=false;button.textContent="Guardar cliente"}
+}
+
+export async function deactivateCliente(id,refresh){
+  const client=store.clientes.find(item=>String(item.id)===String(id));
+  if(!client||!confirm(`Desativar ${client.nome}? O cliente continuará guardado e poderá ser reativado através de Editar.`))return;
+  try{await save("clientes",{estado:"Inativo"},id);toast("Cliente desativado e preservado no histórico.");await refresh()}
+  catch(err){toast(friendlyError(err,"Não foi possível desativar o cliente."),"error")}
 }
 
 export async function deleteCliente(id,refresh){
-  if(!confirm("Confirmar eliminação?"))return;
-  try{await remove("clientes",id);toast("Cliente apagado.");await refresh()}
+  const client=store.clientes.find(item=>String(item.id)===String(id));
+  if(client?.estado!=="Inativo")return toast("Desative primeiro o cliente antes de o apagar definitivamente.","error");
+  if(!confirm(`Apagar definitivamente ${client?.nome||"este cliente"}? Esta ação não pode ser anulada.`))return;
+  try{await remove("clientes",id);toast("Cliente apagado definitivamente.");await refresh()}
   catch(err){toast(friendlyError(err,"Não foi possível apagar o cliente."),"error")}
 }
 
