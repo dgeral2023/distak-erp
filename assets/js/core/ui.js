@@ -1,6 +1,36 @@
 export const $=id=>document.getElementById(id);
 export const esc=(v="")=>String(v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
 export const money=n=>new Intl.NumberFormat("pt-PT",{style:"currency",currency:"EUR"}).format(Number(n||0));
+function parseEuroInteger(value){
+  if(/^\d+$/.test(value))return value;
+  const groups=value.split(/[.,]/);
+  if(!/^\d{1,3}$/.test(groups[0])||!groups.slice(1).every(group=>/^\d{3}$/.test(group)))return null;
+  return groups.join("");
+}
+export function parseEuroValue(value){
+  if(typeof value==="number")return Number.isFinite(value)?value:Number.NaN;
+  const raw=String(value??"").trim();
+  if(!raw)return 0;
+  const compact=raw.replace(/[€\s\u00a0\u202f]/g,"");
+  if(!/^-?\d+(?:[.,]\d+)*$/.test(compact))return Number.NaN;
+  const negative=compact.startsWith("-"),unsigned=negative?compact.slice(1):compact;
+  const comma=unsigned.lastIndexOf(","),dot=unsigned.lastIndexOf(".");
+  let integerPart=unsigned,decimalPart="";
+  if(comma>=0&&dot>=0){
+    const decimalIndex=Math.max(comma,dot);
+    decimalPart=unsigned.slice(decimalIndex+1);
+    if(!/^\d{1,2}$/.test(decimalPart))return Number.NaN;
+    integerPart=parseEuroInteger(unsigned.slice(0,decimalIndex));
+  }else if(comma>=0||dot>=0){
+    const separator=comma>=0?",":".",parts=unsigned.split(separator),last=parts.at(-1);
+    if(last.length<=2){integerPart=parseEuroInteger(parts.slice(0,-1).join(separator));decimalPart=last}
+    else if(parts.slice(1).every(part=>part.length===3)){integerPart=parseEuroInteger(unsigned)}
+    else return Number.NaN;
+  }
+  if(integerPart===null||!/^\d+$/.test(integerPart)||decimalPart&&!/^\d{1,2}$/.test(decimalPart))return Number.NaN;
+  const parsed=Number(`${negative?"-":""}${integerPart}${decimalPart?`.${decimalPart}`:""}`);
+  return Number.isFinite(parsed)?parsed:Number.NaN;
+}
 let toastTimer;
 export function toast(m,t=""){
   const e=$("toast"),error=t==="error";

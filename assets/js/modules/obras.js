@@ -1,5 +1,5 @@
 import {store} from "../core/store.js";
-import {$,esc,money,toast,friendlyError} from "../core/ui.js";
+import {$,esc,money,toast,friendlyError,parseEuroValue} from "../core/ui.js";
 import {db,save,remove} from "../core/supabase.js";
 import {renderObraFotografias} from "./fotografias.js";
 import {renderObraDocumentos} from "./documentos.js";
@@ -49,7 +49,12 @@ export function openObra(o={}){
 export async function submitObra(e,refresh){
   e.preventDefault();
   try{
-    const valor=Number(obraValor.value||0);
+    const valor=parseEuroValue(obraValor.value);
+    if(!Number.isFinite(valor)||valor<0){
+      toast("Introduza um valor válido, por exemplo 5.822,15 €.","error");
+      obraValor.focus();
+      return;
+    }
     await save("obras",{
       cliente_id:obraClienteId.value,
       nome:obraNome.value.trim(),
