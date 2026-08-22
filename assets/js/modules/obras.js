@@ -1,6 +1,6 @@
 import {store} from "../core/store.js";
 import {$,esc,money,toast,friendlyError,parseEuroValue} from "../core/ui.js";
-import {calculateWorkFinancialValues,workFinancialValues} from "../core/work-finance.js";
+import {calculateWorkFinancialValuesFromRate,normalizeWorkVatRate,workFinancialValues} from "../core/work-finance.js";
 import {db,save,remove} from "../core/supabase.js";
 import {renderObraFotografias} from "./fotografias.js";
 import {renderObraDocumentos} from "./documentos.js";
@@ -25,7 +25,7 @@ export function renderObras(rows=store.obras){
       <td><div class="obra-list-identity">${image}<button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button></div></td>
       <td>${esc(o.clientes?.nome||"")}</td>
       <td><span class="badge">${esc(o.estado||"")}</span></td>
-      ${admin?`<td>${money(finance.base)}</td><td>${money(finance.vat)}</td><td><strong>${money(finance.total)}</strong></td><td>${money(custos)}</td><td>${money(recebido)}</td>`:""}
+      ${admin?`<td>${money(finance.base)}</td><td>${money(finance.vat)}<small>${finance.rate?`${finance.rate}%`:"Taxa não registada"}</small></td><td><strong>${money(finance.total)}</strong></td><td>${money(custos)}</td><td>${money(recebido)}</td>`:""}
       <td><div class="progress-line"><span style="width:${Math.min(100,Math.max(0,Number(o.progresso||0)))}%"></span></div><small>${o.progresso||0}%</small></td>
       <td><button class="btn small primary" data-view-obra="${o.id}">Ficha</button>${admin?` <button class="btn small light" data-edit-obra="${o.id}">Editar</button> <button class="btn small danger" data-del-obra="${o.id}">Apagar</button>`:""}</td>
     </tr>`;
@@ -41,7 +41,7 @@ export function openObra(o={}){
   obraEstado.value=o.estado||"Orçamento";
   const finance=workFinancialValues(o);
   obraValor.value=finance.base||"";
-  obraIvaValor.value=finance.vat||"";
+  obraIvaTaxa.value=finance.rate||23;
   obraProgresso.value=o.progresso||0;
   obraPrazo.value=o.prazo||"";
   obraResponsavel.value=o.responsavel||"";
@@ -54,13 +54,13 @@ export function openObra(o={}){
 export async function submitObra(e,refresh){
   e.preventDefault();
   try{
-    const base=parseEuroValue(obraValor.value),iva=parseEuroValue(obraIvaValor.value);
-    if(!Number.isFinite(base)||base<0||!Number.isFinite(iva)||iva<0){
-      toast("Introduza valores válidos para a obra e para o IVA.","error");
+    const base=parseEuroValue(obraValor.value),rate=normalizeWorkVatRate(obraIvaTaxa.value);
+    if(!Number.isFinite(base)||base<0||rate===null){
+      toast("Introduza um valor válido e escolha a taxa de IVA de 23% ou 6%.","error");
       obraValor.focus();
       return;
     }
-    const finance=calculateWorkFinancialValues(base,iva);
+    const finance=calculateWorkFinancialValuesFromRate(base,rate);
     await save("obras",{
       cliente_id:obraClienteId.value,
       nome:obraNome.value.trim(),
@@ -68,6 +68,7 @@ export async function submitObra(e,refresh){
       estado:obraEstado.value,
       valor:finance.base,
       valor_contratado:finance.base,
+      taxa_iva:finance.rate,
       valor_iva:finance.vat,
       progresso:Number(obraProgresso.value||0),
       prazo:obraPrazo.value||null,
@@ -79,15 +80,17 @@ export async function submitObra(e,refresh){
 }
 
 function renderObraTotalPreview(){
-  const base=parseEuroValue(obraValor.value),iva=parseEuroValue(obraIvaValor.value);
-  obraTotalPreview.textContent=Number.isFinite(base)&&Number.isFinite(iva)?money(calculateWorkFinancialValues(base,iva).total):"—";
+  const base=parseEuroValue(obraValor.value),rate=normalizeWorkVatRate(obraIvaTaxa.value);
+  const finance=Number.isFinite(base)&&rate!==null?calculateWorkFinancialValuesFromRate(base,rate):null;
+  obraIvaValorPreview.textContent=finance?money(finance.vat):"—";
+  obraTotalPreview.textContent=finance?money(finance.total):"—";
 }
 
 function configureObraFinancialInputs(){
   if(obraValor.dataset.financialInputsReady)return;
   obraValor.dataset.financialInputsReady="true";
   obraValor.addEventListener("input",renderObraTotalPreview);
-  obraIvaValor.addEventListener("input",renderObraTotalPreview);
+  obraIvaTaxa.addEventListener("change",renderObraTotalPreview);
 }
 
 export async function deleteObra(id,refresh){
@@ -123,6 +126,7 @@ function renderObraFicha(obra){
   obraFichaNome.textContent=obra.nome;
   obraFichaMeta.textContent=[cliente.nome,obra.morada,obra.estado].filter(Boolean).join(" · ");
   obraFichaBase.textContent=money(finance.base);
+  obraFichaIvaLabel.textContent=finance.rate?`IVA (${finance.rate}%)`:"IVA";
   obraFichaIva.textContent=money(finance.vat);
   obraFichaContratado.textContent=money(contratado);
   obraFichaOrcamento.textContent=money(totalOrc);
