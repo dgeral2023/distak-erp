@@ -13,7 +13,7 @@ export async function refreshData(){
     store.clientePortalAtualizacoes=await query("cliente_portal_atualizacoes");
     store.clientePortalFicheiros=await query("cliente_portal_ficheiros");
     store.clientePortalAprovacoes=await query("cliente_portal_aprovacoes");
-    ["obraUtilizadores","leads","clientes","clienteContactos","clienteMoradas","clienteNotas","clienteComunicacoes","clienteDocumentos","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra"].forEach(key=>store[key]=[]);
+    ["obraUtilizadores","leads","clientes","clienteContactos","clienteMoradas","clienteNotas","clienteComunicacoes","clienteDocumentos","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","fornecedores","subempreitadas","subempreitadaAlteracoes","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra"].forEach(key=>store[key]=[]);
     return;
   }
   [
@@ -38,6 +38,7 @@ export async function refreshData(){
   try{store.campoRegistos=await signStorageRows("distak-obras",await query("campo_registos"),"foto_path","foto_url")}catch(err){console.error("Não foi possível carregar os registos de campo:",err);warn("registos de campo");store.campoRegistos=[]}
   store.previsoesFinanceiras = isAdmin ? await query("financeiro_previsoes") : [];
   if(isAdmin){try{[store.pedidosCompra,store.propostasCompra]=await Promise.all([query("compras_pedidos"),query("compras_propostas")])}catch(err){console.error("Não foi possível carregar as compras:",err);warn("compras");store.pedidosCompra=[];store.propostasCompra=[]}}else{store.pedidosCompra=[];store.propostasCompra=[]}
+  if(isAdmin){try{[store.fornecedores,store.subempreitadas,store.subempreitadaAlteracoes]=await Promise.all([query("fornecedores"),query("subempreitadas"),query("subempreitada_alteracoes")])}catch(err){console.error("Não foi possível carregar as subempreitadas:",err);warn("subempreitadas");store.fornecedores=[];store.subempreitadas=[];store.subempreitadaAlteracoes=[]}}else{store.fornecedores=[];store.subempreitadas=[];store.subempreitadaAlteracoes=[]}
   if(isAdmin){try{[store.autosMedicao,store.itensMedicao]=await Promise.all([query("medicoes_autos"),query("medicoes_itens")])}catch(err){console.error("Não foi possível carregar as medições:",err);warn("medições");store.autosMedicao=[];store.itensMedicao=[]}}else{store.autosMedicao=[];store.itensMedicao=[]}
   if(isAdmin){try{store.inteligenciaAvaliacoes=await query("inteligencia_avaliacoes","*,obras(nome)")}catch(err){console.error("Não foi possível carregar as análises de gestão:",err);warn("inteligência de gestão");store.inteligenciaAvaliacoes=[]}}else{store.inteligenciaAvaliacoes=[]}
   try{store.atividades=await query("atividades_sistema","*,profiles(nome)")}catch{warn("atividade recente");store.atividades=[]}

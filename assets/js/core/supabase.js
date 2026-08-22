@@ -81,6 +81,9 @@ async function audit(table,id,acao,payload){
   if(table==="financeiro_previsoes")labels[table]="previsão financeira";
   if(table==="compras_pedidos")labels[table]="pedido de compra";
   if(table==="compras_propostas")labels[table]="proposta de fornecedor";
+  if(table==="fornecedores")labels[table]="subempreiteiro";
+  if(table==="subempreitadas")labels[table]="contrato de subempreitada";
+  if(table==="subempreitada_alteracoes")labels[table]="alteração de subempreitada";
   if(table==="medicoes_autos")labels[table]="auto de medição";
   if(table==="medicoes_itens")labels[table]="linha de medição";
   if(table==="campo_registos")labels[table]="registo de campo";
