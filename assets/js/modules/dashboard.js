@@ -124,15 +124,15 @@ export function renderDashboard(){
 
 function renderVatChart(obras){
   const financial=obras.map(workFinancialValues);
-  const rows=[23,6].map(rate=>{
+  const rows=[23,6,0].map(rate=>{
     const items=financial.filter(item=>item.rate===rate);
     return {label:`IVA ${rate}%`,rate,count:items.length,base:items.reduce((sum,item)=>sum+item.base,0),vat:items.reduce((sum,item)=>sum+item.vat,0)};
   });
   const withoutRate=financial.filter(item=>item.rate===null&&item.vat>0);
   if(withoutRate.length)rows.push({label:"Taxa não registada",rate:null,count:withoutRate.length,base:withoutRate.reduce((sum,item)=>sum+item.base,0),vat:withoutRate.reduce((sum,item)=>sum+item.vat,0)});
   const totalVat=rows.reduce((sum,row)=>sum+row.vat,0),maxVat=Math.max(1,...rows.map(row=>row.vat));
-  const colors={23:"#dfa91f",6:"#315b91",legacy:"#94a3b8"};
-  $("dashboardVatChart").innerHTML=`<div class="vat-chart-total"><span>IVA contratado</span><strong>${money(totalVat)}</strong><small>${rows.reduce((sum,row)=>sum+row.count,0)} obra(s) com IVA calculado ou registado</small></div><div class="vat-rate-bars" role="img" aria-label="IVA contratado por taxa. ${rows.map(row=>`${row.label}: ${money(row.vat)}`).join(". ")}">${rows.map(row=>`<article><div><span>${esc(row.label)}</span><strong>${money(row.vat)}</strong></div><div class="vat-rate-track"><span style="width:${row.vat/maxVat*100}%;background:${colors[row.rate]||colors.legacy}"></span></div><small>${row.count} obra(s) · Base ${money(row.base)}</small></article>`).join("")}</div>`;
+  const colors={23:"#dfa91f",6:"#315b91",0:"#59b99d",legacy:"#94a3b8"};
+  $("dashboardVatChart").innerHTML=`<div class="vat-chart-total"><span>IVA contratado</span><strong>${money(totalVat)}</strong><small>${rows.reduce((sum,row)=>sum+row.count,0)} obra(s) com taxa registada ou IVA legado</small></div><div class="vat-rate-bars" role="img" aria-label="IVA contratado por taxa. ${rows.map(row=>`${row.label}: ${money(row.vat)}`).join(". ")}">${rows.map(row=>`<article><div><span>${esc(row.label)}</span><strong>${money(row.vat)}</strong></div><div class="vat-rate-track"><span style="width:${row.vat/maxVat*100}%;background:${colors[row.rate]||colors.legacy}"></span></div><small>${row.count} obra(s) · Base ${money(row.base)}</small></article>`).join("")}</div>`;
 }
 
 function renderFinanceChart(custos,pagamentos){

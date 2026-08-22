@@ -26,7 +26,7 @@ export function renderObras(rows=store.obras){
       <td><div class="obra-list-identity">${image}<button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button></div></td>
       <td>${esc(o.clientes?.nome||"")}</td>
       <td><span class="badge">${esc(o.estado||"")}</span></td>
-      ${admin?`<td>${money(finance.base)}</td><td>${money(finance.vat)}<small>${finance.rate?`${finance.rate}%`:"Taxa não registada"}</small></td><td><strong>${money(finance.total)}</strong></td><td>${money(custos)}</td><td>${money(recebido)}</td>`:""}
+      ${admin?`<td>${money(finance.base)}</td><td>${money(finance.vat)}<small>${finance.rate!==null?`${finance.rate}%`:"Taxa não registada"}</small></td><td><strong>${money(finance.total)}</strong></td><td>${money(custos)}</td><td>${money(recebido)}</td>`:""}
       <td><div class="progress-line"><span style="width:${Math.min(100,Math.max(0,Number(o.progresso||0)))}%"></span></div><small>${o.progresso||0}%</small></td>
       <td><button class="btn small primary" data-view-obra="${o.id}">Ficha</button>${admin?` <button class="btn small light" data-edit-obra="${o.id}">Editar</button> <button class="btn small danger" data-del-obra="${o.id}">Apagar</button>`:""}</td>
     </tr>`;
@@ -43,7 +43,7 @@ export function openObra(o={}){
   obraEstado.value=o.estado||"Orçamento";
   const finance=workFinancialValues(o);
   obraValor.value=finance.base||"";
-  obraIvaTaxa.value=finance.rate||23;
+  obraIvaTaxa.value=finance.rate??23;
   obraProgresso.value=o.progresso||0;
   obraPrazo.value=o.prazo||"";
   obraResponsavel.value=o.responsavel||"";
@@ -60,7 +60,7 @@ export async function submitObra(e,refresh){
   try{
     const base=parseEuroValue(obraValor.value),rate=normalizeWorkVatRate(obraIvaTaxa.value);
     if(!Number.isFinite(base)||base<0||rate===null){
-      toast("Introduza um valor válido e escolha a taxa de IVA de 23% ou 6%.","error");
+      toast("Introduza um valor válido e escolha a taxa de IVA de 23%, 6% ou 0%.","error");
       obraValor.focus();
       return;
     }
@@ -151,7 +151,7 @@ function renderObraFicha(obra){
   obraFichaNome.textContent=obra.nome;
   obraFichaMeta.textContent=[cliente.nome,obra.morada,obra.estado].filter(Boolean).join(" · ");
   obraFichaBase.textContent=money(finance.base);
-  obraFichaIvaLabel.textContent=finance.rate?`IVA (${finance.rate}%)`:"IVA";
+  obraFichaIvaLabel.textContent=finance.rate!==null?`IVA (${finance.rate}%)`:"IVA";
   obraFichaIva.textContent=money(finance.vat);
   obraFichaContratado.textContent=money(contratado);
   obraFichaOrcamento.textContent=money(totalOrc);

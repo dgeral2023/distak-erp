@@ -4,7 +4,7 @@ const amount=value=>{
 };
 
 export const roundMoney=value=>Math.round((amount(value)+Number.EPSILON)*100)/100;
-export const WORK_VAT_RATES=Object.freeze([6,23]);
+export const WORK_VAT_RATES=Object.freeze([0,6,23]);
 
 export function normalizeWorkVatRate(value){
   const rate=Number(value);
