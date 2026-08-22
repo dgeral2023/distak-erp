@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {findDuplicateClient,isValidPortugueseNif,isValidPortuguesePhone,isValidPortuguesePostalCode,normalizeEmail,normalizeNif,normalizePostalCode,validateClientData} from "../assets/js/core/data-quality.js";
+import {parseEuroValue} from "../assets/js/core/ui.js";
 
 assert.equal(normalizeEmail("  CLIENTE@EXEMPLO.PT "),"cliente@exemplo.pt");
 assert.equal(normalizeNif("PT 123 456 789"),"123456789");
@@ -25,4 +26,14 @@ assert.equal(findDuplicateClient(clients,{email:" GERAL@CLIENTE.PT "})?.id,"a");
 assert.equal(findDuplicateClient(clients,{nif:"123456789"},"a"),null,"Editar o próprio cliente não pode ser tratado como duplicado.");
 assert.equal(findDuplicateClient(clients,{nif:"987654321",email:"novo@cliente.pt"}),null);
 
-console.log("Qualidade de clientes aprovada: NIF e e-mail são normalizados e duplicados são detetados.");
+assert.equal(parseEuroValue("5822,15"),5822.15);
+assert.equal(parseEuroValue("5822.15"),5822.15);
+assert.equal(parseEuroValue("5 822,15 €"),5822.15);
+assert.equal(parseEuroValue("5.822,15"),5822.15);
+assert.equal(parseEuroValue("5,822.15"),5822.15);
+assert.equal(parseEuroValue("5.822"),5822);
+assert.equal(parseEuroValue(""),0);
+assert.equal(Number.isNaN(parseEuroValue("cinco mil")),true);
+assert.equal(Number.isNaN(parseEuroValue("5822,150")),true,"Três casas decimais não podem ser confundidas com milhares.");
+
+console.log("Qualidade de dados aprovada: clientes e valores monetários são normalizados e validados.");
