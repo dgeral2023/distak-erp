@@ -4,7 +4,7 @@
 .progress-line{width:110px;height:7px;background:#e5e7eb;border-radius:999px;overflow:hidden;display:inline-block;margin-right:6px;vertical-align:middle}
 .progress-line span{display:block;height:100%;background:var(--gold);border-radius:999px}
 .obra-edit-form{max-height:82vh;overflow:auto}.obra-ficha-dialog{width:min(1240px,calc(100% - 24px));max-width:none;max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain}
-.obra-contract-total{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #d9e2ec;border-radius:12px;background:#f8fafc;padding:13px 15px}.obra-contract-total span{color:var(--muted);font-size:12px}.obra-contract-total strong{font-size:20px;color:var(--nav)}
+.obra-contract-breakdown{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.obra-contract-breakdown>div{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #d9e2ec;border-radius:12px;background:#f8fafc;padding:13px 15px}.obra-contract-breakdown span{color:var(--muted);font-size:12px}.obra-contract-breakdown strong{font-size:20px;color:var(--nav)}
 .obra-ficha-shell{width:100%;min-width:0;background:var(--bg);min-height:76vh}
 .obra-ficha-head{background:linear-gradient(135deg,var(--nav),#263348);color:#fff;padding:22px 24px;display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
 .obra-ficha-head h2{margin:4px 0 7px}.obra-ficha-head p{margin:0;color:#dbe4f0}.obra-kicker{text-transform:uppercase;letter-spacing:.13em;font-size:11px;color:var(--gold);font-weight:800}
@@ -32,4 +32,4 @@
   .obra-tab-panel .table-scroll table{min-width:680px}
   .obra-tab-panel input,.obra-tab-panel select,.obra-tab-panel textarea{max-width:100%}
 }
-@media(max-width:600px){.obra-finance-summary,.obra-resumo-grid{grid-template-columns:1fr}.obra-finance-summary{padding:10px}.obra-ficha-head{flex-direction:column}.obra-head-actions{width:100%;justify-content:space-between}}
+@media(max-width:600px){.obra-finance-summary,.obra-resumo-grid,.obra-contract-breakdown{grid-template-columns:1fr}.obra-finance-summary{padding:10px}.obra-ficha-head{flex-direction:column}.obra-head-actions{width:100%;justify-content:space-between}}
