@@ -160,9 +160,19 @@
 
       <div class="executive-stats">
         <article class="exec-stat">
-          <span>Valor contratado</span>
+          <span>Total contratado</span>
           <strong id="statValorContratado">0,00 €</strong>
           <small id="statTotalObras">0 obras registadas</small>
+        </article>
+        <article class="exec-stat">
+          <span>Base sem IVA</span>
+          <strong id="statValorSemIva">0,00 €</strong>
+          <small>Valor das obras</small>
+        </article>
+        <article class="exec-stat">
+          <span>IVA contratado</span>
+          <strong id="statValorIva">0,00 €</strong>
+          <small>Imposto separado</small>
         </article>
         <article class="exec-stat">
           <span>Recebido</span>
@@ -668,7 +678,9 @@
   <label>Nome<input id="obraNome" required></label>
   <label>Morada<input id="obraMorada"></label>
   <label>Estado<select id="obraEstado"><option>Orçamento</option><option>Aguardando adjudicação</option><option>Adjudicada</option><option>Em preparação</option><option>Em execução</option><option>Suspensa</option><option>Pagamento em atraso</option><option>Concluída</option><option>Em garantia</option><option>Arquivada</option></select></label>
-  <label>Valor contratado<input id="obraValor" type="text" inputmode="decimal" maxlength="24" autocomplete="off" placeholder="Ex.: 5.822,15 €" aria-describedby="obraValorHelp"><small id="obraValorHelp" class="field-help">Pode usar espaços, pontos, vírgulas e o símbolo €. O ERP não altera o texto enquanto estiver a editar.</small></label>
+  <label>Valor da obra sem IVA<input id="obraValor" type="text" inputmode="decimal" maxlength="24" autocomplete="off" placeholder="Ex.: 5.822,15 €" aria-describedby="obraValorHelp"><small id="obraValorHelp" class="field-help">Valor base contratado, sem imposto.</small></label>
+  <label>Valor do IVA<input id="obraIvaValor" type="text" inputmode="decimal" maxlength="24" autocomplete="off" placeholder="Ex.: 1.339,09 €" aria-describedby="obraIvaValorHelp"><small id="obraIvaValorHelp" class="field-help">Introduza o montante de IVA aplicável à obra.</small></label>
+  <div class="obra-contract-total full"><span>Total contratado com IVA</span><strong id="obraTotalPreview">0,00 €</strong></div>
   <label>Progresso %<input id="obraProgresso" type="number" min="0" max="100"></label>
   <label>Prazo<input id="obraPrazo" placeholder="Ex.: 120 dias úteis"></label>
   <label>Responsável<input id="obraResponsavel"></label>
@@ -713,7 +725,9 @@
     </section>
 
     <div class="obra-finance-summary">
-      <article><span>Valor contratado</span><strong id="obraFichaContratado">0,00 €</strong></article>
+      <article><span>Base sem IVA</span><strong id="obraFichaBase">0,00 €</strong></article>
+      <article><span>IVA</span><strong id="obraFichaIva">0,00 €</strong></article>
+      <article><span>Total contratado</span><strong id="obraFichaContratado">0,00 €</strong></article>
       <article><span>Orçamento total</span><strong id="obraFichaOrcamento">0,00 €</strong></article>
       <article><span>Custos</span><strong id="obraFichaCustos">0,00 €</strong></article>
       <article><span>Recebido</span><strong id="obraFichaRecebido">0,00 €</strong></article>
