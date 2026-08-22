@@ -1,5 +1,6 @@
 import {store} from "../core/store.js";
 import {$,esc,money} from "../core/ui.js";
+import {workFinancialValues} from "../core/work-finance.js";
 
 const num=v=>Number(v||0);
 const norm=v=>String(v||"").trim().toLowerCase();
@@ -12,7 +13,7 @@ function applyDashboardPreference(){
   if(button){button.setAttribute("aria-pressed",String(detailed));button.textContent=detailed?"⚙ Vista resumida":"⚙ Vista detalhada"}
 }
 
-function obraValor(o){return num(o.valor_contratado||o.valor)}
+function obraValor(o){return workFinancialValues(o).total}
 function orcamentoTotal(o){
   const componentes=num(o.mao_obra)+num(o.materiais)+num(o.logistica);
   if(componentes)return componentes*(1+num(o.iva)/100);
@@ -59,12 +60,14 @@ export function renderDashboard(){
   const funcionarios=store.funcionarios||[];
   const funcionarioHoras=store.funcionarioHoras||[];
 
-  const contratado=obras.reduce((s,o)=>s+obraValor(o),0);
+  const baseContratada=obras.reduce((sum,obra)=>sum+workFinancialValues(obra).base,0);
+  const ivaContratado=obras.reduce((sum,obra)=>sum+workFinancialValues(obra).vat,0);
+  const contratado=obras.reduce((sum,obra)=>sum+workFinancialValues(obra).total,0);
   const totalCustos=custos.reduce((s,c)=>s+num(c.valor||c.valor_sem_iva),0);
   const recebido=pagamentos.reduce((s,p)=>s+num(p.valor),0);
   const porReceber=Math.max(0,contratado-recebido);
-  const lucro=contratado-totalCustos;
-  const margem=contratado>0?lucro/contratado*100:0;
+  const lucro=baseContratada-totalCustos;
+  const margem=baseContratada>0?lucro/baseContratada*100:0;
   const clientesAtivos=clientes.filter(c=>norm(c.estado)==="ativo").length;
   const thisMonth=new Date().toISOString().slice(0,7);
   const monthHours=funcionarioHoras.filter(row=>String(row.data||"").startsWith(thisMonth));
@@ -75,13 +78,15 @@ export function renderDashboard(){
   const overdueTasks=(store.agendaTarefas||[]).filter(task=>task.estado!=="concluida"&&task.prazo<todayKey);
 
   $("statValorContratado").textContent=money(contratado);
+  $("statValorSemIva").textContent=money(baseContratada);
+  $("statValorIva").textContent=money(ivaContratado);
   $("statPagamentos").textContent=money(recebido);
   $("statPorReceber").textContent=money(porReceber);
   $("statCustos").textContent=money(totalCustos);
   $("statLucro").textContent=money(lucro);
   $("statMargem").textContent=`Margem de ${margem.toFixed(1)}%`;
   $("statTaxaRecebida").textContent=`${contratado?((recebido/contratado)*100).toFixed(1):0}% do contratado`;
-  $("statTaxaCustos").textContent=`${contratado?((totalCustos/contratado)*100).toFixed(1):0}% do contratado`;
+  $("statTaxaCustos").textContent=`${baseContratada?((totalCustos/baseContratada)*100).toFixed(1):0}% da base sem IVA`;
   $("statClientes").textContent=clientes.length;
   $("statClientesAtivos").textContent=`${clientesAtivos} clientes ativos`;
   $("statTotalObras").textContent=`${obras.length} obras registadas`;
@@ -102,7 +107,7 @@ export function renderDashboard(){
   $("option5Income").textContent=money(recebido);
   $("option5Alerts").textContent=obras.filter(isAlert).length+overdueCosts.length+overdueTasks.length;
   $("option5ActiveTrend").textContent=`${obras.length} obras registadas`;
-  $("option5ExecutionTrend").textContent=`Margem estimada ${margem.toFixed(1)}%`;
+  $("option5ExecutionTrend").textContent=`Sem IVA ${money(baseContratada)} · IVA ${money(ivaContratado)}`;
   $("option5IncomeTrend").textContent=`${contratado?((recebido/contratado)*100).toFixed(1):0}% do contratado`;
   $("option5AlertTrend").textContent=overdueTasks.length?`${overdueTasks.length} tarefa(s) atrasada(s)`:overdueCosts.length?`${overdueCosts.length} custo(s) vencido(s)`:"Sem alertas vencidos";
 
@@ -156,15 +161,15 @@ function renderTopWorks(obras,custos,pagamentos){
   $("dashboardObras").innerHTML=top.length?`<div class="table-scroll"><table class="dashboard-table option5-work-table"><thead><tr><th>Obra</th><th>Estado</th><th>Progresso</th><th>Valor em execução</th><th>Recebido</th><th></th></tr></thead><tbody>${top.map(o=>{
     const c=custos.filter(x=>String(x.obra_id)===String(o.id)).reduce((s,x)=>s+num(x.valor||x.valor_sem_iva),0);
     const p=pagamentos.filter(x=>String(x.obra_id)===String(o.id)).reduce((s,x)=>s+num(x.valor),0);
-    const v=obraValor(o);
-    const m=v?((v-c)/v*100):0;
+    const values=workFinancialValues(o),v=values.total;
+    const m=values.base?((values.base-c)/values.base*100):0;
     const photo=store.fotografias.find(item=>String(item.obra_id)===String(o.id)&&item.url);
     const image=photo?`<img src="${esc(photo.url)}" alt="Fotografia de ${esc(o.nome)}" loading="lazy">`:`<span class="work-photo-fallback">▥</span>`;
     return `<tr>
       <td><div class="work-identity">${image}<div><button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button><small>${esc(o.clientes?.nome||o.morada||"")}</small></div></div></td>
       <td><span class="badge">${esc(o.estado||"")}</span></td>
       <td><div class="table-progress"><span><i style="width:${Math.min(100,Math.max(0,num(o.progresso)))}%"></i></span><strong>${num(o.progresso).toFixed(0)}%</strong></div></td>
-      <td>${money(v)}<small>Margem ${m.toFixed(1)}%</small></td><td>${money(p)}</td><td><button class="table-more" data-view-obra="${o.id}" aria-label="Abrir obra">⋮</button></td>
+      <td>${money(v)}<small>Base ${money(values.base)} · IVA ${money(values.vat)} · Margem ${m.toFixed(1)}%</small></td><td>${money(p)}</td><td><button class="table-more" data-view-obra="${o.id}" aria-label="Abrir obra">⋮</button></td>
     </tr>`;
   }).join("")}</tbody></table></div>`:'<div class="dashboard-empty">Ainda não existem obras registadas.</div>';
 }

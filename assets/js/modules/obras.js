@@ -1,5 +1,6 @@
 import {store} from "../core/store.js";
 import {$,esc,money,toast,friendlyError,parseEuroValue} from "../core/ui.js";
+import {calculateWorkFinancialValues,workFinancialValues} from "../core/work-finance.js";
 import {db,save,remove} from "../core/supabase.js";
 import {renderObraFotografias} from "./fotografias.js";
 import {renderObraDocumentos} from "./documentos.js";
@@ -15,16 +16,16 @@ export function fillObraSelects(){
 export function renderObras(rows=store.obras){
   const admin=store.profile?.role==="admin";
   $("obrasTable").innerHTML=rows.length?`<table><thead><tr>
-    <th>Obra</th><th>Cliente</th><th>Estado</th>${admin?"<th>Valor</th><th>Custos</th><th>Recebido</th>":""}<th>Progresso</th><th>Ações</th>
+    <th>Obra</th><th>Cliente</th><th>Estado</th>${admin?"<th>Base sem IVA</th><th>IVA</th><th>Total</th><th>Custos</th><th>Recebido</th>":""}<th>Progresso</th><th>Ações</th>
   </tr></thead><tbody>${rows.map(o=>{
-    const custos=totalCustos(o.id),recebido=totalRecebido(o.id);
+    const custos=totalCustos(o.id),recebido=totalRecebido(o.id),finance=workFinancialValues(o);
     const photo=store.fotografias.find(item=>String(item.obra_id)===String(o.id)&&item.url);
     const image=photo?`<img src="${esc(photo.url)}" alt="Fotografia de ${esc(o.nome)}" loading="lazy">`:`<span>▥</span>`;
     return `<tr>
       <td><div class="obra-list-identity">${image}<button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button></div></td>
       <td>${esc(o.clientes?.nome||"")}</td>
       <td><span class="badge">${esc(o.estado||"")}</span></td>
-      ${admin?`<td>${money(valorContratado(o))}</td><td>${money(custos)}</td><td>${money(recebido)}</td>`:""}
+      ${admin?`<td>${money(finance.base)}</td><td>${money(finance.vat)}</td><td><strong>${money(finance.total)}</strong></td><td>${money(custos)}</td><td>${money(recebido)}</td>`:""}
       <td><div class="progress-line"><span style="width:${Math.min(100,Math.max(0,Number(o.progresso||0)))}%"></span></div><small>${o.progresso||0}%</small></td>
       <td><button class="btn small primary" data-view-obra="${o.id}">Ficha</button>${admin?` <button class="btn small light" data-edit-obra="${o.id}">Editar</button> <button class="btn small danger" data-del-obra="${o.id}">Apagar</button>`:""}</td>
     </tr>`;
@@ -38,30 +39,36 @@ export function openObra(o={}){
   obraNome.value=o.nome||"";
   obraMorada.value=o.morada||"";
   obraEstado.value=o.estado||"Orçamento";
-  obraValor.value=valorContratado(o)||"";
+  const finance=workFinancialValues(o);
+  obraValor.value=finance.base||"";
+  obraIvaValor.value=finance.vat||"";
   obraProgresso.value=o.progresso||0;
   obraPrazo.value=o.prazo||"";
   obraResponsavel.value=o.responsavel||"";
   obraNotas.value=o.notas||"";
+  configureObraFinancialInputs();
+  renderObraTotalPreview();
   obraDialog.showModal();
 }
 
 export async function submitObra(e,refresh){
   e.preventDefault();
   try{
-    const valor=parseEuroValue(obraValor.value);
-    if(!Number.isFinite(valor)||valor<0){
-      toast("Introduza um valor válido, por exemplo 5.822,15 €.","error");
+    const base=parseEuroValue(obraValor.value),iva=parseEuroValue(obraIvaValor.value);
+    if(!Number.isFinite(base)||base<0||!Number.isFinite(iva)||iva<0){
+      toast("Introduza valores válidos para a obra e para o IVA.","error");
       obraValor.focus();
       return;
     }
+    const finance=calculateWorkFinancialValues(base,iva);
     await save("obras",{
       cliente_id:obraClienteId.value,
       nome:obraNome.value.trim(),
       morada:obraMorada.value||null,
       estado:obraEstado.value,
-      valor,
-      valor_contratado:valor,
+      valor:finance.base,
+      valor_contratado:finance.base,
+      valor_iva:finance.vat,
       progresso:Number(obraProgresso.value||0),
       prazo:obraPrazo.value||null,
       responsavel:obraResponsavel.value||null,
@@ -69,6 +76,18 @@ export async function submitObra(e,refresh){
     },obraId.value||null);
     obraDialog.close();toast("Obra guardada.");await refresh();
   }catch(err){toast(err.message,"error")}
+}
+
+function renderObraTotalPreview(){
+  const base=parseEuroValue(obraValor.value),iva=parseEuroValue(obraIvaValor.value);
+  obraTotalPreview.textContent=Number.isFinite(base)&&Number.isFinite(iva)?money(calculateWorkFinancialValues(base,iva).total):"—";
+}
+
+function configureObraFinancialInputs(){
+  if(obraValor.dataset.financialInputsReady)return;
+  obraValor.dataset.financialInputsReady="true";
+  obraValor.addEventListener("input",renderObraTotalPreview);
+  obraIvaValor.addEventListener("input",renderObraTotalPreview);
 }
 
 export async function deleteObra(id,refresh){
@@ -91,17 +110,20 @@ function renderObraFicha(obra){
   const custos=store.custos.filter(x=>String(x.obra_id)===String(obra.id));
   const pagamentos=store.pagamentos.filter(x=>String(x.obra_id)===String(obra.id));
 
-  const contratado=valorContratado(obra);
+  const finance=workFinancialValues(obra),contratado=finance.total;
   const totalOrc=orcamentos.reduce((s,o)=>s+orcamentoTotal(o),0);
   const totalC=custos.reduce((s,c)=>s+Number(c.valor||c.valor_sem_iva||0),0);
   const totalP=pagamentos.reduce((s,p)=>s+Number(p.valor||0),0);
   const baseReceita=contratado||totalOrc;
   const porReceber=Math.max(0,baseReceita-totalP);
-  const lucro=baseReceita-totalC;
-  const margem=baseReceita>0?(lucro/baseReceita)*100:0;
+  const receitaSemIva=finance.base||totalOrc;
+  const lucro=receitaSemIva-totalC;
+  const margem=receitaSemIva>0?(lucro/receitaSemIva)*100:0;
 
   obraFichaNome.textContent=obra.nome;
   obraFichaMeta.textContent=[cliente.nome,obra.morada,obra.estado].filter(Boolean).join(" · ");
+  obraFichaBase.textContent=money(finance.base);
+  obraFichaIva.textContent=money(finance.vat);
   obraFichaContratado.textContent=money(contratado);
   obraFichaOrcamento.textContent=money(totalOrc);
   obraFichaCustos.textContent=money(totalC);
@@ -143,7 +165,6 @@ function renderObraFicha(obra){
 const field=(label,value)=>`<article class="obra-field"><span>${label}</span><strong>${esc(value||"—")}</strong></article>`;
 const empty=text=>`<div class="obra-placeholder">${text}</div>`;
 const formatDate=v=>v?new Date(v).toLocaleDateString("pt-PT"):"—";
-const valorContratado=o=>Number(o.valor_contratado||o.valor||0);
 const totalCustos=id=>store.custos.filter(x=>String(x.obra_id)===String(id)).reduce((s,x)=>s+Number(x.valor||x.valor_sem_iva||0),0);
 const totalRecebido=id=>store.pagamentos.filter(x=>String(x.obra_id)===String(id)).reduce((s,x)=>s+Number(x.valor||0),0);
 const orcamentoTotal=o=>{
