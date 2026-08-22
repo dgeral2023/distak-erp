@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="assets/css/dossies.css?v=20260806-dossiers-quality-v2">
   <link rel="stylesheet" href="assets/css/operacional.css?v=20260805-operational-v1">
   <link rel="stylesheet" href="assets/css/compras.css?v=20260805-purchases-v1">
+  <link rel="stylesheet" href="assets/css/subempreiteiros.css?v=20260822-subcontract-v1">
   <link rel="stylesheet" href="assets/css/medicoes.css?v=20260805-measurements-v1">
   <link rel="stylesheet" href="assets/css/campo.css?v=20260805-field-v1">
   <link rel="stylesheet" href="assets/css/inteligencia.css?v=20260806-intelligence-v2">
@@ -90,7 +91,7 @@
       <div class="nav-group non-client-only"><button class="nav active" data-view="dashboard"><i data-erp-icon="home"></i><span>Dashboard</span></button></div>
       <div class="nav-group admin-only" data-menu-group="comercial"><button class="nav-group-title" type="button" data-toggle-menu-group="comercial"><span>Comercial</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="leads"><i data-erp-icon="lead"></i><span>Pedidos do site</span><b id="leadNavBadge" class="nav-badge hidden">0</b></button><button class="nav" data-view="clientes"><i data-erp-icon="clients"></i><span>Clientes</span></button><button class="nav" data-view="orcamentos"><i data-erp-icon="file"></i><span>Propostas e orçamentos</span></button></div></div>
       <div class="nav-group" data-menu-group="obras"><button class="nav-group-title" type="button" data-toggle-menu-group="obras"><span>Obras</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="obras"><i data-erp-icon="works"></i><span>Dashboard de obras</span><b id="navWorkCount">0</b></button><button class="nav" data-view="operacional"><i data-erp-icon="operational"></i><span>Centro Operacional</span></button><button class="nav" data-view="agenda"><i data-erp-icon="calendar"></i><span>Agenda e tarefas</span><b id="navTaskCount">0</b></button><button class="nav" data-view="dossies"><i data-erp-icon="folder"></i><span>Dossiê digital</span></button><button class="nav" data-view="funcionario"><i data-erp-icon="field"></i><span>Portal de campo</span></button></div></div>
-      <div class="nav-group admin-only" data-menu-group="financeiro"><button class="nav-group-title" type="button" data-toggle-menu-group="financeiro"><span>Financeiro</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="inteligencia"><i data-erp-icon="intelligence"></i><span>Inteligência de gestão</span></button><button class="nav" data-view="compras"><i data-erp-icon="shopping"></i><span>Compras e fornecedores</span></button><button class="nav" data-view="medicoes"><i data-erp-icon="percent"></i><span>Medições e faturação</span></button><button class="nav" data-view="custos"><i data-erp-icon="receipt"></i><span>Custos e faturas</span></button><button class="nav" data-view="pagamentos"><i data-erp-icon="euro"></i><span>Recebimentos de clientes</span></button><button class="nav" data-view="previsoes"><i data-erp-icon="trend"></i><span>Previsões e cobranças</span></button><button class="nav" data-view="relatorios"><i data-erp-icon="chart"></i><span>Relatórios</span></button></div></div>
+      <div class="nav-group admin-only" data-menu-group="financeiro"><button class="nav-group-title" type="button" data-toggle-menu-group="financeiro"><span>Financeiro</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="inteligencia"><i data-erp-icon="intelligence"></i><span>Inteligência de gestão</span></button><button class="nav" data-view="compras"><i data-erp-icon="shopping"></i><span>Compras e fornecedores</span></button><button class="nav" data-view="subempreiteiros"><i data-erp-icon="team"></i><span>Subempreiteiros</span></button><button class="nav" data-view="medicoes"><i data-erp-icon="percent"></i><span>Medições e faturação</span></button><button class="nav" data-view="custos"><i data-erp-icon="receipt"></i><span>Custos e faturas</span></button><button class="nav" data-view="pagamentos"><i data-erp-icon="euro"></i><span>Recebimentos de clientes</span></button><button class="nav" data-view="previsoes"><i data-erp-icon="trend"></i><span>Previsões e cobranças</span></button><button class="nav" data-view="relatorios"><i data-erp-icon="chart"></i><span>Relatórios</span></button></div></div>
       <div class="nav-group admin-only" data-menu-group="equipa"><button class="nav-group-title" type="button" data-toggle-menu-group="equipa"><span>Equipa</span><i>⌃</i></button><div class="nav-group-items"><button class="nav" data-view="funcionarios"><i data-erp-icon="team"></i><span>Recursos humanos</span></button><button class="nav" data-view="empresa"><i data-erp-icon="settings"></i><span>Empresa</span></button></div></div>
       <div id="favoriteNavGroup" class="nav-group utility-nav-group"><button class="nav-group-title" type="button" data-toggle-menu-group="favoritos"><span>☆ Favoritos</span><i>⌄</i></button><div id="favoriteNav" class="nav-group-items"></div></div>
       <div id="recentNavGroup" class="nav-group utility-nav-group"><button class="nav-group-title" type="button" data-toggle-menu-group="recentes"><span>◷ Recentes</span><i>⌄</i></button><div id="recentNav" class="nav-group-items"></div></div>
@@ -238,6 +239,11 @@
           <div><h3>IVA das obras</h3><p>Montante contratado separado pelas taxas de 23%, 6% e 0%</p></div>
         </div>
         <div id="dashboardVatChart" class="dashboard-vat-chart"></div>
+      </section>
+
+      <section class="panel dashboard-vat-panel admin-only">
+        <div class="panel-title"><div><h3>Subempreitadas e resultado planeado</h3><p>Comparação sem IVA entre obras, compromissos e custos registados</p></div><button class="btn small light" data-dashboard-view="subempreiteiros">Abrir controlo</button></div>
+        <div id="dashboardSubcontractSummary" class="subcontract-kpis"></div>
       </section>
 
       <div class="executive-main-grid">
@@ -469,6 +475,15 @@
       </div>
       <div class="panel"><div id="custosTable"></div></div>
       <div class="panel custo-supplier-panel"><h3>Resumo por fornecedor</h3><div id="custoSupplierReport"></div></div>
+    </section>
+
+    <section id="view-subempreiteiros" class="view hidden admin-only">
+      <header class="subcontract-head"><div><span>CONTROLO DE SUBEMPREITADAS</span><h1>Subempreiteiros e contratos</h1><p>Compare o valor contratado com o cliente, o compromisso assumido e as faturas reais.</p></div><div><button id="newSupplierBtn" class="btn light" type="button">Novo subempreiteiro</button><button id="newSubcontractBtn" class="btn primary" type="button">Novo contrato</button></div></header>
+      <div class="subcontract-note"><strong>Separação financeira:</strong> um contrato representa um compromisso. Só as faturas em Custos e os respetivos pagamentos representam movimentos reais.</div>
+      <div id="subcontractKpis" class="subcontract-kpis"></div>
+      <div class="subcontract-toolbar"><input id="subcontractSearch" type="search" placeholder="Pesquisar obra, subempreiteiro ou trabalho" aria-label="Pesquisar subempreitadas"><select id="subcontractWorkFilter" aria-label="Filtrar por obra"><option value="">Todas as obras</option></select><select id="subcontractStateFilter" aria-label="Filtrar por estado"><option value="">Todos os estados</option><option value="proposta">Proposta</option><option value="adjudicada">Adjudicada</option><option value="em_execucao">Em execução</option><option value="suspensa">Suspensa</option><option value="concluida">Concluída</option><option value="cancelada">Cancelada</option></select></div>
+      <section class="panel"><div class="panel-title"><div><h3>Contratos por obra</h3><p>Compromisso sem IVA, faturação e pagamentos associados</p></div></div><div id="subcontractList" class="subcontract-list"></div></section>
+      <section class="panel subcontract-supplier-panel"><div class="panel-title"><div><h3>Cadastro de subempreiteiros</h3><p>Contactos e dados administrativos internos</p></div></div><div id="subcontractSuppliers"></div></section>
     </section>
 
     <section id="view-pagamentos" class="view hidden">
@@ -748,6 +763,7 @@
       <button class="active" data-obra-tab="resumo">Resumo</button>
       <button data-obra-tab="orcamentos">Orçamentos</button>
       <button data-obra-tab="custos">Custos</button>
+      <button class="admin-only" data-obra-tab="subempreitadas">Subempreitadas</button>
       <button data-obra-tab="pagamentos">Recebimentos</button>
       <button data-obra-tab="documentos">Documentos</button>
       <button data-obra-tab="fotografias">Fotografias</button>
@@ -758,6 +774,7 @@
       <div id="obra-tab-resumo" class="obra-tab-panel"></div>
       <div id="obra-tab-orcamentos" class="obra-tab-panel hidden"></div>
       <div id="obra-tab-custos" class="obra-tab-panel hidden"></div>
+      <div id="obra-tab-subempreitadas" class="obra-tab-panel hidden admin-only"></div>
       <div id="obra-tab-pagamentos" class="obra-tab-panel hidden"></div>
       <div id="obra-tab-documentos" class="obra-tab-panel hidden">
         <section class="work-documents">
@@ -984,6 +1001,7 @@
 <dialog id="custoDialog"><form id="custoForm" class="modal-form">
   <h3>Novo / editar custo</h3><input type="hidden" id="custoId">
   <label>Obra<select id="custoObraId" required></select></label><label>Categoria<select id="custoCategoria"><option>Materiais</option><option>Mão de obra</option><option>Subempreiteiros</option><option>Máquinas</option><option>Andaimes</option><option>Entulho</option><option>Combustível</option><option>Portagens</option><option>Ferramentas</option><option>Seguros</option><option>Outros</option></select></label>
+  <label class="full">Contrato de subempreitada (opcional)<select id="custoSubempreitadaId"><option value="">Sem contrato associado</option></select><small>Associe apenas quando esta fatura pertence a um contrato da obra selecionada.</small></label>
   <label>Nome da empresa / fornecedor<input id="custoNomeEmpresa" placeholder="Ex.: Fornecedor, Lda."></label><label>Nº da fatura<input id="custoNumeroFatura" placeholder="Ex.: FT 2026/123"></label>
   <label>Descrição<input id="custoDescricao" required></label><label>Valor sem IVA<input id="custoValor" type="number" step="0.01" required></label>
   <label>IVA %<select id="custoIva"><option value="0">0%</option><option value="6">6%</option><option value="23">23%</option></select></label><label>Data<input id="custoData" type="date"></label>
@@ -992,6 +1010,37 @@
   <div id="custoAnexoAtual" class="full custo-anexo-atual hidden"></div>
   <div class="full custo-total-preview"><span>Total com IVA</span><strong id="custoTotalPreview">0,00 €</strong></div>
   <div class="actions"><button type="button" class="btn light" data-close="custoDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
+</form></dialog>
+
+<dialog id="supplierDialog"><form id="supplierForm" class="modal-form subcontract-form">
+  <h3>Novo / editar subempreiteiro</h3><input id="supplierId" type="hidden">
+  <label>Tipo<select id="supplierType"><option value="subempreiteiro">Subempreiteiro</option><option value="fornecedor">Fornecedor</option><option value="prestador_servicos">Prestador de serviços</option></select></label><label>Estado<select id="supplierState"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></label>
+  <label>Nome<input id="supplierName" maxlength="180" required></label><label>NIF<input id="supplierNif" maxlength="24"></label>
+  <label>Email<input id="supplierEmail" type="email" maxlength="180"></label><label>Telefone<input id="supplierPhone" maxlength="40"></label>
+  <label class="full">Morada<input id="supplierAddress" maxlength="300"></label><label>Especialidade<input id="supplierSpecialty" maxlength="180" placeholder="Ex.: Eletricidade, pintura ou canalização"></label><label>IBAN<input id="supplierIban" maxlength="48"></label>
+  <label>Condições de pagamento<input id="supplierTerms" maxlength="180"></label><label>Apólice de seguro<input id="supplierInsurance" maxlength="120"></label><label>Validade do seguro<input id="supplierInsuranceDate" type="date"></label>
+  <label class="full">Notas<textarea id="supplierNotes" rows="3"></textarea></label>
+  <div class="actions full"><button type="button" class="btn light" data-close="supplierDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
+</form></dialog>
+
+<dialog id="subcontractDialog"><form id="subcontractForm" class="modal-form subcontract-form">
+  <h3>Novo / editar contrato de subempreitada</h3><input id="subcontractId" type="hidden">
+  <label>Obra<select id="subcontractWork" required></select></label><label>Subempreiteiro<select id="subcontractSupplier" required></select></label>
+  <label class="full">Trabalho contratado<input id="subcontractObject" maxlength="240" required placeholder="Ex.: Instalação elétrica completa"></label>
+  <label>Valor acordado sem IVA<input id="subcontractValue" type="text" inputmode="decimal" maxlength="24" required placeholder="Ex.: 12.500,00 €"></label><label>Taxa de IVA<select id="subcontractVat"><option value="0">0%</option><option value="6">6%</option><option value="23">23%</option></select></label>
+  <label>Estado<select id="subcontractState"><option value="proposta">Proposta</option><option value="adjudicada">Adjudicada</option><option value="em_execucao">Em execução</option><option value="suspensa">Suspensa</option><option value="concluida">Concluída</option><option value="cancelada">Cancelada</option></select></label><label>Data de adjudicação<input id="subcontractAwardDate" type="date"></label>
+  <label>Início previsto<input id="subcontractStart" type="date"></label><label>Fim previsto<input id="subcontractEnd" type="date"></label>
+  <label class="full">Condições de pagamento<input id="subcontractTerms" maxlength="240"></label><label class="full">Notas<textarea id="subcontractNotes" rows="3"></textarea></label>
+  <div class="actions full"><button type="button" class="btn light" data-close="subcontractDialog">Cancelar</button><button class="btn primary">Guardar contrato</button></div>
+</form></dialog>
+
+<dialog id="subcontractChangeDialog"><form id="subcontractChangeForm" class="modal-form subcontract-form">
+  <h3>Trabalho a mais ou a menos</h3><input id="subcontractChangeId" type="hidden">
+  <label class="full">Contrato<select id="subcontractChangeContract" required></select></label><label class="full">Descrição<input id="subcontractChangeDescription" maxlength="240" required></label>
+  <label>Valor sem IVA<input id="subcontractChangeValue" type="text" inputmode="decimal" maxlength="24" required placeholder="Use - para trabalho a menos"></label><label>Estado<select id="subcontractChangeState"><option value="rascunho">Rascunho</option><option value="aprovada">Aprovada</option><option value="recusada">Recusada</option></select></label>
+  <label>Data<input id="subcontractChangeDate" type="date" required></label><label class="full">Notas<textarea id="subcontractChangeNotes" rows="3"></textarea></label>
+  <p class="subcontract-change-warning full">Só alterações aprovadas entram no valor comprometido.</p>
+  <div class="actions full"><button type="button" class="btn light" data-close="subcontractChangeDialog">Cancelar</button><button class="btn primary">Guardar alteração</button></div>
 </form></dialog>
 
 <dialog id="custoPagamentoDialog"><form id="custoPagamentoForm" class="modal-form">

@@ -25,7 +25,7 @@ const {refreshData}=await import("../assets/js/modules/data.js");
 await refreshData();
 
 assert.ok(maxActive>=5,`As consultas independentes devem correr em paralelo; concorrência observada: ${maxActive}.`);
-for(const key of ["leads","profiles","clientes","obras","orcamentos","custos","pagamentos","funcionarios","agendaTarefas"])
+for(const key of ["leads","profiles","clientes","obras","orcamentos","custos","pagamentos","funcionarios","agendaTarefas","fornecedores","subempreitadas","subempreitadaAlteracoes"])
   assert.ok(Array.isArray(store[key]),`${key} deve permanecer uma coleção.`);
 
 console.log(`Atualização de dados aprovada: contratos preservados e consultas independentes em paralelo (${maxActive} simultâneas).`);

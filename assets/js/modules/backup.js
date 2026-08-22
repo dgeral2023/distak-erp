@@ -3,7 +3,7 @@ import {store} from "../core/store.js";
 import {assessRecoveryReadiness} from "../core/backup-readiness.js";
 import {rehearseRecoveryInMemory} from "../core/recovery-rehearsal.js";
 
-const collections=["profiles","leads","obraUtilizadores","clientes","clienteContactos","clienteMoradas","clienteNotas","clienteComunicacoes","clienteDocumentos","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra","clientePortalAcessos","clientePortalObras","clientePortalAtualizacoes","clientePortalFicheiros","clientePortalAprovacoes"];
+const collections=["profiles","leads","obraUtilizadores","clientes","clienteContactos","clienteMoradas","clienteNotas","clienteComunicacoes","clienteDocumentos","obras","orcamentos","custos","pagamentos","fotografias","documentosObra","funcionarios","funcionarioHoras","atividades","agendaTarefas","previsoesFinanceiras","pedidosCompra","propostasCompra","fornecedores","subempreitadas","subempreitadaAlteracoes","autosMedicao","itensMedicao","campoRegistos","inteligenciaAvaliacoes","diariosObra","checklistsObra","materiaisObra","ocorrenciasObra","horasObra","equipaObra","clientePortalAcessos","clientePortalObras","clientePortalAtualizacoes","clientePortalFicheiros","clientePortalAprovacoes"];
 const hex=buffer=>[...new Uint8Array(buffer)].map(value=>value.toString(16).padStart(2,"0")).join("");
 const constantTimeEqual=(left,right)=>{
   if(typeof left!=="string"||typeof right!=="string"||left.length!==right.length)return false;

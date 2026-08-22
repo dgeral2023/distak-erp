@@ -1,6 +1,7 @@
 import {store} from "../core/store.js";
 import {$,esc,money} from "../core/ui.js";
 import {workFinancialValues} from "../core/work-finance.js";
+import {workSubcontractSummary} from "../core/subcontract-finance.js";
 
 const num=v=>Number(v||0);
 const norm=v=>String(v||"").trim().toLowerCase();
@@ -113,6 +114,7 @@ export function renderDashboard(){
 
   renderFinanceChart(custos,pagamentos);
   renderVatChart(obras);
+  renderSubcontractSummary(obras);
   renderStatusChart(obras);
   renderTopWorks(obras,custos,pagamentos);
   renderAlerts(obras,orcamentos,pagamentos,overdueCosts);
@@ -120,6 +122,13 @@ export function renderDashboard(){
   renderMovements(custos,pagamentos);
   renderPipeline(orcamentos);
   renderTeam(funcionarios,monthHours);
+}
+
+function renderSubcontractSummary(obras){
+  const host=$("dashboardSubcontractSummary");if(!host)return;
+  const rows=obras.map(obra=>workSubcontractSummary(obra.id,{contracts:store.subempreitadas||[],changes:store.subempreitadaAlteracoes||[],costs:store.custos||[],clientBase:workFinancialValues(obra).base}));
+  const clientBase=obras.reduce((sum,obra)=>sum+workFinancialValues(obra).base,0),committed=rows.reduce((sum,row)=>sum+row.committed,0),invoiced=rows.reduce((sum,row)=>sum+row.invoiced,0),otherCosts=rows.reduce((sum,row)=>sum+row.otherCosts,0),plannedResult=clientBase-committed-otherCosts;
+  host.innerHTML=`<article><span>Obras sem IVA</span><strong>${money(clientBase)}</strong><small>Receita base contratada</small></article><article><span>Subempreitadas</span><strong>${money(committed)}</strong><small>${money(invoiced)} já faturado</small></article><article><span>Outros custos</span><strong>${money(otherCosts)}</strong><small>Faturas sem contrato associado</small></article><article><span>Resultado planeado</span><strong>${money(plannedResult)}</strong><small>${clientBase?(plannedResult/clientBase*100).toFixed(1):"0.0"}% de margem</small></article>`;
 }
 
 function renderVatChart(obras){

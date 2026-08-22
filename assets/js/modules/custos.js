@@ -18,6 +18,21 @@ function fillObras(){
   filter.value=selected;
 }
 
+function fillSubcontracts(selected=""){
+  const workId=$("custoObraId").value;
+  const rows=store.subempreitadas.filter(row=>String(row.obra_id)===String(workId)&&row.estado!=="cancelada");
+  $("custoSubempreitadaId").innerHTML='<option value="">Sem contrato associado</option>'+rows.map(row=>{const provider=store.fornecedores.find(item=>String(item.id)===String(row.fornecedor_id));return `<option value="${row.id}">${esc(provider?.nome||"Subempreiteiro")} · ${esc(row.objeto)}</option>`}).join("");
+  $("custoSubempreitadaId").value=rows.some(row=>String(row.id)===String(selected))?String(selected):"";
+}
+
+function applySubcontract(){
+  const row=store.subempreitadas.find(item=>String(item.id)===String($("custoSubempreitadaId").value));
+  if(!row)return;
+  const provider=store.fornecedores.find(item=>String(item.id)===String(row.fornecedor_id));
+  $("custoCategoria").value="Subempreiteiros";
+  if(provider)$("custoNomeEmpresa").value=provider.nome;
+}
+
 function filteredRows(){
   const text=$("custoSearch").value.trim().toLowerCase();
   const obra=$("custoObraFiltro").value;
@@ -76,6 +91,7 @@ export function openCusto(c={}){
   $("custoForm").reset();
   $("custoId").value=c.id||"";
   $("custoObraId").value=c.obra_id||"";
+  fillSubcontracts(c.subempreitada_id||"");
   $("custoCategoria").value=c.categoria||"Materiais";
   $("custoNomeEmpresa").value=c.nome_empresa||"";
   $("custoNumeroFatura").value=c.numero_fatura||"";
@@ -100,7 +116,8 @@ export async function submitCusto(e,refresh){
   if(file&&file.size>25*1048576)return toast("A fatura excede 25 MB.","error");
   const allowed=["application/pdf","image/jpeg","image/png","image/webp","image/heic"];
   if(file&&file.type&&!allowed.includes(file.type))return toast("Use uma fatura em PDF, JPG, PNG, WEBP ou HEIC.","error");
-  const payload={obra_id:$("custoObraId").value,categoria:$("custoCategoria").value,nome_empresa:$("custoNomeEmpresa").value.trim()||null,numero_fatura:$("custoNumeroFatura").value.trim()||null,descricao:$("custoDescricao").value.trim(),valor_sem_iva:Number($("custoValor").value||0),iva:Number($("custoIva").value||0),data:$("custoData").value||null,estado_pagamento:$("custoEstadoPagamento").value,data_vencimento:$("custoDataVencimento").value||null};
+  const subcontract=store.subempreitadas.find(row=>String(row.id)===String($("custoSubempreitadaId").value));
+  const payload={obra_id:$("custoObraId").value,fornecedor_id:subcontract?.fornecedor_id||null,subempreitada_id:subcontract?.id||null,categoria:$("custoCategoria").value,nome_empresa:$("custoNomeEmpresa").value.trim()||null,numero_fatura:$("custoNumeroFatura").value.trim()||null,descricao:$("custoDescricao").value.trim(),valor_sem_iva:Number($("custoValor").value||0),iva:Number($("custoIva").value||0),data:$("custoData").value||null,estado_pagamento:$("custoEstadoPagamento").value,data_vencimento:$("custoDataVencimento").value||null};
   let row,newPath=null;
   try{
     row=await saveReturning("custos",payload,id);
@@ -148,6 +165,7 @@ export function initCustos(refresh){
   ["custoSearch","custoObraFiltro","custoEstadoFiltro","custoDataInicioFiltro","custoDataFimFiltro"].forEach(id=>$(id).addEventListener("input",()=>renderCustos()));
   $("custoLimparFiltros").onclick=()=>{["custoSearch","custoObraFiltro","custoEstadoFiltro","custoDataInicioFiltro","custoDataFimFiltro"].forEach(id=>$(id).value="");renderCustos()};
   $("custoValor").addEventListener("input",updatePreview);$("custoIva").addEventListener("change",updatePreview);
+  $("custoObraId").addEventListener("change",()=>fillSubcontracts());$("custoSubempreitadaId").addEventListener("change",applySubcontract);
   $("custoPagamentoForm").addEventListener("submit",submitCostPayment);
   document.addEventListener("click",e=>{const id=e.target.closest("[data-custo-open]")?.dataset.custoOpen,pay=e.target.closest("[data-custo-pay]")?.dataset.custoPay,del=e.target.closest("[data-custo-payment-delete]")?.dataset.custoPaymentDelete;if(id)openAttachment(id);if(pay)openCostPayments(pay);if(del)deleteCostPayment(del)});
 }

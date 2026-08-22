@@ -1,8 +1,8 @@
 import {$,setView} from "../core/ui.js";
 import {store} from "../core/store.js";
 
-const meta={dashboard:["⌂","Início"],leads:["◎","Pedidos do site"],"portal-admin":["◉","Portal do cliente"],empresa:["⚙","Empresa"],clientes:["♙","Clientes"],obras:["▥","Obras"],operacional:["◉","Operacional"],agenda:["◫","Agenda"],dossies:["▧","Dossiês"],orcamentos:["▤","Orçamentos"],compras:["▦","Compras"],medicoes:["％","Medições"],custos:["↘","Custos"],pagamentos:["€","Recebimentos"],previsoes:["↗","Previsões"],inteligencia:["◆","Inteligência"],funcionarios:["♟","Equipa"],relatorios:["▥","Relatórios"],funcionario:["✓","Portal de campo"]};
-const adminViews=["leads","portal-admin","clientes","orcamentos","compras","medicoes","custos","pagamentos","previsoes","inteligencia","relatorios","funcionarios","empresa"];
+const meta={dashboard:["⌂","Início"],leads:["◎","Pedidos do site"],"portal-admin":["◉","Portal do cliente"],empresa:["⚙","Empresa"],clientes:["♙","Clientes"],obras:["▥","Obras"],operacional:["◉","Operacional"],agenda:["◫","Agenda"],dossies:["▧","Dossiês"],orcamentos:["▤","Orçamentos"],compras:["▦","Compras"],subempreiteiros:["♜","Subempreiteiros"],medicoes:["％","Medições"],custos:["↘","Custos"],pagamentos:["€","Recebimentos"],previsoes:["↗","Previsões"],inteligencia:["◆","Inteligência"],funcionarios:["♟","Equipa"],relatorios:["▥","Relatórios"],funcionario:["✓","Portal de campo"]};
+const adminViews=["leads","portal-admin","clientes","orcamentos","compras","subempreiteiros","medicoes","custos","pagamentos","previsoes","inteligencia","relatorios","funcionarios","empresa"];
 let actions={};
 
 function recentViews(){try{return JSON.parse(localStorage.getItem("distakRecentViews")||"[]")}catch{return []}}
@@ -27,7 +27,7 @@ function navigate(view){setView(view);saveRecent(view);document.querySelectorAll
 function renderMore(){
   const motion=`<button data-motion-toggle type="button" aria-pressed="true"><i>✦</i><strong>Movimento</strong><small data-motion-state>Criativa avançada</small></button>`;
   if(store.profile?.role==="cliente"){$("mobileMoreLinks").innerHTML=`<button data-mobile-view="cliente-portal"><i>◎</i><strong>Minhas obras</strong></button>${motion}`;document.dispatchEvent(new CustomEvent("distak:motion-controls"));return}
-  const views=store.profile?.role==="admin"?["leads","clientes","orcamentos","portal-admin","inteligencia","funcionario","operacional","agenda","dossies","compras","medicoes","custos","pagamentos","previsoes","funcionarios","relatorios","empresa"]:["operacional","agenda","dossies","funcionario"];
+  const views=store.profile?.role==="admin"?["leads","clientes","orcamentos","portal-admin","inteligencia","funcionario","operacional","agenda","dossies","compras","subempreiteiros","medicoes","custos","pagamentos","previsoes","funcionarios","relatorios","empresa"]:["operacional","agenda","dossies","funcionario"];
   $("mobileMoreLinks").innerHTML=views.map(view=>`<button data-mobile-view="${view}"><i>${meta[view][0]}</i><strong>${meta[view][1]}</strong></button>`).join("")+motion;
   document.dispatchEvent(new CustomEvent("distak:motion-controls"));
 }

@@ -189,6 +189,7 @@ function renderObraFicha(obra){
   renderObraFotografias(obra);
   renderObraDocumentos(obra);
   renderObraDiario(obra);
+  document.dispatchEvent(new CustomEvent("distak:obra-ficha-render",{detail:{obra}}));
 }
 
 const field=(label,value)=>`<article class="obra-field"><span>${label}</span><strong>${esc(value||"—")}</strong></article>`;
