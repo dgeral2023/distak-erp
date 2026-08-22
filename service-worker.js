@@ -1,4 +1,4 @@
-const CACHE='distak-shell-v3.8-client-addresses-20260822-v1';
+const CACHE='distak-shell-v3.8-work-vat-zero-20260822-v1';
 const SHELL=[
   './','./index.html','./manifest.json','./icon.svg',
   './assets/fragments/cliente-dialog.html',

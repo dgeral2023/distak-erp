@@ -235,7 +235,7 @@
 
       <section class="panel dashboard-vat-panel">
         <div class="panel-title">
-          <div><h3>IVA das obras</h3><p>Montante contratado separado pelas taxas de 23% e 6%</p></div>
+          <div><h3>IVA das obras</h3><p>Montante contratado separado pelas taxas de 23%, 6% e 0%</p></div>
         </div>
         <div id="dashboardVatChart" class="dashboard-vat-chart"></div>
       </section>
@@ -686,7 +686,7 @@
   <label>Morada<input id="obraMorada" list="obraMoradaSuggestions" autocomplete="off" aria-describedby="obraMoradaHelp" placeholder="Selecione uma morada ou escreva outra"><datalist id="obraMoradaSuggestions"></datalist><small id="obraMoradaHelp" class="field-help">Selecione primeiro o cliente para ver as moradas associadas.</small></label>
   <label>Estado<select id="obraEstado"><option>Orçamento</option><option>Aguardando adjudicação</option><option>Adjudicada</option><option>Em preparação</option><option>Em execução</option><option>Suspensa</option><option>Pagamento em atraso</option><option>Concluída</option><option>Em garantia</option><option>Arquivada</option></select></label>
   <label>Valor da obra sem IVA<input id="obraValor" type="text" inputmode="decimal" maxlength="24" autocomplete="off" placeholder="Ex.: 5.822,15 €" aria-describedby="obraValorHelp"><small id="obraValorHelp" class="field-help">Valor base contratado, sem imposto.</small></label>
-  <label>Taxa de IVA<select id="obraIvaTaxa" required aria-describedby="obraIvaTaxaHelp"><option value="23">23%</option><option value="6">6%</option></select><small id="obraIvaTaxaHelp" class="field-help">Escolha a taxa aplicável; o valor do IVA é calculado automaticamente.</small></label>
+  <label>Taxa de IVA<select id="obraIvaTaxa" required aria-describedby="obraIvaTaxaHelp"><option value="23">23%</option><option value="6">6%</option><option value="0">0%</option></select><small id="obraIvaTaxaHelp" class="field-help">Escolha a taxa aplicável; o valor do IVA é calculado automaticamente.</small></label>
   <div class="obra-contract-breakdown full" aria-live="polite"><div><span>Valor do IVA</span><strong id="obraIvaValorPreview">0,00 €</strong></div><div><span>Total contratado com IVA</span><strong id="obraTotalPreview">0,00 €</strong></div></div>
   <label>Progresso %<input id="obraProgresso" type="number" min="0" max="100"></label>
   <label>Prazo<input id="obraPrazo" placeholder="Ex.: 120 dias úteis"></label>
