@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 import {calculateWorkFinancialValues,calculateWorkFinancialValuesFromRate,normalizeWorkVatRate,workFinancialValues} from "../assets/js/core/work-finance.js";
+import {summarizeWorkVatParts,workVatPartValues} from "../assets/js/core/work-vat-parts.js";
 
 assert.deepEqual(workFinancialValues({valor_contratado:5822.15}),{base:5822.15,vat:0,total:5822.15,rate:null});
 assert.deepEqual(workFinancialValues({valor_contratado:0,valor:5822.15}),{base:5822.15,vat:0,total:5822.15,rate:null});
@@ -16,6 +17,12 @@ assert.deepEqual(calculateWorkFinancialValuesFromRate(5822.15,0),{base:5822.15,r
 assert.equal(normalizeWorkVatRate("23"),23);
 assert.equal(normalizeWorkVatRate(6),6);
 assert.equal(normalizeWorkVatRate(0),0);
+
+const taxedPart={descricao:"Trabalhos faturados",valor_base:5000,regime_iva:"tributado",taxa_iva:23};
+assert.deepEqual(workVatPartValues(taxedPart),{base:5000,rate:23,vat:1150,total:6150,regime:"tributado"});
+const untaxedPart={descricao:"Trabalhos sem liquidação",valor_base:5000,regime_iva:"autoliquidacao",taxa_iva:0,motivo_nao_liquidacao:"IVA — autoliquidação"};
+assert.deepEqual(workVatPartValues(untaxedPart),{base:5000,rate:0,vat:0,total:5000,regime:"autoliquidacao"});
+assert.deepEqual(summarizeWorkVatParts([taxedPart,untaxedPart]),{base:10000,vat:1150,total:11150,rate:null});
 
 const root=resolve(import.meta.dirname,"..");
 const sql=readFileSync(resolve(root,"supabase/migrations/20260822131455_separar_iva_valor_obras.sql"),"utf8");
@@ -42,4 +49,17 @@ for(const forbidden of ["drop column","disable row level security","update publi
   assert.equal(zeroRateSql.includes(forbidden),false,`Migration da taxa 0% não pode executar: ${forbidden}`);
 }
 
-console.log("Valores das obras aprovados: taxas de 23%, 6% e 0% calculam automaticamente IVA e total com compatibilidade.");
+const mixedVatSql=readFileSync(resolve(root,"supabase/migrations/20260824075309_adicionar_iva_misto_obras.sql"),"utf8").toLowerCase();
+for(const required of [
+  "create table if not exists public.obra_iva_parcelas","enable row level security",
+  "revoke all on public.obra_iva_parcelas","grant select,insert,update,delete","obra_iva_parcelas_criado_por_idx",
+  "security invoker","set search_path = ''","guardar_obra_com_iva_parcelas",
+  "jsonb_array_length(p_parcelas) not between 2 and 20","motivo_nao_liquidacao"
+]){
+  assert(mixedVatSql.includes(required),`Migration de IVA misto incompleta: ${required}`);
+}
+for(const forbidden of ["disable row level security","security definer","drop table"]){
+  assert.equal(mixedVatSql.includes(forbidden),false,`Migration de IVA misto não pode executar: ${forbidden}`);
+}
+
+console.log("Valores das obras aprovados: taxas únicas e parcelas com tratamentos de IVA diferentes calculam automaticamente base, IVA e total.");

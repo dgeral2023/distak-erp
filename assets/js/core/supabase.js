@@ -73,7 +73,7 @@ export async function remove(table,id){
   await audit(table,id,"eliminou",{});
 }
 
-async function audit(table,id,acao,payload){
+export async function audit(table,id,acao,payload){
   if(table==="atividades_sistema")return;
   const {data:{user}}=await db.auth.getUser();
   if(!user)return;
