@@ -3,6 +3,10 @@ import {store} from "../core/store.js";
 import {save} from "../core/supabase.js";
 import {workFinancialValues} from "../core/work-finance.js";
 import {subcontractCommittedValue,subcontractContractValue,workSubcontractSummary} from "../core/subcontract-finance.js";
+import {createVatPartsForm} from "./obra-iva-misto.js";
+
+const vat=createVatPartsForm({i:["subcontractVatMode","subcontractVatSingleFields","subcontractValue","subcontractVat","subcontractVatPartsSection","subcontractVatParts","subcontractVatSplit","subcontractVatAdd","subcontractVatValuePreview","subcontractTotalPreview","subcontractVatSummary"],t:"subempreitada_iva_parcelas",k:"subempreitada_id",r:"guardar_subempreitada_com_iva_parcelas",p:"p_subempreitada",d:"p_subempreitada_id",a:"subempreitadas",z:1});
+async function saveVat(payload,id){const {finance,parts}=vat.read();return vat.save({...payload,valor_base:finance.base,taxa_iva:finance.rate},parts,id)}
 
 let refreshApp=null;
 const today=()=>new Date().toISOString().slice(0,10);
@@ -55,12 +59,13 @@ async function submitSupplier(event){
 export function openSubcontract(row={}){
   if(!store.fornecedores.some(item=>item.tipo==="subempreiteiro"&&item.estado==="ativo")){toast("Adicione primeiro um subempreiteiro ativo.","error");openSupplier();return}
   fillFilters();$("subcontractForm").reset();$("subcontractId").value=row.id||"";$("subcontractWork").value=row.obra_id||"";$("subcontractSupplier").value=row.fornecedor_id||"";$("subcontractObject").value=row.objeto||"";$("subcontractValue").value=row.valor_inicial??"";$("subcontractVat").value=row.taxa_iva??23;$("subcontractState").value=row.estado||"proposta";$("subcontractAwardDate").value=row.adjudicada_em||"";$("subcontractStart").value=row.inicio_previsto||"";$("subcontractEnd").value=row.fim_previsto||"";$("subcontractTerms").value=row.condicoes_pagamento||"";$("subcontractNotes").value=row.notas||"";$("subcontractDialog").showModal();
+  vat.open(row).catch(error=>toast(error.message,"error"));
 }
 
 async function submitSubcontract(event){
   event.preventDefault();const id=$("subcontractId").value||null,value=parseEuroValue($("subcontractValue").value);
   if(!Number.isFinite(value)||value<0)return toast("Introduza um valor válido sem IVA.","error");
-  try{await save("subempreitadas",{obra_id:$("subcontractWork").value,fornecedor_id:$("subcontractSupplier").value,objeto:$("subcontractObject").value.trim(),valor_inicial:value,taxa_iva:Number($("subcontractVat").value),estado:$("subcontractState").value,adjudicada_em:$("subcontractAwardDate").value||null,inicio_previsto:$("subcontractStart").value||null,fim_previsto:$("subcontractEnd").value||null,condicoes_pagamento:$("subcontractTerms").value.trim()||null,notas:$("subcontractNotes").value.trim()||null,atualizado_em:new Date().toISOString()},id);$("subcontractDialog").close();toast("Contrato de subempreitada guardado.");await refreshApp()}catch(error){toast(error.message,"error")}
+  try{await saveVat({obra_id:$("subcontractWork").value,fornecedor_id:$("subcontractSupplier").value,objeto:$("subcontractObject").value.trim(),estado:$("subcontractState").value,adjudicada_em:$("subcontractAwardDate").value||null,inicio_previsto:$("subcontractStart").value||null,fim_previsto:$("subcontractEnd").value||null,condicoes_pagamento:$("subcontractTerms").value.trim()||null,notas:$("subcontractNotes").value.trim()||null,atualizado_em:new Date().toISOString()},id);$("subcontractDialog").close();toast("Contrato de subempreitada guardado.");await refreshApp()}catch(error){toast(error.message,"error")}
 }
 
 function openChange(row={},contractId=""){

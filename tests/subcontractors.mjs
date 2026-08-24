@@ -36,4 +36,18 @@ assert.ok(!migration.includes("service_role"),"A migration não deve incluir seg
 const indexMigration=readFileSync(resolve(root,"supabase/migrations/20260822163756_indexar_custos_subempreitada_obra.sql"),"utf8").toLowerCase();
 assert.ok(indexMigration.includes("custos_subempreitada_obra_idx")&&indexMigration.includes("subempreitada_id,obra_id"),"A relação composta de custos deve ter um índice de cobertura.");
 
+const mixedVatMigration=readFileSync(resolve(root,"supabase/migrations/20260824115934_adicionar_iva_misto_subempreitadas.sql"),"utf8").toLowerCase();
+for(const required of [
+  "alter table public.subempreitadas alter column taxa_iva drop not null",
+  "create table if not exists public.subempreitada_iva_parcelas","enable row level security",
+  "grant select,insert,update,delete","subempreitada_iva_parcelas_criado_por_idx",
+  "security invoker","set search_path = ''","guardar_subempreitada_com_iva_parcelas",
+  "jsonb_array_length(p_parcelas) not between 2 and 20","motivo_nao_liquidacao"
+]){
+  assert.ok(mixedVatMigration.includes(required),`Migration de IVA misto das subempreitadas incompleta: ${required}`);
+}
+assert.ok(mixedVatMigration.includes("motivo_nao_liquidacao is null or"),"Parcelas sem IVA não devem exigir motivo fiscal.");
+for(const forbidden of ["disable row level security","security definer","drop table"]){
+  assert.equal(mixedVatMigration.includes(forbidden),false,`Migration de IVA misto nao pode executar: ${forbidden}`);
+}
 console.log("Subempreitadas aprovadas: compromisso, trabalhos +/- e faturas reais permanecem separados por obra.");
