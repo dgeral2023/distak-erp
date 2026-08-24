@@ -1,4 +1,4 @@
-const CACHE='distak-shell-v3.8-subcontracts-20260822-v1';
+const CACHE='distak-shell-v3.8-mobile-20260824-v1';
 const SHELL=[
   './','./index.html','./manifest.json','./icon.svg',
   './assets/fragments/cliente-dialog.html',

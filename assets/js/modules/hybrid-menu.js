@@ -22,7 +22,10 @@ function renderFavorites(){
 }
 function closeSheets(){[$("mobileMoreSheet"),$("mobileRegisterSheet")].forEach(node=>{node?.classList.add("hidden");node?.setAttribute("aria-hidden","true")});$("mobileSheetBackdrop")?.classList.add("hidden")}
 function openSheet(id){closeSheets();const sheet=$(id);sheet?.classList.remove("hidden");sheet?.setAttribute("aria-hidden","false");$("mobileSheetBackdrop")?.classList.remove("hidden");setTimeout(()=>sheet?.querySelector("button")?.focus(),0)}
-function navigate(view){setView(view);saveRecent(view);document.querySelectorAll("[data-mobile-view]").forEach(button=>button.classList.toggle("active",button.dataset.mobileView===view));closeSheets()}
+function syncMobileActive(view){
+  const active=document.querySelector(`#mobileNav [data-mobile-view="${view}"]`)||$("mobileMore");document.querySelectorAll("#mobileNav button").forEach(button=>{const current=button===active;button.classList.toggle("active",current);button.setAttribute("aria-current",current?"page":"false")});
+}
+function navigate(view){setView(view);saveRecent(view);syncMobileActive(view);closeSheets()}
 
 function renderMore(){
   const motion=`<button data-motion-toggle type="button" aria-pressed="true"><i>✦</i><strong>Movimento</strong><small data-motion-state>Criativa avançada</small></button>`;
@@ -56,6 +59,7 @@ export function initHybridMenu(handlers){
     localStorage.setItem("distakSidebarCollapsed",String(next));
   });
   document.addEventListener("keydown",event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="k"){event.preventDefault();$("globalSearch")?.focus();$("globalSearch")?.select()}});
+  document.addEventListener("distak:view-change",event=>{if(event.detail?.view)syncMobileActive(event.detail.view)});
   document.addEventListener("click",event=>{
     const group=event.target.closest("[data-toggle-menu-group]")?.dataset.toggleMenuGroup;
     if(group){const node=document.querySelector(`[data-menu-group="${group}"]`)||event.target.closest(".nav-group");node?.classList.toggle("group-collapsed");const states=JSON.parse(localStorage.getItem("distakMenuGroups")||"{}");states[group]=node?.classList.contains("group-collapsed");localStorage.setItem("distakMenuGroups",JSON.stringify(states));return}

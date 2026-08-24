@@ -16,19 +16,19 @@ export function fillObraSelects(){
 
 export function renderObras(rows=store.obras){
   const admin=store.profile?.role==="admin";
-  $("obrasTable").innerHTML=rows.length?`<table><thead><tr>
+  $("obrasTable").innerHTML=rows.length?`<table class="work-list-table"><caption class="sr-only">Lista de obras</caption><thead><tr>
     <th>Obra</th><th>Cliente</th><th>Estado</th>${admin?"<th>Base sem IVA</th><th>IVA</th><th>Total</th><th>Custos</th><th>Recebido</th>":""}<th>Progresso</th><th>Ações</th>
   </tr></thead><tbody>${rows.map(o=>{
     const custos=totalCustos(o.id),recebido=totalRecebido(o.id),finance=workFinancialValues(o);
     const photo=store.fotografias.find(item=>String(item.obra_id)===String(o.id)&&item.url);
     const image=photo?`<img src="${esc(photo.url)}" alt="Fotografia de ${esc(o.nome)}" loading="lazy">`:`<span>▥</span>`;
     return `<tr>
-      <td><div class="obra-list-identity">${image}<button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button></div></td>
-      <td>${esc(o.clientes?.nome||"")}</td>
-      <td><span class="badge">${esc(o.estado||"")}</span></td>
-      ${admin?`<td>${money(finance.base)}</td><td>${money(finance.vat)}<small>${finance.rate!==null?`${finance.rate}%`:"Taxa não registada"}</small></td><td><strong>${money(finance.total)}</strong></td><td>${money(custos)}</td><td>${money(recebido)}</td>`:""}
-      <td><div class="progress-line"><span style="width:${Math.min(100,Math.max(0,Number(o.progresso||0)))}%"></span></div><small>${o.progresso||0}%</small></td>
-      <td><button class="btn small primary" data-view-obra="${o.id}">Ficha</button>${admin?` <button class="btn small light" data-edit-obra="${o.id}">Editar</button> <button class="btn small danger" data-del-obra="${o.id}">Apagar</button>`:""}</td>
+      <td data-label="Obra"><div class="obra-list-identity">${image}<button class="obra-link" data-view-obra="${o.id}">${esc(o.nome)}</button></div></td>
+      <td data-label="Cliente">${esc(o.clientes?.nome||"")}</td>
+      <td data-label="Estado"><span class="badge">${esc(o.estado||"")}</span></td>
+      ${admin?`<td data-label="Base sem IVA">${money(finance.base)}</td><td data-label="IVA">${money(finance.vat)}<small>${finance.rate!==null?`${finance.rate}%`:"Taxa não registada"}</small></td><td data-label="Total"><strong>${money(finance.total)}</strong></td><td data-label="Custos">${money(custos)}</td><td data-label="Recebido">${money(recebido)}</td>`:""}
+      <td data-label="Progresso"><div class="work-list-progress"><div class="progress-line"><span style="width:${Math.min(100,Math.max(0,Number(o.progresso||0)))}%"></span></div><small>${o.progresso||0}%</small></div></td>
+      <td data-label="Ações"><div class="work-list-actions"><button class="btn small primary" data-view-obra="${o.id}">Ficha</button>${admin?`<button class="btn small light" data-edit-obra="${o.id}">Editar</button><button class="btn small danger" data-del-obra="${o.id}">Apagar</button>`:""}</div></td>
     </tr>`;
   }).join("")}</tbody></table>`:"<p>Sem obras.</p>";
 }
