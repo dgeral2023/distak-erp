@@ -5,8 +5,9 @@ function showUpdateNotice(){
   const notice=document.createElement("aside");
   notice.className="pwa-update-notice";
   notice.setAttribute("role","status");
-  notice.innerHTML='<div><strong>Nova versão preparada</strong><small>Atualize para receber as correções mais recentes.</small></div><button type="button">Atualizar agora</button>';
+  notice.innerHTML='<div><strong>Nova versão</strong><small>Atualize após guardar</small></div><button type="button">Atualizar</button><button class="pwa-update-dismiss" type="button" aria-label="Fechar aviso">×</button>';
   notice.querySelector("button").onclick=()=>location.reload();
+  notice.querySelector(".pwa-update-dismiss").onclick=()=>notice.remove();
   document.body.appendChild(notice);
 }
 
