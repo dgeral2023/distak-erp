@@ -1,13 +1,14 @@
 import {store} from "../core/store.js";
-import {$,esc,money,toast,friendlyError,parseEuroValue} from "../core/ui.js";
-import {calculateWorkFinancialValuesFromRate,normalizeWorkVatRate,workFinancialValues} from "../core/work-finance.js";
+import {$,esc,money,toast,friendlyError} from "../core/ui.js";
+import {workFinancialValues} from "../core/work-finance.js";
 import {clientAddressKey,clientAddressSuggestions} from "../core/client-addresses.js";
-import {db,save,remove} from "../core/supabase.js";
+import {db,remove} from "../core/supabase.js";
 import {renderObraFotografias} from "./fotografias.js";
 import {renderObraDocumentos} from "./documentos.js";
 import {renderObraDiario} from "./diario.js";
 
-let obraFichaAtual=null,suggestedAddressKeys=new Set();
+let obraFichaAtual=null,suggestedAddressKeys=new Set(),vatModule;
+const workVat=()=>vatModule??=import("./obra-iva-misto.js?v=20260824-mixed-v1");
 
 export function fillObraSelects(){
   const c=store.clientes.map(x=>`<option value="${x.id}">${esc(x.nome)}</option>`).join("");
@@ -33,7 +34,7 @@ export function renderObras(rows=store.obras){
   }).join("")}</tbody></table>`:"<p>Sem obras.</p>";
 }
 
-export function openObra(o={}){
+export async function openObra(o={}){
   fillObraSelects();
   suggestedAddressKeys=new Set();
   obraId.value=o.id||"";
@@ -50,35 +51,27 @@ export function openObra(o={}){
   obraNotas.value=o.notas||"";
   configureObraAddressInputs();
   renderObraAddressSuggestions();
-  configureObraFinancialInputs();
-  renderObraTotalPreview();
+  try{await (await workVat()).openWorkVatForm(o)}
+  catch(err){toast(err.message||"Não foi possível preparar o IVA da obra.","error");return}
   obraDialog.showModal();
 }
 
 export async function submitObra(e,refresh){
   e.preventDefault();
   try{
-    const base=parseEuroValue(obraValor.value),rate=normalizeWorkVatRate(obraIvaTaxa.value);
-    if(!Number.isFinite(base)||base<0||rate===null){
-      toast("Introduza um valor válido e escolha a taxa de IVA de 23%, 6% ou 0%.","error");
-      obraValor.focus();
-      return;
-    }
-    const finance=calculateWorkFinancialValuesFromRate(base,rate);
-    await save("obras",{
+    const vat=await workVat(),{finance,parts}=vat.readWorkVatForm();
+    await vat.saveWorkWithVatParts({
       cliente_id:obraClienteId.value,
       nome:obraNome.value.trim(),
       morada:obraMorada.value||null,
       estado:obraEstado.value,
-      valor:finance.base,
-      valor_contratado:finance.base,
+      valor_base:finance.base,
       taxa_iva:finance.rate,
-      valor_iva:finance.vat,
       progresso:Number(obraProgresso.value||0),
       prazo:obraPrazo.value||null,
       responsavel:obraResponsavel.value||null,
       notas:obraNotas.value||null
-    },obraId.value||null);
+    },parts,obraId.value||null);
     obraDialog.close();toast("Obra guardada.");await refresh();
   }catch(err){toast(err.message,"error")}
 }
@@ -102,20 +95,6 @@ function configureObraAddressInputs(){
   if(obraClienteId.dataset.addressSuggestionsReady)return;
   obraClienteId.dataset.addressSuggestionsReady="true";
   obraClienteId.addEventListener("change",renderObraAddressSuggestions);
-}
-
-function renderObraTotalPreview(){
-  const base=parseEuroValue(obraValor.value),rate=normalizeWorkVatRate(obraIvaTaxa.value);
-  const finance=Number.isFinite(base)&&rate!==null?calculateWorkFinancialValuesFromRate(base,rate):null;
-  obraIvaValorPreview.textContent=finance?money(finance.vat):"—";
-  obraTotalPreview.textContent=finance?money(finance.total):"—";
-}
-
-function configureObraFinancialInputs(){
-  if(obraValor.dataset.financialInputsReady)return;
-  obraValor.dataset.financialInputsReady="true";
-  obraValor.addEventListener("input",renderObraTotalPreview);
-  obraIvaTaxa.addEventListener("change",renderObraTotalPreview);
 }
 
 export async function deleteObra(id,refresh){

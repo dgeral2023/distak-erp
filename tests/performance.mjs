@@ -17,8 +17,8 @@ const staticGraph=(entry,seen=new Set())=>{
 };
 const eagerJs=[join(root,"assets","js","config.js"),join(root,"assets","js","core","bootstrap-errors.js"),...staticGraph(join(root,"assets","js","app.js"))].filter(path=>path.startsWith(join(root,"assets","js")));
 const indexSize=statSync(join(root,"index.html")).size,cssSize=size(css),jsSize=size(js),eagerJsSize=size([...new Set(eagerJs)]),vendorSize=size(vendorJs);
-// O controlo de subempreitadas acrescenta formulários e estilos estáticos, mas o módulo funcional permanece lazy-loaded.
-const budgets={index:124_000,css:170_000,js:430_000,eagerJs:385_000,vendor:120_000,single:25_000};
+// Subempreitadas e IVA misto acrescentam UI, mas os módulos funcionais permanecem lazy-loaded.
+const budgets={index:124_500,css:170_000,js:434_000,eagerJs:385_000,vendor:120_000,single:25_000};
 const failures=[];
 const relationIndexes=readFileSync(join(root,"supabase","migrations","20260806175141_indices_relacoes_operacionais_v35.sql"),"utf8");
 for(const required of ["compras_pedidos_criado_por_idx","compras_propostas_criado_por_idx","medicoes_autos_criado_por_idx"])if(!relationIndexes.includes(required))failures.push(`Índice operacional em falta: ${required}`);
