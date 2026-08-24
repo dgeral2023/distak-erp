@@ -1028,7 +1028,7 @@
   <div class="actions full"><button type="button" class="btn light" data-close="supplierDialog">Cancelar</button><button class="btn primary">Guardar</button></div>
 </form></dialog>
 
-<dialog id="subcontractDialog"><form id="subcontractForm" class="modal-form subcontract-form">
+<dialog id="subcontractDialog"><form id="subcontractForm" class="modal-form subcontract-form" style="max-height:88dvh;overflow:auto;overscroll-behavior:contain">
   <h3>Novo / editar contrato de subempreitada</h3><input id="subcontractId" type="hidden">
   <label>Obra<select id="subcontractWork" required></select></label><label>Subempreiteiro<select id="subcontractSupplier" required></select></label>
   <label class="full">Trabalho contratado<input id="subcontractObject" maxlength="240" required placeholder="Ex.: Instalação elétrica completa"></label>

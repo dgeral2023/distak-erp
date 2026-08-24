@@ -69,6 +69,11 @@ for (const id of requiredIds) {
 }
 
 check(
+  index.includes('id="subcontractForm" class="modal-form subcontract-form" style="max-height:88dvh;overflow:auto;overscroll-behavior:contain"'),
+  "O contrato de subempreitada deve permitir scroll em ecrãs de altura reduzida."
+);
+
+check(
   index.includes("@supabase/supabase-js@2.110.9"),
   "A versão exata e aprovada de supabase-js não está fixada."
 );
