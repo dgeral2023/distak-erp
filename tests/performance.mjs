@@ -17,8 +17,8 @@ const staticGraph=(entry,seen=new Set())=>{
 };
 const eagerJs=[join(root,"assets","js","config.js"),join(root,"assets","js","core","bootstrap-errors.js"),...staticGraph(join(root,"assets","js","app.js"))].filter(path=>path.startsWith(join(root,"assets","js")));
 const indexSize=statSync(join(root,"index.html")).size,cssSize=size(css),jsSize=size(js),eagerJsSize=size([...new Set(eagerJs)]),vendorSize=size(vendorJs);
-// Subempreitadas e IVA misto acrescentam UI, mas os módulos funcionais permanecem lazy-loaded.
-const budgets={index:124_500,css:170_000,js:434_000,eagerJs:385_000,vendor:120_000,single:25_000};
+// Inclui o cadastro canónico de fornecedores e os avisos de duplicado/rateio, mantendo margem inferior a 1,3 KB.
+const budgets={index:125_500,css:170_000,js:440_000,eagerJs:390_000,vendor:120_000,single:25_000};
 const failures=[];
 const relationIndexes=readFileSync(join(root,"supabase","migrations","20260806175141_indices_relacoes_operacionais_v35.sql"),"utf8");
 for(const required of ["compras_pedidos_criado_por_idx","compras_propostas_criado_por_idx","medicoes_autos_criado_por_idx"])if(!relationIndexes.includes(required))failures.push(`Índice operacional em falta: ${required}`);
