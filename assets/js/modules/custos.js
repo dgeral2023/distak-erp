@@ -1,6 +1,7 @@
 import {db,remove,saveReturning} from "../core/supabase.js";
-import {$,esc,money,toast} from "../core/ui.js";
+import {$,esc,money,setView,toast} from "../core/ui.js";
 import {store} from "../core/store.js";
+import {findInvoiceConflicts,invoiceConflictKind,resolveCostSupplier,supplierTypeLabel} from "../core/cost-suppliers.js";
 
 const BUCKET="distak-documentos";
 const today=()=>new Date().toISOString().slice(0,10);
@@ -25,12 +26,26 @@ function fillSubcontracts(selected=""){
   $("custoSubempreitadaId").value=rows.some(row=>String(row.id)===String(selected))?String(selected):"";
 }
 
+function fillSuppliers(selected="",legacyName=""){
+  const resolved=resolveCostSupplier(store.fornecedores,{fornecedorId:selected,nomeEmpresa:legacyName});
+  const rows=store.fornecedores.filter(row=>row.estado!=="inativo"||String(row.id)===String(resolved?.id)).sort((a,b)=>String(a.nome).localeCompare(String(b.nome),"pt-PT"));
+  $("custoFornecedorId").innerHTML='<option value="">Outro / não cadastrado</option>'+rows.map(row=>`<option value="${row.id}">${esc(row.nome)} · ${esc(supplierTypeLabel(row.tipo))}${row.estado==="inativo"?" · Inativo":""}</option>`).join("");
+  $("custoFornecedorId").value=resolved?.id||"";
+}
+
+function applySupplier(){
+  const provider=store.fornecedores.find(row=>String(row.id)===String($("custoFornecedorId").value));
+  if(provider)$("custoNomeEmpresa").value=provider.nome;
+  updateDuplicateWarning();
+}
+
 function applySubcontract(){
   const row=store.subempreitadas.find(item=>String(item.id)===String($("custoSubempreitadaId").value));
   if(!row)return;
   const provider=store.fornecedores.find(item=>String(item.id)===String(row.fornecedor_id));
   $("custoCategoria").value="Subempreiteiros";
-  if(provider)$("custoNomeEmpresa").value=provider.nome;
+  if(provider){$("custoFornecedorId").value=provider.id;$("custoNomeEmpresa").value=provider.nome}
+  updateDuplicateWarning();
 }
 
 function filteredRows(){
@@ -86,6 +101,21 @@ function updatePreview(){
   $("custoTotalPreview").textContent=money(Number($("custoValor").value||0)*(1+Number($("custoIva").value||0)/100));
 }
 
+function currentConflict(){
+  const supplier=store.fornecedores.find(row=>String(row.id)===String($("custoFornecedorId").value));
+  const candidate={id:$("custoId").value,obraId:$("custoObraId").value,fornecedorId:supplier?.id||"",nomeEmpresa:supplier?.nome||$("custoNomeEmpresa").value,numeroFatura:$("custoNumeroFatura").value};
+  const conflicts=findInvoiceConflicts(store.custos,candidate);
+  return {conflicts,kind:invoiceConflictKind(conflicts,candidate.obraId)};
+}
+
+function updateDuplicateWarning(){
+  const warning=$("custoDuplicateWarning"),{conflicts,kind}=currentConflict();
+  warning.classList.toggle("hidden",!conflicts.length);
+  if(!conflicts.length){warning.textContent="";return}
+  const works=[...new Set(conflicts.map(row=>row.obras?.nome||store.obras.find(work=>String(work.id)===String(row.obra_id))?.nome||"outra obra"))].join(", ");
+  warning.innerHTML=kind==="same_work"?`<strong>Possível duplicado:</strong> esta fatura já está registada nesta obra. Confirme antes de guardar.`:`<strong>Possível rateio:</strong> esta fatura já tem valor atribuído a ${esc(works)}. Pode guardar outra parcela se a compra foi dividida entre obras.`;
+}
+
 export function openCusto(c={}){
   fillObras();
   $("custoForm").reset();
@@ -93,6 +123,7 @@ export function openCusto(c={}){
   $("custoObraId").value=c.obra_id||"";
   fillSubcontracts(c.subempreitada_id||"");
   $("custoCategoria").value=c.categoria||"Materiais";
+  fillSuppliers(c.fornecedor_id||"",c.nome_empresa||"");
   $("custoNomeEmpresa").value=c.nome_empresa||"";
   $("custoNumeroFatura").value=c.numero_fatura||"";
   $("custoDescricao").value=c.descricao||"";
@@ -105,6 +136,7 @@ export function openCusto(c={}){
   attachment.classList.toggle("hidden",!c.anexo_path);
   attachment.innerHTML=c.anexo_path?`<span><strong>Fatura atual:</strong> ${esc(c.anexo_nome||"Anexo")}</span><label class="crm-check"><input id="custoRemoverAnexo" type="checkbox"> Remover ao guardar</label>`:"";
   updatePreview();
+  updateDuplicateWarning();
   $("custoDialog").showModal();
 }
 
@@ -117,7 +149,13 @@ export async function submitCusto(e,refresh){
   const allowed=["application/pdf","image/jpeg","image/png","image/webp","image/heic"];
   if(file&&file.type&&!allowed.includes(file.type))return toast("Use uma fatura em PDF, JPG, PNG, WEBP ou HEIC.","error");
   const subcontract=store.subempreitadas.find(row=>String(row.id)===String($("custoSubempreitadaId").value));
-  const payload={obra_id:$("custoObraId").value,fornecedor_id:subcontract?.fornecedor_id||null,subempreitada_id:subcontract?.id||null,categoria:$("custoCategoria").value,nome_empresa:$("custoNomeEmpresa").value.trim()||null,numero_fatura:$("custoNumeroFatura").value.trim()||null,descricao:$("custoDescricao").value.trim(),valor_sem_iva:Number($("custoValor").value||0),iva:Number($("custoIva").value||0),data:$("custoData").value||null,estado_pagamento:$("custoEstadoPagamento").value,data_vencimento:$("custoDataVencimento").value||null};
+  const selectedSupplier=store.fornecedores.find(row=>String(row.id)===String($("custoFornecedorId").value));
+  const provider=store.fornecedores.find(row=>String(row.id)===String(subcontract?.fornecedor_id))||selectedSupplier;
+  const payload={obra_id:$("custoObraId").value,fornecedor_id:provider?.id||null,subempreitada_id:subcontract?.id||null,categoria:$("custoCategoria").value,nome_empresa:provider?.nome||$("custoNomeEmpresa").value.trim()||null,numero_fatura:$("custoNumeroFatura").value.trim()||null,descricao:$("custoDescricao").value.trim(),valor_sem_iva:Number($("custoValor").value||0),iva:Number($("custoIva").value||0),data:$("custoData").value||null,estado_pagamento:$("custoEstadoPagamento").value,data_vencimento:$("custoDataVencimento").value||null};
+  const conflicts=findInvoiceConflicts(store.custos,{id,obraId:payload.obra_id,fornecedorId:payload.fornecedor_id,nomeEmpresa:payload.nome_empresa,numeroFatura:payload.numero_fatura});
+  const conflictKind=invoiceConflictKind(conflicts,payload.obra_id);
+  if(conflictKind==="same_work"&&!confirm("Esta fatura já está registada para este fornecedor nesta obra. Quer guardar mesmo assim?"))return;
+  if(conflictKind==="cross_work"&&!confirm("Esta fatura já foi parcialmente atribuída a outra obra. Quer guardar esta parcela como rateio entre obras?"))return;
   let row,newPath=null;
   try{
     row=await saveReturning("custos",payload,id);
@@ -165,7 +203,9 @@ export function initCustos(refresh){
   ["custoSearch","custoObraFiltro","custoEstadoFiltro","custoDataInicioFiltro","custoDataFimFiltro"].forEach(id=>$(id).addEventListener("input",()=>renderCustos()));
   $("custoLimparFiltros").onclick=()=>{["custoSearch","custoObraFiltro","custoEstadoFiltro","custoDataInicioFiltro","custoDataFimFiltro"].forEach(id=>$(id).value="");renderCustos()};
   $("custoValor").addEventListener("input",updatePreview);$("custoIva").addEventListener("change",updatePreview);
-  $("custoObraId").addEventListener("change",()=>fillSubcontracts());$("custoSubempreitadaId").addEventListener("change",applySubcontract);
+  $("custoObraId").addEventListener("change",()=>{fillSubcontracts();updateDuplicateWarning()});$("custoSubempreitadaId").addEventListener("change",applySubcontract);
+  $("custoFornecedorId").addEventListener("change",applySupplier);$("custoNomeEmpresa").addEventListener("input",updateDuplicateWarning);$("custoNumeroFatura").addEventListener("input",updateDuplicateWarning);
+  $("custoGerirFornecedores").onclick=()=>{$("custoDialog").close();setView("subempreiteiros")};
   $("custoPagamentoForm").addEventListener("submit",submitCostPayment);
   document.addEventListener("click",e=>{const id=e.target.closest("[data-custo-open]")?.dataset.custoOpen,pay=e.target.closest("[data-custo-pay]")?.dataset.custoPay,del=e.target.closest("[data-custo-payment-delete]")?.dataset.custoPaymentDelete;if(id)openAttachment(id);if(pay)openCostPayments(pay);if(del)deleteCostPayment(del)});
 }
